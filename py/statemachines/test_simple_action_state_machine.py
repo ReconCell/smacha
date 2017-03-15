@@ -18,6 +18,9 @@ import actionlib
 # Action messages
 import robot_module.msg
 
+# TF
+import tf
+
 # Robot functions
 from robotfunctions.getrobotpose import getrobotpose_quat
 from robotfunctions.getrobotpose import getrobotpose_rmat
@@ -74,6 +77,10 @@ HEXAPOD_CLAMPS = (5, -1, 5)
 CLAMP_OPEN = 0
 CLAMP_CLOSE = 1
 
+HEXAPOD_BRAKE_1_GPIO = 7
+HEXAPOD_BRAKE_OPEN = 1
+HEXAPOD_BRAKE_CLOSE = 0
+
 # Scipy I/O for reading .mat files
 # import scipy.io
 # from scipy.io import savemat
@@ -93,7 +100,29 @@ import numpy as np
 # cartclient = actionlib.SimpleActionClient('ur_cartesian_action', robot_module.msg.CartLinTaskAction)
 
 # Create some global variables
-# xaxis, yaxis, zaxis = [1, 0, 0], [0, 1, 0], [0, 0, 1]
+# xaxis, yaxis, zaxis = [1, 0, 0], [0, 1, 0], [0, 0, 1] 
+# Define tf listener state class
+class TFListenerState(smach.State):
+    def __init__(self, target_frame, source_frame, output_key, time=rospy.Time(0), duration=rospy.Duration(1)):
+
+        self._target_frame = target_frame
+        self._source_frame = source_frame
+        self._output_key = output_key
+        self._time = time
+        self._duration = duration
+
+        smach.State.__init__(self,
+                             outcomes=['succeeded'],
+                             input_keys=[],
+                             output_keys=[self._output_key])
+
+        self.tf_listener = tf.TransformListener()
+        self.tf_listener.waitForTransform(self._target_frame, self._source_frame, self._time, self._duration)
+
+    def execute(self, userdata):
+        rospy.loginfo('Executing TFListenerState for target_frame ' + self._target_frame + ' and source_frame ' + self._source_frame)
+        setattr(userdata, self._output_key, self.tf_listener.lookupTransform(self._target_frame, self._source_frame, self._time))
+        return 'succeeded'
 
 # main
 def main():
@@ -112,38 +141,193 @@ def main():
 	
     # Open the container
     with sm_top:
-        # Add states to the container
+        
+        # Create the sub SMACH state machine
+        sm_sub = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
+          
+        #----------------------------------------------------------------------------------------
+        # BEGIN: READ_HEXAPOD_CURRENT_POSITION
+        # TEMPLATE: DefineBlock
+        #
+        sis2 = smach_ros.IntrospectionServer('test_simple_action_state_machine_server', sm_sub, '/SM_TOP/RECONFIGURE_HEXAPOD')
+        sis2.start()
 
-        clt_p_new = np.asarray([0.0, 0.0, 0.0])
-        clt_q_new = np.asarray([0.0, 0.0, 0.0, 0.0])
-        clt_t_des = 3
-        clt_goal = robot_module.msg.CartLinTaskGoal(clt_p_new, clt_q_new, clt_t_des)
-        smach.StateMachine.add('CART_LIN_TASK_ACTION_STATE',
-                               smach_ros.SimpleActionState('/ur10_1/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
-                                                           goal = clt_goal),
-                               {'succeeded':'CART_TRAP_VEL_ACTION_STATE'})
+        with sm_sub:
 
-        ctv_p_new = np.asarray([0.0, 0.0, 0.0])
-        ctv_q_new = np.asarray([0.0, 0.0, 0.0, 0.0])
-        ctv_t_des = 3
-        ctv_goal = robot_module.msg.CartTrapVelGoal(ctv_p_new, ctv_q_new, ctv_t_des)
-        smach.StateMachine.add('CART_TRAP_VEL_ACTION_STATE',
-                               smach_ros.SimpleActionState('/ur10_1/cart_trap_vel_action_server', robot_module.msg.CartTrapVelAction,
-                                                           goal = ctv_goal),
-                               {'succeeded':'OPEN_GRIPPER_STATE'})
+          #----------------------------------------------------------------------------------------
+          # BEGIN: READ_HEXAPOD_CURRENT_POSITION
+          # TEMPLATE: ReadTransform
+          #
+          smach.StateMachine.add('READ_HEXAPOD_CURRENT_POSITION', TFListenerState('ur10_1/base', 'hexapod_1/top', 'hexapod_current_position'),
+                                                                                  {'succeeded':'MOVE_ABOVE_HEXAPOD_1'})
+          # END: READ_HEXAPOD_CURRENT_POSITION 
+          #----------------------------------------------------------------------------------------
 
-        open_gripper_request = gpio.OutputRequest(HOUSING_GRIPPER_FINGER_GPIO, HOUSING_GRIPPER_FINGER_OPEN)
-        smach.StateMachine.add('OPEN_GRIPPER_STATE',
-                               smach_ros.ServiceState('/ur10_1/set_output',
-                                                      gpio.Output,
-                                                      request = open_gripper_request),
-                               {'succeeded':'succeeded'})
+          #----------------------------------------------------------------------------------------
+          # BEGIN: MOVE_ABOVE_HEXAPOD_1
+          # TEMPLATE: CartTrapVelAction
+          #
+          offset_from_hexapod = np.asarray([0.0, 0.0, -0.20])
+          ctv_p_new = np.asarray([0.0, 0.0, 0.0])
+          ctv_q_new = np.asarray([0.0, 0.0, 0.0, 0.0])
+          ctv_v_des = 0.1 
+          ctv_goal = robot_module.msg.CartTrapVelGoal(ctv_p_new, ctv_q_new, ctv_v_des)
+          smach.StateMachine.add('MOVE_ABOVE_HEXAPOD_1',
+                                 smach_ros.SimpleActionState('/ur10_1/cart_trap_vel_action_server', robot_module.msg.CartTrapVelAction,
+                                                             goal = ctv_goal),
+                                 transitions={'succeeded':'OPEN_TOOL_EXCHANGE_1'})
+          # END: MOVE_ABOVE_HEXAPOD_1
+          #----------------------------------------------------------------------------------------
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: OPEN_TOOL_EXCHANGE_1
+          # TEMPLATE: SetOutput
+          #
+          open_tool_exchange_request = gpio.OutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_OPEN)
+          smach.StateMachine.add('OPEN_TOOL_EXCHANGE_1',
+                                 smach_ros.ServiceState('/ur10_1/set_output',
+                                                        gpio.Output,
+                                                        request = open_tool_exchange_request),
+                                 transitions={'succeeded':'COUPLE_WITH_HEXAPOD'})
+          # END: OPEN_TOOL_EXCHANGE_1
+          #----------------------------------------------------------------------------------------
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: COUPLE_WITH_HEXAPOD
+          # TEMPLATE: CartLinTaskAction
+          #
+          clt_p_new = np.asarray([0.0, 0.0, 0.0])
+          clt_q_new = np.asarray([0.0, 0.0, 0.0, 0.0])
+          clt_t_des = 3
+          clt_goal = robot_module.msg.CartLinTaskGoal(clt_p_new, clt_q_new, clt_t_des)
+          smach.StateMachine.add('COUPLE_WITH_HEXAPOD',
+                                 smach_ros.SimpleActionState('/ur10_1/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
+                                                             goal = clt_goal),
+                                 transitions={'succeeded':'CLOSE_TOOL_EXCHANGE'})
+          # END: COUPLE_WITH_HEXAPOD
+          #----------------------------------------------------------------------------------------
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: CLOSE_TOOL_EXCHANGE
+          # TEMPLATE: SetOutput
+          #
+          close_tool_exchange_request = gpio.OutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_CLOSE)
+          smach.StateMachine.add('CLOSE_TOOL_EXCHANGE',
+                                 smach_ros.ServiceState('/ur10_1/set_output',
+                                                        gpio.Output,
+                                                        request = close_tool_exchange_request),
+                                 transitions={'succeeded':'RELEASE_HEXAPOD_BRAKES'})
+          # END: CLOSE_TOOL_EXCHANGE
+          #----------------------------------------------------------------------------------------
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: RELEASE_HEXAPOD_BRAKES
+          # TEMPLATE: SetOutput
+          #
+          release_hexapod_brakes_request = gpio.OutputRequest(HEXAPOD_BRAKE_1_GPIO, HEXAPOD_BRAKE_OPEN)
+          smach.StateMachine.add('RELEASE_HEXAPOD_BRAKES',
+                                 smach_ros.ServiceState('/ur10_1/set_output',
+                                                        gpio.Output,
+                                                        request = close_tool_exchange_request),
+                                 transitions={'succeeded':'READ_HEXAPOD_MIDDLE_POSITION'})
+          
+          smach.StateMachine.add('READ_HEXAPOD_MIDDLE_POSITION', TFListenerState('ur10_1/base', 'hexapod_1/mid', 'hexapod_middle_position'),
+                                                                                 {'succeeded':'MOVE_TO_MIDPOINT'})
+          # END: RELEASE_HEXAPOD_BRAKES
+          #----------------------------------------------------------------------------------------
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: MOVE_TO_MIDPOINT
+          # TEMPLATE: CartLinTaskAction
+          #
+          clt_p_new = np.asarray([0.0, 0.0, 0.0])
+          clt_q_new = np.asarray([0.0, 0.0, 0.0, 0.0])
+          clt_t_des = 3
+          clt_goal = robot_module.msg.CartLinTaskGoal(clt_p_new, clt_q_new, clt_t_des)
+          smach.StateMachine.add('MOVE_TO_MIDPOINT',
+                                 smach_ros.SimpleActionState('/ur10_1/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
+                                                             goal = clt_goal),
+                                 transitions={'succeeded':'READ_HEXAPOD_NEW_POSITION'})
+          # END: MOVE_TO_MIDPOINT
+          #----------------------------------------------------------------------------------------
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: READ_HEXAPOD_NEW_POSITION
+          # TEMPLATE: ReadTransform
+          #
+          smach.StateMachine.add('READ_HEXAPOD_NEW_POSITION', TFListenerState('ur10_1/base', 'elvez/housingx07/hexapod_1/top', 'hexapod_new_position'),
+                                                                              {'succeeded':'MOVE_TO_NEW_POSITION'})
+          # END: READ_HEXAPOD_NEW_POSITION
+          #----------------------------------------------------------------------------------------
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: MOVE_TO_NEW_POSITION
+          # TEMPLATE: CartLinTaskAction
+          #
+          clt_p_new = np.asarray([0.0, 0.0, 0.0])
+          clt_q_new = np.asarray([0.0, 0.0, 0.0, 0.0])
+          clt_t_des = 3
+          clt_goal = robot_module.msg.CartLinTaskGoal(clt_p_new, clt_q_new, clt_t_des)
+          smach.StateMachine.add('MOVE_TO_NEW_POSITION',
+                                 smach_ros.SimpleActionState('/ur10_1/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
+                                                             goal = clt_goal),
+                                 transitions={'succeeded':'LOCK_HEXAPOD_BRAKES'})
+          # END: MOVE_TO_NEW_POSITION
+          #----------------------------------------------------------------------------------------
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: LOCK_HEXAPOD_BRAKES
+          # TEMPLATE: SetOutput
+          #
+          lock_hexapod_brakes_request = gpio.OutputRequest(HEXAPOD_BRAKE_1_GPIO, HEXAPOD_BRAKE_CLOSE)
+          smach.StateMachine.add('LOCK_HEXAPOD_BRAKES',
+                                 smach_ros.ServiceState('/ur10_1/set_output',
+                                                        gpio.Output,
+                                                        request = close_tool_exchange_request),
+                                 transitions={'succeeded':'OPEN_TOOL_EXCHANGE_2'})
+          # END: LOCK_HEXAPOD_BRAKES
+          #----------------------------------------------------------------------------------------
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: OPEN_TOOL_EXCHANGE_2
+          # TEMPLATE: SetOutput
+          #
+          open_tool_exchange_request = gpio.OutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_OPEN)
+          smach.StateMachine.add('OPEN_TOOL_EXCHANGE_2',
+                                 smach_ros.ServiceState('/ur10_1/set_output',
+                                                        gpio.Output,
+                                                        request = open_tool_exchange_request),
+                                 transitions={'succeeded':'MOVE_ABOVE_HEXAPOD_2'})
+          # END: OPEN_TOOL_EXCHANGE_2
+          #----------------------------------------------------------------------------------------
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: MOVE_ABOVE_HEXAPOD_2
+          # TEMPLATE: SetOutput
+          #
+          clt_p_new = np.asarray([0.0, 0.0, 0.0])
+          clt_q_new = np.asarray([0.0, 0.0, 0.0, 0.0])
+          clt_t_des = 3
+          clt_goal = robot_module.msg.CartLinTaskGoal(clt_p_new, clt_q_new, clt_t_des)
+          smach.StateMachine.add('MOVE_ABOVE_HEXAPOD_2',
+                                 smach_ros.SimpleActionState('/ur10_1/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
+                                                             goal = clt_goal),
+                                 transitions={'succeeded':'succeeded'})
+          # END: MOVE_ABOVE_HEXAPOD_2
+          #----------------------------------------------------------------------------------------
+          
+
+        smach.StateMachine.add('RECONFIGURE_HEXAPOD', sm_sub,
+                             transitions={'succeeded':'succeeded'})
+        # END: READ_HEXAPOD_CURRENT_POSITION
+        #----------------------------------------------------------------------------------------
 
     # Execute SMACH plan
     outcome = sm_top.execute()
 
     # Wait for ctrl-c to stop the application
     rospy.spin()
+    sis2.stop()
     sis.stop()
 
     rospy.signal_shutdown('All done.')
