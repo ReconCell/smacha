@@ -123,6 +123,19 @@ class TFListenerState(smach.State):
         rospy.loginfo('Executing TFListenerState for target_frame ' + self._target_frame + ' and source_frame ' + self._source_frame)
         setattr(userdata, self._output_key, self.tf_listener.lookupTransform(self._target_frame, self._source_frame, self._time))
         return 'succeeded'
+          
+def cart_trap_vel_goal_cb(userdata, goal):
+
+  #
+  # TODO: Fix the rotational offset!
+  #
+  new_position = userdata.cart_trap_vel_pose_input[0] + userdata.cart_trap_vel_position_offset_input
+  new_rotation = userdata.cart_trap_vel_pose_input[1] # + userdata.cart_trap_vel_rotation_offset_input
+  
+  cart_trap_vel_goal = robot_module.msg.CartTrapVelGoal(new_position, new_rotation, userdata.cart_trap_vel_desired_velocity_input)
+  
+  return cart_trap_vel_goal
+
 
 # main
 def main():
@@ -146,7 +159,7 @@ def main():
         sm_sub = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
           
         #----------------------------------------------------------------------------------------
-        # BEGIN: READ_HEXAPOD_CURRENT_POSITION
+        # BEGIN: RECONFIGURE_HEXAPOD
         # TEMPLATE: DefineBlock
         #
         sis2 = smach_ros.IntrospectionServer('test_simple_action_state_machine_server', sm_sub, '/SM_TOP/RECONFIGURE_HEXAPOD')
@@ -155,27 +168,35 @@ def main():
         with sm_sub:
 
           #----------------------------------------------------------------------------------------
-          # BEGIN: READ_HEXAPOD_CURRENT_POSITION
+          # BEGIN: READ_HEXAPOD_CURRENT_POSE
           # TEMPLATE: ReadTransform
           #
-          smach.StateMachine.add('READ_HEXAPOD_CURRENT_POSITION', TFListenerState('ur10_1/base', 'hexapod_1/top', 'hexapod_current_position'),
-                                                                                  {'succeeded':'MOVE_ABOVE_HEXAPOD_1'})
-          # END: READ_HEXAPOD_CURRENT_POSITION 
+          smach.StateMachine.add('READ_HEXAPOD_CURRENT_POSE', TFListenerState('ur10_1/base', 'hexapod_1/top', 'hexapod_current_pose'),
+                                                                                  transitions={'succeeded':'MOVE_ABOVE_HEXAPOD_1'},
+                                                                                  remapping={'hexapod_current_pose':'hexapod_current_pose'})
+          # END: READ_HEXAPOD_CURRENT_POSE
           #----------------------------------------------------------------------------------------
 
           #----------------------------------------------------------------------------------------
           # BEGIN: MOVE_ABOVE_HEXAPOD_1
           # TEMPLATE: CartTrapVelAction
           #
-          offset_from_hexapod = np.asarray([0.0, 0.0, -0.20])
-          ctv_p_new = np.asarray([0.0, 0.0, 0.0])
-          ctv_q_new = np.asarray([0.0, 0.0, 0.0, 0.0])
-          ctv_v_des = 0.1 
-          ctv_goal = robot_module.msg.CartTrapVelGoal(ctv_p_new, ctv_q_new, ctv_v_des)
+          sm_sub.userdata.move_above_hexapod_1_position_offset = np.asarray([0.0, 0.0, -0.20])
+          sm_sub.userdata.move_above_hexapod_1_rotation_offset = np.asarray([0.0, 0.0, -0.20])
+          sm_sub.userdata.move_above_hexapod_1_desired_velocity = 0.1
+
           smach.StateMachine.add('MOVE_ABOVE_HEXAPOD_1',
                                  smach_ros.SimpleActionState('/ur10_1/cart_trap_vel_action_server', robot_module.msg.CartTrapVelAction,
-                                                             goal = ctv_goal),
-                                 transitions={'succeeded':'OPEN_TOOL_EXCHANGE_1'})
+                                                             goal_cb = cart_trap_vel_goal_cb,
+                                                             input_keys=['cart_trap_vel_pose_input',
+                                                                         'cart_trap_vel_position_offset_input',
+                                                                         'cart_trap_vel_rotation_offset_input',
+                                                                         'cart_trap_vel_desired_velocity_input']),
+                                 transitions={'succeeded':'OPEN_TOOL_EXCHANGE_1'},
+                                 remapping={'cart_trap_vel_pose_input':'hexapod_current_pose',
+                                            'cart_trap_vel_position_offset_input':'move_above_hexapod_1_position_offset',
+                                            'cart_trap_vel_rotation_offset_input':'move_above_hexapod_1_rotation_offset',
+                                            'cart_trap_vel_desired_velocity_input':'move_above_hexapod_1_desired_velocity'})
           # END: MOVE_ABOVE_HEXAPOD_1
           #----------------------------------------------------------------------------------------
           
@@ -229,9 +250,9 @@ def main():
                                  smach_ros.ServiceState('/ur10_1/set_output',
                                                         gpio.Output,
                                                         request = close_tool_exchange_request),
-                                 transitions={'succeeded':'READ_HEXAPOD_MIDDLE_POSITION'})
+                                 transitions={'succeeded':'READ_HEXAPOD_MIDDLE_POSE'})
           
-          smach.StateMachine.add('READ_HEXAPOD_MIDDLE_POSITION', TFListenerState('ur10_1/base', 'hexapod_1/mid', 'hexapod_middle_position'),
+          smach.StateMachine.add('READ_HEXAPOD_MIDDLE_POSE', TFListenerState('ur10_1/base', 'hexapod_1/mid', 'hexapod_middle_position'),
                                                                                  {'succeeded':'MOVE_TO_MIDPOINT'})
           # END: RELEASE_HEXAPOD_BRAKES
           #----------------------------------------------------------------------------------------
@@ -247,32 +268,32 @@ def main():
           smach.StateMachine.add('MOVE_TO_MIDPOINT',
                                  smach_ros.SimpleActionState('/ur10_1/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
                                                              goal = clt_goal),
-                                 transitions={'succeeded':'READ_HEXAPOD_NEW_POSITION'})
+                                 transitions={'succeeded':'READ_HEXAPOD_NEW_POSE'})
           # END: MOVE_TO_MIDPOINT
           #----------------------------------------------------------------------------------------
           
           #----------------------------------------------------------------------------------------
-          # BEGIN: READ_HEXAPOD_NEW_POSITION
+          # BEGIN: READ_HEXAPOD_NEW_POSE
           # TEMPLATE: ReadTransform
           #
-          smach.StateMachine.add('READ_HEXAPOD_NEW_POSITION', TFListenerState('ur10_1/base', 'elvez/housingx07/hexapod_1/top', 'hexapod_new_position'),
-                                                                              {'succeeded':'MOVE_TO_NEW_POSITION'})
-          # END: READ_HEXAPOD_NEW_POSITION
+          smach.StateMachine.add('READ_HEXAPOD_NEW_POSE', TFListenerState('ur10_1/base', 'elvez/housingx07/hexapod_1/top', 'hexapod_new_position'),
+                                                                              {'succeeded':'MOVE_TO_NEW_POSE'})
+          # END: READ_HEXAPOD_NEW_POSE
           #----------------------------------------------------------------------------------------
           
           #----------------------------------------------------------------------------------------
-          # BEGIN: MOVE_TO_NEW_POSITION
+          # BEGIN: MOVE_TO_NEW_POSE
           # TEMPLATE: CartLinTaskAction
           #
           clt_p_new = np.asarray([0.0, 0.0, 0.0])
           clt_q_new = np.asarray([0.0, 0.0, 0.0, 0.0])
           clt_t_des = 3
           clt_goal = robot_module.msg.CartLinTaskGoal(clt_p_new, clt_q_new, clt_t_des)
-          smach.StateMachine.add('MOVE_TO_NEW_POSITION',
+          smach.StateMachine.add('MOVE_TO_NEW_POSE',
                                  smach_ros.SimpleActionState('/ur10_1/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
                                                              goal = clt_goal),
                                  transitions={'succeeded':'LOCK_HEXAPOD_BRAKES'})
-          # END: MOVE_TO_NEW_POSITION
+          # END: MOVE_TO_NEW_POSE
           #----------------------------------------------------------------------------------------
           
           #----------------------------------------------------------------------------------------
@@ -319,7 +340,7 @@ def main():
 
         smach.StateMachine.add('RECONFIGURE_HEXAPOD', sm_sub,
                              transitions={'succeeded':'succeeded'})
-        # END: READ_HEXAPOD_CURRENT_POSITION
+        # END: RECONFIGURE_HEXAPOD
         #----------------------------------------------------------------------------------------
 
     # Execute SMACH plan
