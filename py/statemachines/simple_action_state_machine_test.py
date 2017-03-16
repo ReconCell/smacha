@@ -221,6 +221,12 @@ def main():
           clt_q_new = np.asarray([0.0, 0.0, 0.0, 0.0])
           clt_t_des = 3
           clt_goal = robot_module.msg.CartLinTaskGoal(clt_p_new, clt_q_new, clt_t_des)
+
+          sm_sub.userdata.couple_with_hexapod_position_offset = np.asarray([0.0, 0.0, -0.20])
+          sm_sub.userdata.couple_with_hexapod_rotation_offset = np.asarray([0.0, 0.0, -0.20])
+          sm_sub.userdata.couple_with_hexapod_desired_velocity = 0.1
+
+
           smach.StateMachine.add('COUPLE_WITH_HEXAPOD',
                                  smach_ros.SimpleActionState('/ur10_1/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
                                                              goal = clt_goal),
