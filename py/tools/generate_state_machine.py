@@ -1,3 +1,4 @@
+import os
 import yaml
 import jinja2
 
@@ -10,33 +11,39 @@ template_loader = jinja2.FileSystemLoader(search_path)
 template_env = jinja2.Environment( loader=template_loader )
 
 # Load state machine script yaml file
-smachgen_file = os.path.join(script_dir_path, '../statemachines/simple_state_machine_script_test.yml')
-with open(smachgen_file) as fd:
-  smachgen_script = yaml.load(fd)
+smachgen_filepath = os.path.join(script_dir_path, '../statemachines/simple_state_machine_script_test.yml')
+with open(smachgen_filepath) as smachgen_file:
+  smachgen_script = yaml.load(smachgen_file)
+
+# Initialise a list in which to store generated smach code
+smach_code = list()
 
 # Parse smachgen script
-for state, state_vars in smachgen_script.items():
+for i_state, state in enumerate(smachgen_script):
+
+  # Grab state name and state variables
+  state_name, state_vars = state.items()[0]
 
   # Create a new dictionary for the state variables
-  template_vars = { 'state_name' : state } 
-
+  template_vars = { 'state_name' : state_name } 
+  
   # Select the right template file based on the template variable
-  template_file = os.path.join(state_vars['template'], '.jinja')
-
-  # Read the template file using the environment object.
-  # This also constructs our Template object.
-  template = template_env.get_template( template_file )
-
+  template_filename = state_vars['template'] + '.jinja'
+  
+  # Read the state template file into a template object using the environment object
+  template = template_env.get_template( template_filename )
+  
   # Add the other state variables to the template variables dictionary
-  for state_var, state_var_val in template_vars.items():
+  for state_var, state_var_val in state_vars.items():
     if state_var != 'template':
       template_vars[state_var] = state_var_val
   
-  # Finally, process the template to produce our final text.
-  output_text = template.render( template_vars )
+  # Render the template for current state to smach_code list
+  smach_code.append(template.render( **template_vars ))
 
-  data[state] =  output_text
-
-print(data)
-
-# print yaml.safe_dump(data, default_flow_style=False)
+# Write the final output to a smach python file
+smach_filepath = os.path.join(script_dir_path, '../statemachines/simple_state_machine_script_test.py')
+with open(smach_filepath, 'w') as smach_file:
+  for code_snippet in smach_code:
+    smach_file.write(code_snippet)
+    smach_file.write('\n\n')
