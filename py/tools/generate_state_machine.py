@@ -11,15 +11,15 @@ template_loader = jinja2.FileSystemLoader(search_path)
 template_env = jinja2.Environment( loader=template_loader )
 
 # Load state machine script yaml file
-smachgen_filepath = os.path.join(script_dir_path, '../statemachines/simple_state_machine_script_test.yml')
-with open(smachgen_filepath) as smachgen_file:
-  smachgen_script = yaml.load(smachgen_file)
+smacha_filepath = os.path.join(script_dir_path, '../statemachines/simple_state_machine_script_test.yml')
+with open(smacha_filepath) as smacha_file:
+  smacha_script = yaml.load(smacha_file)
 
 # Initialise a list in which to store generated smach code
 smach_code = list()
 
-# Parse smachgen script
-for i_state, state in enumerate(smachgen_script):
+# Parse smacha script
+for i_state, state in enumerate(smacha_script):
 
   # Grab state name and state variables
   state_name, state_vars = state.items()[0]
