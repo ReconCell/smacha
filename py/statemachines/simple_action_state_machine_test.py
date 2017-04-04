@@ -258,11 +258,19 @@ def main():
                                                         request = close_tool_exchange_request),
                                  transitions={'succeeded':'READ_HEXAPOD_MIDDLE_POSE'})
           
-          smach.StateMachine.add('READ_HEXAPOD_MIDDLE_POSE', TFListenerState('ur10_1/base', 'hexapod_1/mid', 'hexapod_middle_position'),
-                                                                                 {'succeeded':'MOVE_TO_MIDPOINT'})
           # END: RELEASE_HEXAPOD_BRAKES
           #----------------------------------------------------------------------------------------
           
+          
+          #----------------------------------------------------------------------------------------
+          # BEGIN: READ_HEXAPOD_MIDDLE_POSE
+          # TEMPLATE: ReadTransform
+          #
+          smach.StateMachine.add('READ_HEXAPOD_MIDDLE_POSE', TFListenerState('ur10_1/base', 'hexapod_1/mid', 'hexapod_middle_position'),
+          
+          # END: READ_HEXAPOD_MIDDLE_POSE
+          #----------------------------------------------------------------------------------------
+                                                                                 {'succeeded':'MOVE_TO_MIDPOINT'})
           #----------------------------------------------------------------------------------------
           # BEGIN: MOVE_TO_MIDPOINT
           # TEMPLATE: CartLinTaskAction
