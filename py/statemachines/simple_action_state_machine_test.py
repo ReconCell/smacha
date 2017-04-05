@@ -32,14 +32,24 @@ from robotfunctions.getrobotjoints import getrobotjoints
 from robotfunctions.getrobotfinishsuccessful import getrobotfinishsuccessful 
 
 # GPIO Service
-import gpio.srv as gpio
-gpio_service_1 = None
-gpio_service_2 = None
+# import gpio.srv as gpio
+# gpio_service_1 = None
+# gpio_service_2 = None
+
+# Digital output service
+from robot_module.srv import Output as DigitalOutput
+from robot_module.srv import OutputRequest as DigitalOutputRequest
+from robot_module.srv import OutputResponse as DigitalOutputResponse
+
+# Set robot tool service
+# from robot_module.srv import SetRobotTool
+# set_robot_tool_service_1 = None
+# set_robot_tool_service_2 = None
 
 # Set robot tool service
 from robot_module.srv import SetRobotTool
-set_robot_tool_service_1 = None
-set_robot_tool_service_2 = None
+from robot_module.srv import SetRobotToolRequest
+from robot_module.srv import SetRobotToolResponse
 
 TOOL_EXCHANGE_GPIO = 0
 TOOL_EXCHANGE_CLOSE = 0
@@ -204,10 +214,11 @@ def main():
           # BEGIN: OPEN_TOOL_EXCHANGE_1
           # TEMPLATE: SetOutput
           #
-          open_tool_exchange_request = gpio.OutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_OPEN)
+          open_tool_exchange_request = DigitalOutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_OPEN)
+
           smach.StateMachine.add('OPEN_TOOL_EXCHANGE_1',
                                  smach_ros.ServiceState('/ur10_1/set_output',
-                                                        gpio.Output,
+                                                        DigitalOutput,
                                                         request = open_tool_exchange_request),
                                  transitions={'succeeded':'COUPLE_WITH_HEXAPOD'})
           # END: OPEN_TOOL_EXCHANGE_1
@@ -238,10 +249,11 @@ def main():
           # BEGIN: CLOSE_TOOL_EXCHANGE
           # TEMPLATE: SetOutput
           #
-          close_tool_exchange_request = gpio.OutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_CLOSE)
+          close_tool_exchange_request = DigitalOutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_CLOSE)
+
           smach.StateMachine.add('CLOSE_TOOL_EXCHANGE',
                                  smach_ros.ServiceState('/ur10_1/set_output',
-                                                        gpio.Output,
+                                                        DigitalOutput,
                                                         request = close_tool_exchange_request),
                                  transitions={'succeeded':'RELEASE_HEXAPOD_BRAKES'})
           # END: CLOSE_TOOL_EXCHANGE
@@ -251,10 +263,11 @@ def main():
           # BEGIN: RELEASE_HEXAPOD_BRAKES
           # TEMPLATE: SetOutput
           #
-          release_hexapod_brakes_request = gpio.OutputRequest(HEXAPOD_BRAKE_1_GPIO, HEXAPOD_BRAKE_OPEN)
+          release_hexapod_brakes_request = DigitalOutputRequest(HEXAPOD_BRAKE_1_GPIO, HEXAPOD_BRAKE_OPEN)
+
           smach.StateMachine.add('RELEASE_HEXAPOD_BRAKES',
                                  smach_ros.ServiceState('/ur10_1/set_output',
-                                                        gpio.Output,
+                                                        DigitalOutput,
                                                         request = close_tool_exchange_request),
                                  transitions={'succeeded':'READ_HEXAPOD_MIDDLE_POSE'})
           
@@ -314,10 +327,11 @@ def main():
           # BEGIN: LOCK_HEXAPOD_BRAKES
           # TEMPLATE: SetOutput
           #
-          lock_hexapod_brakes_request = gpio.OutputRequest(HEXAPOD_BRAKE_1_GPIO, HEXAPOD_BRAKE_CLOSE)
+          lock_hexapod_brakes_request = DigitalOutputRequest(HEXAPOD_BRAKE_1_GPIO, HEXAPOD_BRAKE_CLOSE)
+
           smach.StateMachine.add('LOCK_HEXAPOD_BRAKES',
                                  smach_ros.ServiceState('/ur10_1/set_output',
-                                                        gpio.Output,
+                                                        DigitalOutput,
                                                         request = close_tool_exchange_request),
                                  transitions={'succeeded':'OPEN_TOOL_EXCHANGE_2'})
           # END: LOCK_HEXAPOD_BRAKES
@@ -327,10 +341,11 @@ def main():
           # BEGIN: OPEN_TOOL_EXCHANGE_2
           # TEMPLATE: SetOutput
           #
-          open_tool_exchange_request = gpio.OutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_OPEN)
+          open_tool_exchange_request = DigitalOutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_OPEN)
+
           smach.StateMachine.add('OPEN_TOOL_EXCHANGE_2',
                                  smach_ros.ServiceState('/ur10_1/set_output',
-                                                        gpio.Output,
+                                                        DigitalOutput,
                                                         request = open_tool_exchange_request),
                                  transitions={'succeeded':'MOVE_ABOVE_HEXAPOD_2'})
           # END: OPEN_TOOL_EXCHANGE_2
