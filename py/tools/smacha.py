@@ -4,6 +4,15 @@ import os
 import yaml
 import jinja2
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 class Parser():
   """SMACHA script parser."""
@@ -46,39 +55,67 @@ class Templater():
 
 class Generator():
   """SMACH code generator."""
-  def __init__(self, script, templater):
-    self._script = script
+  def __init__(self, templater):
+    # Handle to the Jinja templater
     self._templater = templater
-    pass
-
-  def process_state(self):
-    pass
-
-  def generate(self):
     # Initialise a list in which to store generated smach code
-    smach_code = list()
-    
-    # Parse smacha script
-    for i_state, state in enumerate(self._script):
+    self._smach_code_buffer = list()
 
+  def _process_state(self, state):
+    if type(state) is list:
+      # Loop through list of states
+      for i_sub_state, sub_state in enumerate(state):
+        # Recursively process each state
+        self._process_state(sub_state)
+
+    elif type(state) is dict:
       # Grab state name and state variables
       state_name, state_vars = state.items()[0]
-    
+
       # Create a new dictionary for the state template variables
       template_vars = { 'state_name' : state_name } 
-      
-      # Add the other state variables to the template variables dictionary
-      for state_var, state_var_val in state_vars.items():
-        if state_var != 'template':
-          template_vars[state_var] = state_var_val
+        
+      # If we have state_vars that contain a 'states' key,
+      # we're dealing with a nested SMACH container.
+      if 'states' in state_vars:
+        # Recursively process the nested sub-states
+        print(bcolors.OKGREEN +
+              'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
+        self._process_state(state_vars['states'])
 
-      # Generate state code from template
-      state_code = self._templater.process(state_vars['template'], template_vars)
+      # Otherwise, assume we have hit a leaf.
+      else:
+        # Add the other state variables to the template variables dictionary
+        for state_var, state_var_val in state_vars.items():
+          if state_var != 'template':
+            template_vars[state_var] = state_var_val
+
+        # Process and render state code from template
+        try:
+          # Call the templater object to process the current state template
+          print(bcolors.OKBLUE + 'Processing state \'' + state_name + '\'' + bcolors.ENDC)
+          state_code = self._templater.process(state_vars['template'], template_vars)
+
+          # Append the template for current state to smach_code buffer list
+          self._smach_code_buffer.append(state_code)
+
+        except Exception as e:
+          print(bcolors.WARNING +
+                'WARNING: Error processing state \'' + state_name + '\': ' + bcolors.ENDC +
+                str(e))
+          pass
       
-      # Render the template for current state to smach_code list
-      smach_code.append(state_code)
+    else:
+      pass
+
+  def run(self, script):
+    # Clear the buffer
+    self._smach_code_buffer = list()
+ 
+    # Start processing states from the script
+    self._process_state(script)
   
-    return smach_code
+    return self._smach_code_buffer
 
 
 def main(args):
@@ -92,10 +129,10 @@ def main(args):
   templater = Templater(args.template_dir)
 
   # Load code generator
-  generator = Generator(smacha_script, templater)
+  generator = Generator(templater)
 
   # Generate the SMACH code
-  smach_code = generator.generate()
+  smach_code = generator.run(smacha_script)
   
   # Write the final output to a smach python file
   # smach_filepath = os.path.join(script_dir_path, '../statemachines/simple_state_machine_script_test.py')
