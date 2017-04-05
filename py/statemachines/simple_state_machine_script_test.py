@@ -31,3 +31,37 @@ smach.StateMachine.add('MOVE_ABOVE_HEXAPOD_1',
 # END: MOVE_ABOVE_HEXAPOD_1
 #----------------------------------------------------------------------------------------
 
+#----------------------------------------------------------------------------------------
+# BEGIN: OPEN_TOOL_EXCHANGE_1
+# TEMPLATE: SetOutput
+#
+OPEN_TOOL_EXCHANGE_1_request = DigitalOutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_OPEN)
+
+smach.StateMachine.add('OPEN_TOOL_EXCHANGE_1',
+                       smach_ros.ServiceState('/ur10_1/set_output',
+                                              DigitalOutput,
+                                              request = OPEN_TOOL_EXCHANGE_1_request),
+                       transitions={'succeeded':'COUPLE_WITH_HEXAPOD'})
+# END: OPEN_TOOL_EXCHANGE_1
+#----------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------
+# BEGIN: SUB_STATE_1
+# TEMPLATE: ReadTransformState
+#
+smach.StateMachine.add('SUB_STATE_1', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
+                                                                        transitions={'succeeded':'SUB_STATE_2'},
+                                                                        remapping={'hexapod_current_pose':'hexapod_current_pose'})
+# END: SUB_STATE_1
+#----------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------
+# BEGIN: SUB_STATE_2
+# TEMPLATE: ReadTransformState
+#
+smach.StateMachine.add('SUB_STATE_2', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
+                                                                        transitions={'succeeded':'MOVE_ABOVE_HEXAPOD_1'},
+                                                                        remapping={'hexapod_current_pose':'hexapod_current_pose'})
+# END: SUB_STATE_2
+#----------------------------------------------------------------------------------------
+
