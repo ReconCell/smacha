@@ -151,20 +151,20 @@ def cart_trap_vel_goal_cb(userdata, goal):
 def main():
     
   # Initialize the ROS node
-  rospy.init_node('test_simple_action_state_machine')
+  rospy.init_node('{{ node_name }}')
 
   # Create a SMACH state machine
   # sm_top = smach.StateMachine("")
-  sm_top = smach.StateMachine(outcomes=['succeeded','aborted','preempted'])
+  {{ name | lower() }} = smach.StateMachine(outcomes=['succeeded','aborted','preempted'])
   
   # Create the Introspection server
-  sis = smach_ros.IntrospectionServer('test_simple_action_state_machine_server', sm_top, '/SM_TOP')
-  sis.start()
+  {{name | lower() }}_sis = smach_ros.IntrospectionServer('{{ node_name }}_server', {{ name | lower() }}, '/{{ name }}')
+  {{name | lower() }}_sis.start()
       
   # Open the container
-  with sm_top:
+  with {{ name | lower() }}:
 
-    {{ body }}
+    {{ body | indent(4) }}
   
   # Execute SMACH plan
   outcome = sm_top.execute()
