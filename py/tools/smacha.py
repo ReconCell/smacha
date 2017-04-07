@@ -129,33 +129,65 @@ class Generator():
       else:
         # Find the state name and variables
         for state_name, state_vars in state.items():
-          if state_name is not '__line__':
+          if state_name != '__line__':
             break
 
-        # Create a new dictionary for the state template variables
-        template_vars = { 'state_name' : state_name } 
-          
         # If we have state_vars that contain a 'states' key,
         # we're dealing with a nested SMACH container.
         if 'states' in state_vars:
-          # Recursively process the nested sub-states
-          if self._verbose:
-            print(bcolors.OKGREEN +
-                  'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
-          body = self._process_state_machine((body), state_vars['states'])
+          # Process and render state code from nested container template
+          try:
+            if self._verbose:
+              print(bcolors.OKGREEN +
+                    'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
+
+            # Create a new dictionary for the state template variables
+            template_vars = { 'state_name' : state_name } 
+            
+            # Add the other state variables to the template variables dictionary
+            for state_var, state_var_val in state_vars.items():
+              if state_var != 'states' and state_var != 'template' and state_var != '__line__':
+                template_vars[state_var] = state_var_val
+
+            # Initialise list buffers for smach code generated from nested container states
+            container_body = list()
+
+            # Recursively process nested states
+            container_body = self._process_state_machine((container_body), state_vars['states'])
+
+            # Convert nested state code to strings
+            template_vars['body'] = self._gen_code_string(container_body)
+
+            # Call the templater object to process the container template with
+            # the generated nested state code
+            container_code = self._templater.process(state_vars['template'], template_vars)
+           
+            # Append the generated container code to the base code body
+            body.append(container_code)
+
+          
+          except Exception as e:
+            print(bcolors.WARNING +
+                  'WARNING: Error processing template for nested container state \'' + state_name + '\': ' + bcolors.ENDC +
+                  str(e))
+            pass
 
         # Otherwise, assume we have hit a leaf.
         else:
-          # Add the other state variables to the template variables dictionary
-          for state_var, state_var_val in state_vars.items():
-            if state_var is not 'template' and state_var is not '__line__':
-              template_vars[state_var] = state_var_val
-
-          # Process and render state code from template
+          # Process and render state code from leaf template
           try:
-            # Call the templater object to process the current state template
             if self._verbose:
               print(bcolors.OKBLUE + 'Processing state \'' + state_name + '\'' + bcolors.ENDC)
+
+            # Create a new dictionary for the state template variables
+            template_vars = { 'state_name' : state_name } 
+          
+            # Add the other state variables to the template variables dictionary
+            for state_var, state_var_val in state_vars.items():
+              if state_var != 'template' and state_var != '__line__':
+                template_vars[state_var] = state_var_val
+
+            # Call the templater object to process the current state template
             state_code = self._templater.process(state_vars['template'], template_vars)
 
             # Append the template for current state to smach_code buffer list
