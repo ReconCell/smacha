@@ -1,9 +1,9 @@
 #----------------------------------------------------------------------------------------
-# BEGIN: {{ state_name }}
+# BEGIN: {{ name }}
 # TEMPLATE: ReadTransformState
 #
-smach.StateMachine.add('{{ state_name }}', TFListenerState('{{ target_frame }}', '{{ source_frame }}', '{{ transform_output }}'),
+smach.StateMachine.add('{{ name }}', TFListenerState('{{ target_frame }}', '{{ source_frame }}', '{{ transform_output }}'),
                                                                         transitions={'succeeded':'{{ succeeded }}'},
                                                                         remapping={'{{ transform_output }}':'{{ transform_output }}'})
-# END: {{ state_name }}
+# END: {{ name }}
 #----------------------------------------------------------------------------------------

@@ -1,18 +1,18 @@
 #----------------------------------------------------------------------------------------
-# BEGIN: {{ state_name }}
+# BEGIN: {{ name }}
 # TEMPLATE: StateMachine
 #
-{{ state_name | lower() }} = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
+{{ name | lower() }} = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
       
-{{ state_name | lower() }}_sis = smach_ros.IntrospectionServer('{{ node_name }}', {{ state_name }}, '{{ sis_topic }}')
-{{ state_name | lower() }}_sis.start()
+{{ name | lower() }}_sis = smach_ros.IntrospectionServer('{{ node_name }}', {{ name }}, '{{ sis_topic }}')
+{{ name | lower() }}_sis.start()
 
-with {{ state_name | lower() }}:
+with {{ name | lower() }}:
 
   {{ body | indent(2) }}
 
-smach.StateMachine.add('{{ state_name }}', {{ state_name }},
+smach.StateMachine.add('{{ name }}', {{ name | lower() }},
                        transitions={'succeeded':'succeeded'})
 #
-# END: {{ state_name }}
+# END: {{ name }}
 #----------------------------------------------------------------------------------------

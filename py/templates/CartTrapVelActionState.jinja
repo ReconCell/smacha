@@ -1,12 +1,12 @@
 #----------------------------------------------------------------------------------------
-# BEGIN: {{ state_name }}
+# BEGIN: {{ name }}
 # TEMPLATE: CartTrapVelActionState
 #
-sm_sub.userdata.{{ state_name }}_position_offset = np.asarray([{{ position_offset_x }}, {{ position_offset_y }}, {{ position_offset_z }}])
-sm_sub.userdata.{{ state_name }}_rotation_offset = np.asarray([{{ rotation_offset_x }}, {{ rotation_offset_y }}, {{ rotation_offset_z }}])
-sm_sub.userdata.{{ state_name }}_desired_velocity = {{ desired_velocity }}
+{{ container_name | lower() }}.userdata.{{ name | lower() }}_position_offset = np.asarray([{{ position_offset_x }}, {{ position_offset_y }}, {{ position_offset_z }}])
+{{ container_name | lower() }}.userdata.{{ name | lower() }}_rotation_offset = np.asarray([{{ rotation_offset_x }}, {{ rotation_offset_y }}, {{ rotation_offset_z }}])
+{{ container_name | lower() }}.userdata.{{ name | lower() }}_desired_velocity = {{ desired_velocity }}
 
-smach.StateMachine.add('{{ state_name }}',
+smach.StateMachine.add('{{ name }}',
                        smach_ros.SimpleActionState('/{{ robot }}/cart_trap_vel_action_server', robot_module.msg.CartTrapVelAction,
                                                    goal_cb = cart_trap_vel_goal_cb,
                                                    input_keys=['cart_trap_vel_pose_input',
@@ -15,8 +15,8 @@ smach.StateMachine.add('{{ state_name }}',
                                                                'cart_trap_vel_desired_velocity_input']),
                        transitions={'succeeded':'{{ succeeded }}'},
                        remapping={'cart_trap_vel_pose_input':'{{ pose_input }}',
-                                  'cart_trap_vel_position_offset_input':'{{ state_name }}_position_offset',
-                                  'cart_trap_vel_rotation_offset_input':'{{ state_name }}_rotation_offset',
-                                  'cart_trap_vel_desired_velocity_input':'{{ state_name }}_desired_velocity'})
-# END: MOVE_ABOVE_HEXAPOD_1
+                                  'cart_trap_vel_position_offset_input':'{{ name | lower() }}_position_offset',
+                                  'cart_trap_vel_rotation_offset_input':'{{ name | lower() }}_rotation_offset',
+                                  'cart_trap_vel_desired_velocity_input':'{{ name | lower() }}_desired_velocity'})
+# END: {{ name }}
 #----------------------------------------------------------------------------------------
