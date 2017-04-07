@@ -108,16 +108,17 @@ class Generator():
     self._verbose = verbose
     # Handle to the Jinja templater
     self._templater = templater
-    # Initialise list buffers in which to store generated smach code
-    self._header_code_list_buffer = list()
-    self._body_code_list_buffer = list()
 
-  def _process_state_machine(self, state):
+  def _process_state_machine(self, code_buffers, state):
+    # Unpack code_buffers
+    body = code_buffers
+
+    # Inspect state
     if type(state) is list:
       # Iterate through list of states
       for i_sub_state, sub_state in enumerate(state):
         # Recursively process each state
-        self._process_state_machine(sub_state)
+        body = self._process_state_machine((body), sub_state)
 
     elif type(state) is dict:
 
@@ -141,7 +142,7 @@ class Generator():
           if self._verbose:
             print(bcolors.OKGREEN +
                   'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
-          self._process_state_machine(state_vars['states'])
+          body = self._process_state_machine((body), state_vars['states'])
 
         # Otherwise, assume we have hit a leaf.
         else:
@@ -158,7 +159,7 @@ class Generator():
             state_code = self._templater.process(state_vars['template'], template_vars)
 
             # Append the template for current state to smach_code buffer list
-            self._body_code_list_buffer.append(state_code)
+            body.append(state_code)
 
           except Exception as e:
             print(bcolors.WARNING +
@@ -168,19 +169,18 @@ class Generator():
 
     else:
       pass
+    
+    return (body)
 
-  def _gen_code_string(self, code_list_buffer):
+  def _gen_code_string(self, code_buffer):
     """Generate code string from code list buffer."""
     code_string = ''
-    for code_snippet in code_list_buffer:
+    for code_snippet in code_buffer:
       code_string = code_string + code_snippet + '\n\n'
-
     return code_string
 
   def run(self, script):
     """Generate SMACH code from a parsed SMACHA yaml script."""
-    # Clear the buffer
-    self._body_code_list_buffer = list()
 
     # TODO: Clean up this logic
     if type(script) is not dict:
@@ -191,11 +191,19 @@ class Generator():
       # Start processing states from the script
       if self._verbose:
         print(bcolors.HEADER + 'Processing state machine' + bcolors.ENDC)
-      self._process_state_machine(script['states'])
+    
+      # Initialise list buffers in which to store generated smach code
+      # TODO: Write code for header and footer processing
+      header = list()
+      body = list()
+      footer = list()
+      body = self._process_state_machine((body), script['states'])
 
-      # Create a dict for the base template variables
+      # Create and fill a dict for the base template variables
       base_template_vars = dict()
-      base_template_vars['body'] = self._gen_code_string(self._body_code_list_buffer)
+      base_template_vars['name'] = script['name']
+      base_template_vars['node_name'] = script['node_name']
+      base_template_vars['body'] = self._gen_code_string(body)
 
       # Process the base state machine template
       base_code = self._templater.process(script['template'], base_template_vars)
