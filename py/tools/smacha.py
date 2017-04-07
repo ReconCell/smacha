@@ -104,7 +104,8 @@ class Templater():
 
 class Generator():
   """SMACH code generator."""
-  def __init__(self, templater):
+  def __init__(self, templater, verbose=False):
+    self._verbose = verbose
     # Handle to the Jinja templater
     self._templater = templater
     # Initialise list buffers in which to store generated smach code
@@ -137,8 +138,9 @@ class Generator():
         # we're dealing with a nested SMACH container.
         if 'states' in state_vars:
           # Recursively process the nested sub-states
-          print(bcolors.OKGREEN +
-                'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
+          if self._verbose:
+            print(bcolors.OKGREEN +
+                  'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
           self._process_state_machine(state_vars['states'])
 
         # Otherwise, assume we have hit a leaf.
@@ -151,7 +153,8 @@ class Generator():
           # Process and render state code from template
           try:
             # Call the templater object to process the current state template
-            print(bcolors.OKBLUE + 'Processing state \'' + state_name + '\'' + bcolors.ENDC)
+            if self._verbose:
+              print(bcolors.OKBLUE + 'Processing state \'' + state_name + '\'' + bcolors.ENDC)
             state_code = self._templater.process(state_vars['template'], template_vars)
 
             # Append the template for current state to smach_code buffer list
@@ -159,7 +162,7 @@ class Generator():
 
           except Exception as e:
             print(bcolors.WARNING +
-                  'WARNING: Error processing state \'' + state_name + '\': ' + bcolors.ENDC +
+                  'WARNING: Error processing template for state \'' + state_name + '\': ' + bcolors.ENDC +
                   str(e))
             pass
 
@@ -186,7 +189,8 @@ class Generator():
       raise ParseException(error='Script does not contain states!')
     else:
       # Start processing states from the script
-      print(bcolors.HEADER + 'Processing state machine' + bcolors.ENDC)
+      if self._verbose:
+        print(bcolors.HEADER + 'Processing state machine' + bcolors.ENDC)
       self._process_state_machine(script['states'])
 
       # Create a dict for the base template variables
@@ -213,7 +217,7 @@ def main(args):
   templater = Templater(args.template_dir)
 
   # Load code generator
-  generator = Generator(templater)
+  generator = Generator(templater, verbose=args.verbose)
 
   # Generate the SMACH code
   smach_code = generator.run(smacha_script)
@@ -243,6 +247,10 @@ if __name__ == '__main__':
                           action='store',
                           default='./smacha_output.py',
                           help='Generated SMACH output (python file).')
+
+  arg_parser.add_argument('-v', '--verbose',
+                          action='store_true',
+                          help='Print verbose output to terminal')
 
   args = arg_parser.parse_args()
 
