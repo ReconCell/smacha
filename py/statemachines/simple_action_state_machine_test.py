@@ -165,13 +165,13 @@ def main():
   # Open the container
   with sm_top:
       
+    #----------------------------------------------------------------------------------------
+    # BEGIN: RECONFIGURE_HEXAPOD
+    # TEMPLATE: StateMachine
+    #
     # Create the sub SMACH state machine
     sm_sub = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
       
-    #----------------------------------------------------------------------------------------
-    # BEGIN: RECONFIGURE_HEXAPOD
-    # TEMPLATE: DefineBlock
-    #
     sis2 = smach_ros.IntrospectionServer('test_simple_action_state_machine_server', sm_sub, '/SM_TOP/RECONFIGURE_HEXAPOD')
     sis2.start()
   
