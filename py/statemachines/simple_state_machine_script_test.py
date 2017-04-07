@@ -165,70 +165,134 @@ def main():
   with sm_top:
 
     #----------------------------------------------------------------------------------------
-    # BEGIN: READ_HEXAPOD_CURRENT_POSE
-    # TEMPLATE: ReadTransformState
+    # BEGIN: RECONFIGURE_HEXAPOD
+    # TEMPLATE: StateMachine
     #
-    smach.StateMachine.add('READ_HEXAPOD_CURRENT_POSE', TFListenerState('ur10_1/base', 'hexapod_1/top', 'hexapod_current_pose'),
-                                                                            transitions={'succeeded':'MOVE_ABOVE_HEXAPOD_1'},
-                                                                            remapping={'hexapod_current_pose':'hexapod_current_pose'})
-    # END: READ_HEXAPOD_CURRENT_POSE
-    #----------------------------------------------------------------------------------------
+    reconfigure_hexapod = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
+          
+    reconfigure_hexapod_sis = smach_ros.IntrospectionServer('', RECONFIGURE_HEXAPOD, '')
+    reconfigure_hexapod_sis.start()
     
-    #----------------------------------------------------------------------------------------
-    # BEGIN: MOVE_ABOVE_HEXAPOD_1
-    # TEMPLATE: CartTrapVelActionState
+    with reconfigure_hexapod:
+    
+      #----------------------------------------------------------------------------------------
+      # BEGIN: READ_HEXAPOD_CURRENT_POSE
+      # TEMPLATE: ReadTransformState
+      #
+      smach.StateMachine.add('READ_HEXAPOD_CURRENT_POSE', TFListenerState('ur10_1/base', 'hexapod_1/top', 'hexapod_current_pose'),
+                                                                              transitions={'succeeded':'MOVE_ABOVE_HEXAPOD_1'},
+                                                                              remapping={'hexapod_current_pose':'hexapod_current_pose'})
+      # END: READ_HEXAPOD_CURRENT_POSE
+      #----------------------------------------------------------------------------------------
+      
+      #----------------------------------------------------------------------------------------
+      # BEGIN: MOVE_ABOVE_HEXAPOD_1
+      # TEMPLATE: CartTrapVelActionState
+      #
+      sm_sub.userdata.MOVE_ABOVE_HEXAPOD_1_position_offset = np.asarray([0.0, 0.0, -0.2])
+      sm_sub.userdata.MOVE_ABOVE_HEXAPOD_1_rotation_offset = np.asarray([0.0, 0.0, 0.0])
+      sm_sub.userdata.MOVE_ABOVE_HEXAPOD_1_desired_velocity = 0.1
+      
+      smach.StateMachine.add('MOVE_ABOVE_HEXAPOD_1',
+                             smach_ros.SimpleActionState('/ur10_1/cart_trap_vel_action_server', robot_module.msg.CartTrapVelAction,
+                                                         goal_cb = cart_trap_vel_goal_cb,
+                                                         input_keys=['cart_trap_vel_pose_input',
+                                                                     'cart_trap_vel_position_offset_input',
+                                                                     'cart_trap_vel_rotation_offset_input',
+                                                                     'cart_trap_vel_desired_velocity_input']),
+                             transitions={'succeeded':'OPEN_TOOL_EXCHANGE_1'},
+                             remapping={'cart_trap_vel_pose_input':'hexapod_current_pose',
+                                        'cart_trap_vel_position_offset_input':'MOVE_ABOVE_HEXAPOD_1_position_offset',
+                                        'cart_trap_vel_rotation_offset_input':'MOVE_ABOVE_HEXAPOD_1_rotation_offset',
+                                        'cart_trap_vel_desired_velocity_input':'MOVE_ABOVE_HEXAPOD_1_desired_velocity'})
+      # END: MOVE_ABOVE_HEXAPOD_1
+      #----------------------------------------------------------------------------------------
+      
+      #----------------------------------------------------------------------------------------
+      # BEGIN: OPEN_TOOL_EXCHANGE_1
+      # TEMPLATE: SetOutput
+      #
+      OPEN_TOOL_EXCHANGE_1_request = DigitalOutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_OPEN)
+      
+      smach.StateMachine.add('OPEN_TOOL_EXCHANGE_1',
+                             smach_ros.ServiceState('/ur10_1/set_output',
+                                                    DigitalOutput,
+                                                    request = OPEN_TOOL_EXCHANGE_1_request),
+                             transitions={'succeeded':'COUPLE_WITH_HEXAPOD'})
+      # END: OPEN_TOOL_EXCHANGE_1
+      #----------------------------------------------------------------------------------------
+      
+    
+    smach.StateMachine.add('RECONFIGURE_HEXAPOD', RECONFIGURE_HEXAPOD,
+                           transitions={'succeeded':'succeeded'})
     #
-    sm_sub.userdata.MOVE_ABOVE_HEXAPOD_1_position_offset = np.asarray([0.0, 0.0, -0.2])
-    sm_sub.userdata.MOVE_ABOVE_HEXAPOD_1_rotation_offset = np.asarray([0.0, 0.0, 0.0])
-    sm_sub.userdata.MOVE_ABOVE_HEXAPOD_1_desired_velocity = 0.1
-    
-    smach.StateMachine.add('MOVE_ABOVE_HEXAPOD_1',
-                           smach_ros.SimpleActionState('/ur10_1/cart_trap_vel_action_server', robot_module.msg.CartTrapVelAction,
-                                                       goal_cb = cart_trap_vel_goal_cb,
-                                                       input_keys=['cart_trap_vel_pose_input',
-                                                                   'cart_trap_vel_position_offset_input',
-                                                                   'cart_trap_vel_rotation_offset_input',
-                                                                   'cart_trap_vel_desired_velocity_input']),
-                           transitions={'succeeded':'OPEN_TOOL_EXCHANGE_1'},
-                           remapping={'cart_trap_vel_pose_input':'hexapod_current_pose',
-                                      'cart_trap_vel_position_offset_input':'MOVE_ABOVE_HEXAPOD_1_position_offset',
-                                      'cart_trap_vel_rotation_offset_input':'MOVE_ABOVE_HEXAPOD_1_rotation_offset',
-                                      'cart_trap_vel_desired_velocity_input':'MOVE_ABOVE_HEXAPOD_1_desired_velocity'})
-    # END: MOVE_ABOVE_HEXAPOD_1
+    # END: RECONFIGURE_HEXAPOD
     #----------------------------------------------------------------------------------------
     
     #----------------------------------------------------------------------------------------
-    # BEGIN: OPEN_TOOL_EXCHANGE_1
-    # TEMPLATE: SetOutput
+    # BEGIN: SECONDARY_META_STATE
+    # TEMPLATE: StateMachine
     #
-    OPEN_TOOL_EXCHANGE_1_request = DigitalOutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_OPEN)
+    secondary_meta_state = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
+          
+    secondary_meta_state_sis = smach_ros.IntrospectionServer('', SECONDARY_META_STATE, '')
+    secondary_meta_state_sis.start()
     
-    smach.StateMachine.add('OPEN_TOOL_EXCHANGE_1',
-                           smach_ros.ServiceState('/ur10_1/set_output',
-                                                  DigitalOutput,
-                                                  request = OPEN_TOOL_EXCHANGE_1_request),
-                           transitions={'succeeded':'COUPLE_WITH_HEXAPOD'})
-    # END: OPEN_TOOL_EXCHANGE_1
-    #----------------------------------------------------------------------------------------
+    with secondary_meta_state:
     
-    #----------------------------------------------------------------------------------------
-    # BEGIN: SUB_STATE_1
-    # TEMPLATE: ReadTransformState
+      #----------------------------------------------------------------------------------------
+      # BEGIN: SUB_STATE_1
+      # TEMPLATE: ReadTransformState
+      #
+      smach.StateMachine.add('SUB_STATE_1', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
+                                                                              transitions={'succeeded':'SUB_STATE_2'},
+                                                                              remapping={'hexapod_current_pose':'hexapod_current_pose'})
+      # END: SUB_STATE_1
+      #----------------------------------------------------------------------------------------
+      
+      #----------------------------------------------------------------------------------------
+      # BEGIN: SUB_STATE_2
+      # TEMPLATE: ReadTransformState
+      #
+      smach.StateMachine.add('SUB_STATE_2', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
+                                                                              transitions={'succeeded':'TERNARY_META_STATE'},
+                                                                              remapping={'hexapod_current_pose':'hexapod_current_pose'})
+      # END: SUB_STATE_2
+      #----------------------------------------------------------------------------------------
+      
+      #----------------------------------------------------------------------------------------
+      # BEGIN: TERNARY_META_STATE
+      # TEMPLATE: StateMachine
+      #
+      ternary_meta_state = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
+            
+      ternary_meta_state_sis = smach_ros.IntrospectionServer('', TERNARY_META_STATE, '')
+      ternary_meta_state_sis.start()
+      
+      with ternary_meta_state:
+      
+        #----------------------------------------------------------------------------------------
+        # BEGIN: SUB_SUB_STATE_1
+        # TEMPLATE: ReadTransformState
+        #
+        smach.StateMachine.add('SUB_SUB_STATE_1', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
+                                                                                transitions={'succeeded':'succeeded'},
+                                                                                remapping={'hexapod_current_pose':'hexapod_current_pose'})
+        # END: SUB_SUB_STATE_1
+        #----------------------------------------------------------------------------------------
+        
+      
+      smach.StateMachine.add('TERNARY_META_STATE', TERNARY_META_STATE,
+                             transitions={'succeeded':'succeeded'})
+      #
+      # END: TERNARY_META_STATE
+      #----------------------------------------------------------------------------------------
+      
+    
+    smach.StateMachine.add('SECONDARY_META_STATE', SECONDARY_META_STATE,
+                           transitions={'succeeded':'succeeded'})
     #
-    smach.StateMachine.add('SUB_STATE_1', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
-                                                                            transitions={'succeeded':'SUB_STATE_2'},
-                                                                            remapping={'hexapod_current_pose':'hexapod_current_pose'})
-    # END: SUB_STATE_1
-    #----------------------------------------------------------------------------------------
-    
-    #----------------------------------------------------------------------------------------
-    # BEGIN: SUB_STATE_2
-    # TEMPLATE: ReadTransformState
-    #
-    smach.StateMachine.add('SUB_STATE_2', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
-                                                                            transitions={'succeeded':'MOVE_ABOVE_HEXAPOD_1'},
-                                                                            remapping={'hexapod_current_pose':'hexapod_current_pose'})
-    # END: SUB_STATE_2
+    # END: SECONDARY_META_STATE
     #----------------------------------------------------------------------------------------
     
   
