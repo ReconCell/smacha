@@ -96,7 +96,7 @@ class Templater():
     # Read the state template file into a template object using the environment object
     template = self._template_env.get_template( template_filename )
     
-    # Generate code
+    # Render code
     code = template.render( **template_vars ) 
 
     return code
@@ -107,8 +107,9 @@ class Generator():
   def __init__(self, templater):
     # Handle to the Jinja templater
     self._templater = templater
-    # Initialise a list in which to store generated smach code
-    self._state_machine_code_buffer = list()
+    # Initialise list buffers in which to store generated smach code
+    self._header_code_list_buffer = list()
+    self._body_code_list_buffer = list()
 
   def _process_state_machine(self, state):
     if type(state) is list:
@@ -154,7 +155,7 @@ class Generator():
             state_code = self._templater.process(state_vars['template'], template_vars)
 
             # Append the template for current state to smach_code buffer list
-            self._state_machine_code_buffer.append(state_code)
+            self._body_code_list_buffer.append(state_code)
 
           except Exception as e:
             print(bcolors.WARNING +
@@ -165,9 +166,18 @@ class Generator():
     else:
       pass
 
+  def _gen_code_string(self, code_list_buffer):
+    """Generate code string from code list buffer."""
+    code_string = ''
+    for code_snippet in code_list_buffer:
+      code_string = code_string + code_snippet + '\n\n'
+
+    return code_string
+
   def run(self, script):
+    """Generate SMACH code from a parsed SMACHA yaml script."""
     # Clear the buffer
-    self._state_machine_code_buffer = list()
+    self._body_code_list_buffer = list()
 
     # TODO: Clean up this logic
     if type(script) is not dict:
@@ -176,9 +186,17 @@ class Generator():
       raise ParseException(error='Script does not contain states!')
     else:
       # Start processing states from the script
+      print(bcolors.HEADER + 'Processing state machine' + bcolors.ENDC)
       self._process_state_machine(script['states'])
+
+      # Create a dict for the base template variables
+      base_template_vars = dict()
+      base_template_vars['body'] = self._gen_code_string(self._body_code_list_buffer)
+
+      # Process the base state machine template
+      base_code = self._templater.process(script['template'], base_template_vars)
   
-    return self._state_machine_code_buffer
+      return base_code
 
 
 def main(args):
@@ -187,7 +205,7 @@ def main(args):
   # Load parser
   parser = Parser()
 
-  # Load and parse smacha script
+  # Load and parse SMACHA script
   with open(args.script_file) as smacha_file:
     smacha_script = parser.parse(smacha_file)
 
@@ -200,12 +218,9 @@ def main(args):
   # Generate the SMACH code
   smach_code = generator.run(smacha_script)
   
-  # Write the final output to a smach python file
-  # smach_filepath = os.path.join(script_dir_path, '../statemachines/simple_state_machine_script_test.py')
+  # Write the final output to a SMACH python file
   with open(args.output_file, 'w') as smach_file:
-    for code_snippet in smach_code:
-      smach_file.write(code_snippet)
-      smach_file.write('\n\n')
+    smach_file.write(smach_code)
 
 
 if __name__ == '__main__':
