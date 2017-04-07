@@ -109,7 +109,7 @@ class Generator():
     # Handle to the Jinja templater
     self._templater = templater
 
-  def _process_state_machine(self, code_buffers, state):
+  def _process_state_machine(self, code_buffers, container_name, state):
     # Unpack code_buffers
     body = code_buffers
 
@@ -118,7 +118,7 @@ class Generator():
       # Iterate through list of states
       for i_sub_state, sub_state in enumerate(state):
         # Recursively process each state
-        body = self._process_state_machine((body), sub_state)
+        body = self._process_state_machine((body), container_name, sub_state)
 
     elif type(state) is dict:
 
@@ -142,7 +142,7 @@ class Generator():
                     'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
 
             # Create a new dictionary for the state template variables
-            template_vars = { 'state_name' : state_name } 
+            template_vars = { 'name' : state_name } 
             
             # Add the other state variables to the template variables dictionary
             for state_var, state_var_val in state_vars.items():
@@ -153,7 +153,7 @@ class Generator():
             container_body = list()
 
             # Recursively process nested states
-            container_body = self._process_state_machine((container_body), state_vars['states'])
+            container_body = self._process_state_machine((container_body), state_name, state_vars['states'])
 
             # Convert nested state code to strings
             template_vars['body'] = self._gen_code_string(container_body)
@@ -180,12 +180,16 @@ class Generator():
               print(bcolors.OKBLUE + 'Processing state \'' + state_name + '\'' + bcolors.ENDC)
 
             # Create a new dictionary for the state template variables
-            template_vars = { 'state_name' : state_name } 
+            template_vars = { 'name' : state_name } 
           
             # Add the other state variables to the template variables dictionary
             for state_var, state_var_val in state_vars.items():
               if state_var != 'template' and state_var != '__line__':
                 template_vars[state_var] = state_var_val
+
+            # Add the container name to template_vars so that states can
+            # refer to their parent containers in their templates
+            template_vars['container_name'] = container_name
 
             # Call the templater object to process the current state template
             state_code = self._templater.process(state_vars['template'], template_vars)
@@ -229,7 +233,7 @@ class Generator():
       header = list()
       body = list()
       footer = list()
-      body = self._process_state_machine((body), script['states'])
+      body = self._process_state_machine((body), script['name'], script['states'])
 
       # Create and fill a dict for the base template variables
       base_template_vars = dict()
