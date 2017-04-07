@@ -88,8 +88,8 @@ class Templater():
 
     pass
 
-  def process(self, template_name, template_vars):
-    """Process code template."""
+  def render(self, template_name, template_vars):
+    """Render code template."""
     # Select the right template file based on the template variable
     template_filename = template_name + '.jinja'
     
@@ -158,9 +158,9 @@ class Generator():
             # Convert nested state code to strings
             template_vars['body'] = self._gen_code_string(container_body)
 
-            # Call the templater object to process the container template with
+            # Call the templater object to render the container template with
             # the generated nested state code
-            container_code = self._templater.process(state_vars['template'], template_vars)
+            container_code = self._templater.render(state_vars['template'], template_vars)
            
             # Append the generated container code to the base code body
             body.append(container_code)
@@ -191,8 +191,8 @@ class Generator():
             # refer to their parent containers in their templates
             template_vars['container_name'] = container_name
 
-            # Call the templater object to process the current state template
-            state_code = self._templater.process(state_vars['template'], template_vars)
+            # Call the templater object to render the current state template
+            state_code = self._templater.render(state_vars['template'], template_vars)
 
             # Append the template for current state to smach_code buffer list
             body.append(state_code)
@@ -241,8 +241,8 @@ class Generator():
       base_template_vars['node_name'] = script['node_name']
       base_template_vars['body'] = self._gen_code_string(body)
 
-      # Process the base state machine template
-      base_code = self._templater.process(script['template'], base_template_vars)
+      # Render the base state machine template
+      base_code = self._templater.render(script['template'], base_template_vars)
   
       return base_code
 
