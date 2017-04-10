@@ -154,7 +154,6 @@ def main():
   rospy.init_node('{{ node_name }}')
 
   # Create a SMACH state machine
-  # sm_top = smach.StateMachine("")
   {{ name | lower() }} = smach.StateMachine(outcomes=['succeeded','aborted','preempted'])
   
   # Create the Introspection server
@@ -167,12 +166,12 @@ def main():
     {{ body | indent(4) }}
   
   # Execute SMACH plan
-  outcome = sm_top.execute()
+  outcome = {{ name | lower() }}.execute()
   
   # Wait for ctrl-c to stop the application
   rospy.spin()
-  sis2.stop()
-  sis.stop()
+
+  {{ footer | indent(2) }}
   
   rospy.signal_shutdown('All done.')
 
