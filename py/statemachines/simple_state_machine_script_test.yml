@@ -35,6 +35,27 @@ states:
           position: [0.0, 0.0, 0.0]
           rotation: [0.0, 0.0, 0.0, 0.0]
           desired_travel_time: 3
+          succeeded: CLOSE_TOOL_EXCHANGE_1
+      
+      - CLOSE_TOOL_EXCHANGE_1:
+          template: SetOutputState
+          robot: ur10_1
+          output_number: TOOL_EXCHANGE_GPIO
+          value: TOOL_EXCHANGE_CLOSE
+          succeeded: RELEASE_HEXAPOD_BRAKES 
+      
+      - RELEASE_HEXAPOD_BRAKES:
+          template: SetOutputState
+          robot: ur10_1
+          output_number: HEXAPOD_BRAKE_1_GPIO
+          value: HEXAPOD_BRAKE_OPEN
+          succeeded: READ_HEXAPOD_MIDDLE_POSE
+
+      - READ_HEXAPOD_MIDDLE_POSE:
+          template: ReadTransformState
+          target_frame: ur10_1/base
+          source_frame: hexapod_1/mid
+          transform_output: hexapod_middle_pose
           succeeded: SECONDARY_META_STATE
 
       succeeded: SECONDARY_META_STATE
@@ -64,6 +85,22 @@ states:
               target_frame: ur10_2/base
               source_frame: hexapod_1/top
               transform_output: hexapod_current_pose
+              succeeded: FOURTH_META_STATE
+
+          - FOURTH_META_STATE:
+              template: StateMachine
+              states:
+              - SUB_SUB_SUB_STATE_1:
+                  template: ReadTransformState
+                  target_frame: ur10_2/base
+                  source_frame: hexapod_1/top
+                  transform_output: hexapod_current_pose
+                  succeeded: succeeded
+
               succeeded: succeeded
+
+          succeeded: succeeded
   
       succeeded: succeeded
+
+succeeded: succeeded
