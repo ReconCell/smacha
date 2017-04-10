@@ -190,7 +190,7 @@ def main():
       # TEMPLATE: CartTrapVelActionState
       #
       reconfigure_hexapod.userdata.move_above_hexapod_1_position_offset = np.asarray([0.0, 0.0, -0.2])
-      reconfigure_hexapod.userdata.move_above_hexapod_1_rotation_offset = np.asarray([0.0, 0.0, 0.0])
+      reconfigure_hexapod.userdata.move_above_hexapod_1_rotation_offset = np.asarray([0.0, 0.0, 0.0, 0.0])
       reconfigure_hexapod.userdata.move_above_hexapod_1_desired_velocity = 0.1
       
       smach.StateMachine.add('MOVE_ABOVE_HEXAPOD_1',
@@ -220,6 +220,23 @@ def main():
                                                     request = open_tool_exchange_1_request),
                              transitions={'succeeded':'COUPLE_WITH_HEXAPOD'})
       # END: OPEN_TOOL_EXCHANGE_1
+      #----------------------------------------------------------------------------------------
+      
+      #----------------------------------------------------------------------------------------
+      # BEGIN: COUPLE_WITH_HEXAPOD
+      # TEMPLATE: CartLinTaskActionState
+      #
+      couple_with_hexapod_pos = np.asarray([0.0, 0.0, 0.0])
+      couple_with_hexapod_rot = np.asarray([0.0, 0.0, 0.0, 0.0])
+      couple_with_hexapod_des_trav_time = 3
+      clt_goal = robot_module.msg.CartLinTaskGoal(couple_with_hexapod_pos, couple_with_hexapod_rot, couple_with_hexapod_des_trav_time)
+      
+      smach.StateMachine.add('COUPLE_WITH_HEXAPOD',
+                             smach_ros.SimpleActionState('/ur10_1/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
+                                                         goal = clt_goal),
+                             transitions={'succeeded':'SECONDARY_META_STATE'})
+      #
+      # END: COUPLE_WITH_HEXAPOD
       #----------------------------------------------------------------------------------------
       
     
