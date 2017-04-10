@@ -17,12 +17,8 @@ states:
           template: CartTrapVelActionState
           robot: ur10_1
           pose_input: hexapod_current_pose
-          position_offset_x: 0.0
-          position_offset_y: 0.0
-          position_offset_z: -0.20
-          rotation_offset_x: 0.0
-          rotation_offset_y: 0.0
-          rotation_offset_z: 0.0
+          position_offset: [0.0, 0.0, -0.20]
+          rotation_offset: [0.0, 0.0, 0.0, 0.0]
           desired_velocity: 0.1
           succeeded: OPEN_TOOL_EXCHANGE_1
       
@@ -32,7 +28,15 @@ states:
           output_number: TOOL_EXCHANGE_GPIO
           value: TOOL_EXCHANGE_OPEN
           succeeded: COUPLE_WITH_HEXAPOD 
-  
+
+      - COUPLE_WITH_HEXAPOD:
+          template: CartLinTaskActionState
+          robot: ur10_1
+          position: [0.0, 0.0, 0.0]
+          rotation: [0.0, 0.0, 0.0, 0.0]
+          desired_travel_time: 3
+          succeeded: SECONDARY_META_STATE
+
       succeeded: SECONDARY_META_STATE
   
   - SECONDARY_META_STATE:
