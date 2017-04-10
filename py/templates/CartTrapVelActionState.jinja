@@ -2,8 +2,8 @@
 # BEGIN: {{ name }}
 # TEMPLATE: CartTrapVelActionState
 #
-{{ container_name | lower() }}.userdata.{{ name | lower() }}_position_offset = np.asarray([{{ position_offset_x }}, {{ position_offset_y }}, {{ position_offset_z }}])
-{{ container_name | lower() }}.userdata.{{ name | lower() }}_rotation_offset = np.asarray([{{ rotation_offset_x }}, {{ rotation_offset_y }}, {{ rotation_offset_z }}])
+{{ container_name | lower() }}.userdata.{{ name | lower() }}_position_offset = np.asarray({{ position_offset }})
+{{ container_name | lower() }}.userdata.{{ name | lower() }}_rotation_offset = np.asarray({{ rotation_offset }})
 {{ container_name | lower() }}.userdata.{{ name | lower() }}_desired_velocity = {{ desired_velocity }}
 
 smach.StateMachine.add('{{ name }}',
