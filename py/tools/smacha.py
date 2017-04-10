@@ -1,6 +1,7 @@
 import argparse
 import sys
 import os
+import re
 
 # Yaml for script parsing
 import yaml
@@ -84,22 +85,42 @@ class Templater():
     self._template_loader = jinja2.FileSystemLoader(self._templates_path)
   
     # Create an environment for reading and parsing templates
-    self._template_env = jinja2.Environment( loader=self._template_loader )
+    self._template_env = jinja2.Environment(loader=self._template_loader)
 
     pass
 
   def render(self, template_name, template_vars):
     """Render code template."""
     # Select the right template file based on the template variable
-    template_filename = template_name + '.jinja'
+    # template_filename = template_name + '.jinja'
     
     # Read the state template file into a template object using the environment object
-    template = self._template_env.get_template( template_filename )
+    template = self._template_env.select_template([template_name, template_name + '.jinja'])
     
     # Render code
-    code = template.render( **template_vars ) 
+    code = template.render(**template_vars) 
 
     return code
+
+  def render_all(self, state_name, template_vars):
+    """Render all code templates for a given state."""
+    # Compile regular expression to match all templates for the given state_name
+    regex = re.compile(state_name + '_(.+)\.jinja')
+
+    # Find templates matching the regex
+    template_list = self._template_env.list_templates(filter_func = lambda template_name: re.match(regex, template_name))
+
+    # Create a dict of {template types : template names} from the template names
+    # (where template_type = template name stub: the template name without state name and without file extension)
+    template_dict = {regex.match(template_name).group(1) : template_name for template_name in template_list}
+
+    # Render template code for each of the templates
+    template_code = {t_type : self.render(t_name, template_vars) for t_type, t_name in template_dict.items()}
+    
+    # Include the main body template, which does not get matched by the above.
+    template_code['body'] = self.render(state_name, template_vars)
+
+    return template_code
     
 
 class Generator():
@@ -110,15 +131,12 @@ class Generator():
     self._templater = templater
 
   def _process_state_machine(self, code_buffers, container_name, state):
-    # Unpack code_buffers
-    body = code_buffers
-
     # Inspect state
     if type(state) is list:
       # Iterate through list of states
       for i_sub_state, sub_state in enumerate(state):
         # Recursively process each state
-        body = self._process_state_machine((body), container_name, sub_state)
+        code_buffers = self._process_state_machine(code_buffers, container_name, sub_state)
 
     elif type(state) is dict:
 
@@ -150,21 +168,29 @@ class Generator():
                 template_vars[state_var] = state_var_val
 
             # Initialise list buffers for smach code generated from nested container states
-            container_body = list()
+            container_code_buffers = dict()
+            container_code_buffers['body'] = list()
+            container_code_buffers['base_footer'] = list()
 
             # Recursively process nested states
-            container_body = self._process_state_machine((container_body), state_name, state_vars['states'])
+            container_code_buffers = self._process_state_machine(container_code_buffers, state_name, state_vars['states'])
 
             # Convert nested state code to strings
-            template_vars['body'] = self._gen_code_string(container_body)
+            template_vars['body'] = self._gen_code_string(container_code_buffers['body'])
 
             # Call the templater object to render the container template with
             # the generated nested state code
-            container_code = self._templater.render(state_vars['template'], template_vars)
-           
-            # Append the generated container code to the base code body
-            body.append(container_code)
+            container_code = self._templater.render_all(state_vars['template'], template_vars)
 
+            # Append relevant generated container code to respective 
+            if 'base_footer' in container_code_buffers and 'base_footer' in container_code:
+              container_code_buffers['base_footer'].append(container_code['base_footer'])
+
+            # Append the generated container code to the respective base code sections
+            if 'body' in code_buffers:
+              code_buffers['body'].append(container_code['body'])
+            if 'base_footer' in code_buffers and 'base_footer' in container_code_buffers:
+              code_buffers['base_footer'].insert(0, self._gen_code_string(container_code_buffers['base_footer']))
           
           except Exception as e:
             print(bcolors.WARNING +
@@ -192,10 +218,13 @@ class Generator():
             template_vars['container_name'] = container_name
 
             # Call the templater object to render the current state template
-            state_code = self._templater.render(state_vars['template'], template_vars)
-
+            state_code = self._templater.render_all(state_vars['template'], template_vars)
+            
             # Append the template for current state to smach_code buffer list
-            body.append(state_code)
+            if 'body' in code_buffers:
+              code_buffers['body'].append(state_code['body'])
+            if 'base_footer' in code_buffers and 'base_footer' in state_code:
+              code_buffers['base_footer'].insert(0,state_code['base_footer'])
 
           except Exception as e:
             print(bcolors.WARNING +
@@ -206,7 +235,7 @@ class Generator():
     else:
       pass
     
-    return (body)
+    return code_buffers
 
   def _gen_code_string(self, code_buffer):
     """Generate code string from code list buffer."""
@@ -230,16 +259,17 @@ class Generator():
     
       # Initialise list buffers in which to store generated smach code
       # TODO: Write code for header and footer processing
-      header = list()
-      body = list()
-      footer = list()
-      body = self._process_state_machine((body), script['name'], script['states'])
+      base_code_buffers = dict()
+      base_code_buffers['body'] = list()
+      base_code_buffers['base_footer'] = list()
+      base_code_buffers = self._process_state_machine(base_code_buffers, script['name'], script['states'])
 
       # Create and fill a dict for the base template variables
       base_template_vars = dict()
       base_template_vars['name'] = script['name']
       base_template_vars['node_name'] = script['node_name']
-      base_template_vars['body'] = self._gen_code_string(body)
+      base_template_vars['body'] = self._gen_code_string(base_code_buffers['body'])
+      base_template_vars['footer'] = self._gen_code_string(base_code_buffers['base_footer'])
 
       # Render the base state machine template
       base_code = self._templater.render(script['template'], base_template_vars)
