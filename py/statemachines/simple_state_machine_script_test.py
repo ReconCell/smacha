@@ -154,7 +154,6 @@ def main():
   rospy.init_node('test_simple_action_state_machine')
 
   # Create a SMACH state machine
-  # sm_top = smach.StateMachine("")
   sm_top = smach.StateMachine(outcomes=['succeeded','aborted','preempted'])
   
   # Create the Introspection server
@@ -234,9 +233,47 @@ def main():
       smach.StateMachine.add('COUPLE_WITH_HEXAPOD',
                              smach_ros.SimpleActionState('/ur10_1/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
                                                          goal = clt_goal),
-                             transitions={'succeeded':'SECONDARY_META_STATE'})
+                             transitions={'succeeded':'CLOSE_TOOL_EXCHANGE_1'})
       #
       # END: COUPLE_WITH_HEXAPOD
+      #----------------------------------------------------------------------------------------
+      
+      #----------------------------------------------------------------------------------------
+      # BEGIN: CLOSE_TOOL_EXCHANGE_1
+      # TEMPLATE: SetOutput
+      #
+      close_tool_exchange_1_request = DigitalOutputRequest(TOOL_EXCHANGE_GPIO, TOOL_EXCHANGE_CLOSE)
+      
+      smach.StateMachine.add('CLOSE_TOOL_EXCHANGE_1',
+                             smach_ros.ServiceState('/ur10_1/set_output',
+                                                    DigitalOutput,
+                                                    request = close_tool_exchange_1_request),
+                             transitions={'succeeded':'RELEASE_HEXAPOD_BRAKES'})
+      # END: CLOSE_TOOL_EXCHANGE_1
+      #----------------------------------------------------------------------------------------
+      
+      #----------------------------------------------------------------------------------------
+      # BEGIN: RELEASE_HEXAPOD_BRAKES
+      # TEMPLATE: SetOutput
+      #
+      release_hexapod_brakes_request = DigitalOutputRequest(HEXAPOD_BRAKE_1_GPIO, HEXAPOD_BRAKE_OPEN)
+      
+      smach.StateMachine.add('RELEASE_HEXAPOD_BRAKES',
+                             smach_ros.ServiceState('/ur10_1/set_output',
+                                                    DigitalOutput,
+                                                    request = release_hexapod_brakes_request),
+                             transitions={'succeeded':'READ_HEXAPOD_MIDDLE_POSE'})
+      # END: RELEASE_HEXAPOD_BRAKES
+      #----------------------------------------------------------------------------------------
+      
+      #----------------------------------------------------------------------------------------
+      # BEGIN: READ_HEXAPOD_MIDDLE_POSE
+      # TEMPLATE: ReadTransformState
+      #
+      smach.StateMachine.add('READ_HEXAPOD_MIDDLE_POSE', TFListenerState('ur10_1/base', 'hexapod_1/mid', 'hexapod_middle_pose'),
+                                                                              transitions={'succeeded':'SECONDARY_META_STATE'},
+                                                                              remapping={'hexapod_middle_pose':'hexapod_middle_pose'})
+      # END: READ_HEXAPOD_MIDDLE_POSE
       #----------------------------------------------------------------------------------------
       
     
@@ -293,9 +330,37 @@ def main():
         # TEMPLATE: ReadTransformState
         #
         smach.StateMachine.add('SUB_SUB_STATE_1', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
-                                                                                transitions={'succeeded':'succeeded'},
+                                                                                transitions={'succeeded':'FOURTH_META_STATE'},
                                                                                 remapping={'hexapod_current_pose':'hexapod_current_pose'})
         # END: SUB_SUB_STATE_1
+        #----------------------------------------------------------------------------------------
+        
+        #----------------------------------------------------------------------------------------
+        # BEGIN: FOURTH_META_STATE
+        # TEMPLATE: StateMachine
+        #
+        fourth_meta_state = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
+              
+        fourth_meta_state_sis = smach_ros.IntrospectionServer('', FOURTH_META_STATE, '')
+        fourth_meta_state_sis.start()
+        
+        with fourth_meta_state:
+        
+          #----------------------------------------------------------------------------------------
+          # BEGIN: SUB_SUB_SUB_STATE_1
+          # TEMPLATE: ReadTransformState
+          #
+          smach.StateMachine.add('SUB_SUB_SUB_STATE_1', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
+                                                                                  transitions={'succeeded':'succeeded'},
+                                                                                  remapping={'hexapod_current_pose':'hexapod_current_pose'})
+          # END: SUB_SUB_SUB_STATE_1
+          #----------------------------------------------------------------------------------------
+          
+        
+        smach.StateMachine.add('FOURTH_META_STATE', fourth_meta_state,
+                               transitions={'succeeded':'succeeded'})
+        #
+        # END: FOURTH_META_STATE
         #----------------------------------------------------------------------------------------
         
       
@@ -318,8 +383,51 @@ def main():
   
   # Wait for ctrl-c to stop the application
   rospy.spin()
-  sis2.stop()
-  sis.stop()
+
+  #----------------------------------------------------------------------------------------
+  # BEGIN: FOURTH_META_STATE
+  # TEMPLATE: StateMachine_base_footer
+  #
+  fourth_meta_state_sis.stop()
+  #
+  # END: FOURTH_META_STATE
+  #----------------------------------------------------------------------------------------
+  
+  
+  
+  #----------------------------------------------------------------------------------------
+  # BEGIN: TERNARY_META_STATE
+  # TEMPLATE: StateMachine_base_footer
+  #
+  ternary_meta_state_sis.stop()
+  #
+  # END: TERNARY_META_STATE
+  #----------------------------------------------------------------------------------------
+  
+  
+  
+  #----------------------------------------------------------------------------------------
+  # BEGIN: SECONDARY_META_STATE
+  # TEMPLATE: StateMachine_base_footer
+  #
+  secondary_meta_state_sis.stop()
+  #
+  # END: SECONDARY_META_STATE
+  #----------------------------------------------------------------------------------------
+  
+  
+  
+  #----------------------------------------------------------------------------------------
+  # BEGIN: RECONFIGURE_HEXAPOD
+  # TEMPLATE: StateMachine_base_footer
+  #
+  reconfigure_hexapod_sis.stop()
+  #
+  # END: RECONFIGURE_HEXAPOD
+  #----------------------------------------------------------------------------------------
+  
+  
+  
   
   rospy.signal_shutdown('All done.')
 
