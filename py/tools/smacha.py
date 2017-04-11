@@ -169,6 +169,7 @@ class Generator():
 
             # Initialise list buffers for smach code generated from nested container states
             container_code_buffers = dict()
+            container_code_buffers['base_header'] = list()
             container_code_buffers['body'] = list()
             container_code_buffers['base_footer'] = list()
 
@@ -178,15 +179,19 @@ class Generator():
             # Convert nested state code to strings
             template_vars['body'] = self._gen_code_string(container_code_buffers['body'])
 
-            # Call the templater object to render the container template with
+            # Call the templater object to render the container templates with
             # the generated nested state code
             container_code = self._templater.render_all(state_vars['template'], template_vars)
 
             # Append relevant generated container code to respective 
+            if 'base_header' in container_code_buffers and 'base_header' in container_code:
+              container_code_buffers['base_header'].insert(0, container_code['base_header'])
             if 'base_footer' in container_code_buffers and 'base_footer' in container_code:
               container_code_buffers['base_footer'].append(container_code['base_footer'])
 
-            # Append the generated container code to the respective base code sections
+            # Append the generated container code buffers to the respective base code sections
+            if 'base_header' in code_buffers and 'base_header' in container_code_buffers:
+              code_buffers['base_header'].append(self._gen_code_string(container_code_buffers['base_header']))
             if 'body' in code_buffers:
               code_buffers['body'].append(container_code['body'])
             if 'base_footer' in code_buffers and 'base_footer' in container_code_buffers:
@@ -221,10 +226,12 @@ class Generator():
             state_code = self._templater.render_all(state_vars['template'], template_vars)
             
             # Append the template for current state to smach_code buffer list
+            if 'base_header' in code_buffers and 'base_header' in state_code:
+              code_buffers['base_header'].append(state_code['base_header'])
             if 'body' in code_buffers:
               code_buffers['body'].append(state_code['body'])
             if 'base_footer' in code_buffers and 'base_footer' in state_code:
-              code_buffers['base_footer'].insert(0,state_code['base_footer'])
+              code_buffers['base_footer'].insert(0, state_code['base_footer'])
 
           except Exception as e:
             print(bcolors.WARNING +
@@ -258,8 +265,8 @@ class Generator():
         print(bcolors.HEADER + 'Processing state machine' + bcolors.ENDC)
     
       # Initialise list buffers in which to store generated smach code
-      # TODO: Write code for header and footer processing
       base_code_buffers = dict()
+      base_code_buffers['base_header'] = list()
       base_code_buffers['body'] = list()
       base_code_buffers['base_footer'] = list()
       base_code_buffers = self._process_state_machine(base_code_buffers, script['name'], script['states'])
@@ -268,6 +275,7 @@ class Generator():
       base_template_vars = dict()
       base_template_vars['name'] = script['name']
       base_template_vars['node_name'] = script['node_name']
+      base_template_vars['header'] = self._gen_code_string(base_code_buffers['base_header'])
       base_template_vars['body'] = self._gen_code_string(base_code_buffers['body'])
       base_template_vars['footer'] = self._gen_code_string(base_code_buffers['base_footer'])
 
