@@ -1,0 +1,13 @@
+#----------------------------------------------------------------------------------------
+# BEGIN: {{ name }}
+# TEMPLATE: SetOutput
+#
+{{ name | lower() }}_request = DigitalOutputRequest({{ output_number }}, {{ value }})
+
+smach.StateMachine.add('{{ name }}',
+                       smach_ros.ServiceState('/{{ robot }}/set_output',
+                                              DigitalOutput,
+                                              request = {{ name | lower() }}_request),
+                       transitions={'succeeded':'{{ succeeded }}'})
+# END: {{ name }}
+#----------------------------------------------------------------------------------------

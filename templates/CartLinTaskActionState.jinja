@@ -1,0 +1,16 @@
+#----------------------------------------------------------------------------------------
+# BEGIN: {{ name }}
+# TEMPLATE: CartLinTaskActionState
+#
+{{ name | lower() }}_pos = np.asarray({{ position }})
+{{ name | lower() }}_rot = np.asarray({{ rotation }})
+{{ name | lower() }}_des_trav_time = {{ desired_travel_time }}
+clt_goal = robot_module.msg.CartLinTaskGoal({{ name | lower() }}_pos, {{ name | lower() }}_rot, {{ name | lower() }}_des_trav_time)
+
+smach.StateMachine.add('{{ name }}',
+                       smach_ros.SimpleActionState('/{{ robot }}/cart_lin_task_action_server', robot_module.msg.CartLinTaskAction,
+                                                   goal = clt_goal),
+                       transitions={'succeeded':'{{ succeeded }}'})
+#
+# END: {{ name }}
+#----------------------------------------------------------------------------------------
