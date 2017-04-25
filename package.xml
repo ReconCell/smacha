@@ -42,6 +42,10 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rospy</build_depend>
   <run_depend>rospy</run_depend>
+  <run_depend>python-argparse</run_depend>
+  <run_depend>python-yaml</run_depend>
+  <run_depend>python-jinja2</run_depend>
+
 
 
   <!-- The export tag contains other, unspecified, tags -->
