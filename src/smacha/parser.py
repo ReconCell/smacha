@@ -3,6 +3,8 @@ import yaml
 from yaml.composer import Composer
 from yaml.constructor import Constructor
 
+__all__ = ['Parser']
+
 class Parser():
     """SMACHA script parser."""
     def __init__(self):

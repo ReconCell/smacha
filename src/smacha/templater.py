@@ -5,6 +5,8 @@ from jinja2.ext import Extension
 import os
 import re
 
+__all__ = ['Templater']
+
 
 # Credit to Alexander Todorov for this class that allows specified blocks
 # to be either skipped or rendered in a given template.

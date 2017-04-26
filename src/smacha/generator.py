@@ -3,6 +3,8 @@ import smacha
 from smacha.util import bcolors
 from smacha.util import ParseException
 
+__all__ = ['Generator']
+
 class Generator():
     """SMACH code generator."""
     def __init__(self, templater, verbose=False):
@@ -13,6 +15,7 @@ class Generator():
         self._templater = templater
     
     def _process_state_machine(self, code_buffers, container_name, state):
+        """Recursively process parsed yaml SMACHA script."""
         # Inspect state
         if type(state) is list:
             # Iterate through list of states
