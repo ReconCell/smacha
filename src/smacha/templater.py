@@ -1,18 +1,23 @@
 # Jinja2 for templating & code generation
 import jinja2
 
+import os
 import re
 
 class Templater():
     """Jinja template processor."""
-    def __init__(self, templates_path):
-        self._templates_path = templates_path
-        
-        # Load templates from the templates folder
-        self._template_loader = jinja2.FileSystemLoader(self._templates_path)
-        
+    def __init__(self, template_dirs=[]):
+        # Create list of any custom user-defined template dirs + default template dir
+        self._template_dirs = template_dirs + [os.path.dirname(__file__) + '/templates']
+
+        # Create template loader for the template directories
+        template_loaders = [jinja2.FileSystemLoader(template_dir) for template_dir in self._template_dirs]
+        # print(template_loaders)
+        self._template_loader = jinja2.ChoiceLoader(template_loaders)
+
         # Create an environment for reading and parsing templates
         self._template_env = jinja2.Environment(loader=self._template_loader)
+        # self._template_env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'))
         
         pass
     

@@ -164,6 +164,26 @@ def cart_trap_vel_goal_cb(userdata, goal):
 # END: SECONDARY_META_STATE
 #----------------------------------------------------------------------------------------
 
+#----------------------------------------------------------------------------------------
+# BEGIN: TERNARY_META_STATE
+# TEMPLATE: StateMachine_base_header
+#
+#
+# END: TERNARY_META_STATE
+#----------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------
+# BEGIN: FOURTH_META_STATE
+# TEMPLATE: StateMachine_base_header
+#
+#
+# END: FOURTH_META_STATE
+#----------------------------------------------------------------------------------------
+
+
+
+
+
 
 
 
@@ -335,6 +355,62 @@ def main():
       # END: SUB_STATE_2
       #----------------------------------------------------------------------------------------
       
+      #----------------------------------------------------------------------------------------
+      # BEGIN: TERNARY_META_STATE
+      # TEMPLATE: StateMachine
+      #
+      ternary_meta_state = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
+            
+      ternary_meta_state_sis = smach_ros.IntrospectionServer('', TERNARY_META_STATE, '')
+      ternary_meta_state_sis.start()
+      
+      with ternary_meta_state:
+      
+        #----------------------------------------------------------------------------------------
+        # BEGIN: SUB_SUB_STATE_1
+        # TEMPLATE: ReadTransformState
+        #
+        smach.StateMachine.add('SUB_SUB_STATE_1', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
+                                                                                transitions={'succeeded':'FOURTH_META_STATE'},
+                                                                                remapping={'hexapod_current_pose':'hexapod_current_pose'})
+        # END: SUB_SUB_STATE_1
+        #----------------------------------------------------------------------------------------
+        
+        #----------------------------------------------------------------------------------------
+        # BEGIN: FOURTH_META_STATE
+        # TEMPLATE: StateMachine
+        #
+        fourth_meta_state = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
+              
+        fourth_meta_state_sis = smach_ros.IntrospectionServer('', FOURTH_META_STATE, '')
+        fourth_meta_state_sis.start()
+        
+        with fourth_meta_state:
+        
+          #----------------------------------------------------------------------------------------
+          # BEGIN: SUB_SUB_SUB_STATE_1
+          # TEMPLATE: ReadTransformState
+          #
+          smach.StateMachine.add('SUB_SUB_SUB_STATE_1', TFListenerState('ur10_2/base', 'hexapod_1/top', 'hexapod_current_pose'),
+                                                                                  transitions={'succeeded':'succeeded'},
+                                                                                  remapping={'hexapod_current_pose':'hexapod_current_pose'})
+          # END: SUB_SUB_SUB_STATE_1
+          #----------------------------------------------------------------------------------------
+          
+        
+        smach.StateMachine.add('FOURTH_META_STATE', fourth_meta_state,
+                               transitions={'succeeded':'succeeded'})
+        #
+        # END: FOURTH_META_STATE
+        #----------------------------------------------------------------------------------------
+        
+      
+      smach.StateMachine.add('TERNARY_META_STATE', ternary_meta_state,
+                             transitions={'succeeded':'succeeded'})
+      #
+      # END: TERNARY_META_STATE
+      #----------------------------------------------------------------------------------------
+      
     
     smach.StateMachine.add('SECONDARY_META_STATE', secondary_meta_state,
                            transitions={'succeeded':'succeeded'})
@@ -349,6 +425,28 @@ def main():
   # Wait for ctrl-c to stop the application
   rospy.spin()
 
+  #----------------------------------------------------------------------------------------
+  # BEGIN: FOURTH_META_STATE
+  # TEMPLATE: StateMachine_base_footer
+  #
+  fourth_meta_state_sis.stop()
+  #
+  # END: FOURTH_META_STATE
+  #----------------------------------------------------------------------------------------
+  
+  
+  
+  #----------------------------------------------------------------------------------------
+  # BEGIN: TERNARY_META_STATE
+  # TEMPLATE: StateMachine_base_footer
+  #
+  ternary_meta_state_sis.stop()
+  #
+  # END: TERNARY_META_STATE
+  #----------------------------------------------------------------------------------------
+  
+  
+  
   #----------------------------------------------------------------------------------------
   # BEGIN: SECONDARY_META_STATE
   # TEMPLATE: StateMachine_base_footer

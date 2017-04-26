@@ -15,10 +15,11 @@ if __name__ == '__main__':
                             help='SMACHA script (yaml file).')
     
     arg_parser.add_argument('-t', '--templates',
-                            dest='template_dir',
+                            nargs = '*',
+                            dest='template_dirs',
                             action='store',
-                            default='./templates',
-                            help='SMACHA templates directory (jinja files).')
+                            default=[],
+                            help='Custom SMACHA template directories (directories containing jinja files).')
     
     arg_parser.add_argument('-o', '--output',
                             dest='output_file',
@@ -40,7 +41,7 @@ if __name__ == '__main__':
         smacha_script = parser.parse(smacha_file)
     
     # Load template processor
-    templater = smacha.Templater(args.template_dir)
+    templater = smacha.Templater(args.template_dirs)
     
     # Load code generator
     generator = smacha.Generator(templater, verbose=args.verbose)
