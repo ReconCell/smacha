@@ -6,7 +6,9 @@ from smacha.util import ParseException
 class Generator():
     """SMACH code generator."""
     def __init__(self, templater, verbose=False):
+        # Flag to enable verbose output to terminal 
         self._verbose = verbose
+
         # Handle to the Jinja templater
         self._templater = templater
     

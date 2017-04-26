@@ -27,9 +27,13 @@ if __name__ == '__main__':
                             default='./smacha_output.py',
                             help='Generated SMACH output (python file).')
     
+    arg_parser.add_argument('-c', '--comments',
+                            action='store_true',
+                            help='Include template header and footer comments in generated code.')
+    
     arg_parser.add_argument('-v', '--verbose',
                             action='store_true',
-                            help='Print verbose output to terminal')
+                            help='Print verbose output to terminal.')
     
     args = arg_parser.parse_args()
     
@@ -41,7 +45,7 @@ if __name__ == '__main__':
         smacha_script = parser.parse(smacha_file)
     
     # Load template processor
-    templater = smacha.Templater(args.template_dirs)
+    templater = smacha.Templater(args.template_dirs, include_comments=args.comments)
     
     # Load code generator
     generator = smacha.Generator(templater, verbose=args.verbose)

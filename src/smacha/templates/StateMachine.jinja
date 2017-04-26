@@ -1,7 +1,9 @@
+{% block header_comments %}
 #----------------------------------------------------------------------------------------
 # BEGIN: {{ name }}
 # TEMPLATE: StateMachine
 #
+{% endblock header_comments %}
 {{ name | lower() }} = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
       
 {{ name | lower() }}_sis = smach_ros.IntrospectionServer('{{ node_name }}', {{ name }}, '{{ sis_topic }}')
@@ -9,10 +11,12 @@
 
 with {{ name | lower() }}:
 
-  {{ body | indent(2) }}
+    {{ body | indent(4) }}
 
 smach.StateMachine.add('{{ name }}', {{ name | lower() }},
                        transitions={'succeeded':'succeeded'})
+{% block footer_comments %}
 #
 # END: {{ name }}
 #----------------------------------------------------------------------------------------
+{% endblock footer_comments %}

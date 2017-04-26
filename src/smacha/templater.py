@@ -1,31 +1,78 @@
 # Jinja2 for templating & code generation
 import jinja2
+from jinja2.ext import Extension
 
 import os
 import re
 
+
+# Credit to Alexander Todorov for this class that allows specified blocks
+# to be either skipped or rendered in a given template.
+#
+# http://atodorov.org/blog/2014/02/21/skip-or-render-specific-blocks-from-jinja2-templates/
+# 
+class SkipBlockExtension(Extension):
+    def __init__(self, environment):
+        super(SkipBlockExtension, self).__init__(environment)
+        environment.extend(skip_blocks=[])
+
+    def filter_stream(self, stream):
+        block_level = 0
+        skip_level = 0
+        in_endblock = False
+
+        for token in stream:
+            if (token.type == 'block_begin'):
+                if (stream.current.value == 'block'):
+                    block_level += 1
+                    if (stream.look().value in self.environment.skip_blocks):
+                        skip_level = block_level
+
+            if (token.value == 'endblock' ):
+                in_endblock = True
+
+            if skip_level == 0:
+                yield token
+
+            if (token.type == 'block_end'):
+                if in_endblock:
+                    in_endblock = False
+                    block_level -= 1
+
+                    if skip_level == block_level+1:
+                        skip_level = 0
+
+
 class Templater():
     """Jinja template processor."""
-    def __init__(self, template_dirs=[]):
+    def __init__(self, template_dirs=[], include_comments=False):
+        # Flag to enable rendering of header and footer comments in templates
+        self._include_comments = include_comments
+
         # Create list of any custom user-defined template dirs + default template dir
         self._template_dirs = template_dirs + [os.path.dirname(__file__) + '/templates']
 
         # Create template loader for the template directories
         template_loaders = [jinja2.FileSystemLoader(template_dir) for template_dir in self._template_dirs]
-        # print(template_loaders)
         self._template_loader = jinja2.ChoiceLoader(template_loaders)
 
         # Create an environment for reading and parsing templates
-        self._template_env = jinja2.Environment(loader=self._template_loader)
-        # self._template_env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'))
+        if self._include_comments:
+            self._template_env = jinja2.Environment(loader=self._template_loader,
+                                                    trim_blocks=True,
+                                                    lstrip_blocks=True)
+        else:
+            self._template_env = jinja2.Environment(loader=self._template_loader,
+                                                    extensions = [SkipBlockExtension],
+                                                    trim_blocks=True,
+                                                    lstrip_blocks=True)
+            self._template_env.skip_blocks.append('header_comments')
+            self._template_env.skip_blocks.append('footer_comments')
         
         pass
     
     def render(self, template_name, template_vars):
         """Render code template."""
-        # Select the right template file based on the template variable
-        # template_filename = template_name + '.jinja'
-        
         # Read the state template file into a template object using the environment object
         template = self._template_env.select_template([template_name, template_name + '.jinja'])
         
