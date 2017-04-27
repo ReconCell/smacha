@@ -16,7 +16,8 @@ class Foo(smach.State):
 
 {% block body %}
 smach.StateMachine.add('{{ name }}', Foo(), 
-                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }})
+                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
+                                    {% endif %}{% endfor %}{{ '}' }})
 {% endblock body %}
 
 {% block base_footer %}

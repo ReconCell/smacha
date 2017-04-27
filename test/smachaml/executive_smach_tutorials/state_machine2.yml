@@ -1,4 +1,4 @@
---- # Simple State Machine SMACHA script.
+--- # Simple State Machine Tutorial SMACHAML script.
 name: sm
 template: Base
 node_name: smach_example_state_machine
