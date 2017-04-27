@@ -61,13 +61,13 @@ class Templater():
         # Create an environment for reading and parsing templates
         if self._include_comments:
             self._template_env = jinja2.Environment(loader=self._template_loader,
-                                                    trim_blocks=True,
-                                                    lstrip_blocks=True)
+                                                    trim_blocks=False,
+                                                    lstrip_blocks=False)
         else:
             self._template_env = jinja2.Environment(loader=self._template_loader,
                                                     extensions = [SkipBlockExtension],
-                                                    trim_blocks=True,
-                                                    lstrip_blocks=True)
+                                                    trim_blocks=False,
+                                                    lstrip_blocks=False)
             self._template_env.skip_blocks.append('header_comments')
             self._template_env.skip_blocks.append('footer_comments')
         
@@ -82,9 +82,17 @@ class Templater():
         code = template.render(**template_vars) 
         
         return code
-    
+
     def render_all(self, state_name, template_vars):
-        """Render all code templates for a given state."""
+        """
+        Render all code templates for a given state.
+
+        This function search for all templates with file names beginning
+        with state_name and possibly proceeded by an underscore followed by a stub name,
+        e.g. MyState.jinja, MyState_header.jinja, MyState_footer.jinja,
+        render them all, and return the rendered code in a dict with 'body' + stub names
+        as keys, e.g. {'body': <body>, 'header': <header>, 'footer': <footer>}.
+        """
         # Compile regular expression to match all templates for the given state_name
         regex = re.compile(state_name + '_(.+)\.jinja')
         
@@ -102,3 +110,28 @@ class Templater():
         template_code['body'] = self.render(state_name, template_vars)
         
         return template_code
+    
+    def render_block(self, template_name, template_vars, block):
+        """Render specific block from code template."""
+        # Read the state template file into a template object using the environment object
+        template = self._template_env.select_template([template_name, template_name + '.jinja'])
+
+        # Render code for block
+        block_code = ''
+        for line in template.blocks[block](template.new_context(template_vars)):
+            block_code = block_code + line.strip('\n')
+        
+        if block_code == '':
+            return block_code
+        else:
+            return block_code + '\n'
+
+    def render_all_blocks(self, template_name, template_vars):
+        """Render all blocks from code template."""
+        # Read the state template file into a template object using the environment object
+        template = self._template_env.select_template([template_name, template_name + '.jinja'])
+
+        # Render template code for each of the template blocks
+        template_block_code = {block : self.render_block(template_name, template_vars, block) for block, _ in template.blocks.items()}
+
+        return template_block_code

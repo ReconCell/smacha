@@ -50,7 +50,7 @@ class Generator():
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
                             if state_var != 'states' and state_var != 'template' and state_var != '__line__':
-                                template_vars[state_var] = state_var_val
+                                template_vars[state_var] = self._strip_line_numbers(state_var_val)
                         
                         # Initialise list buffers for smach code generated from nested container states
                         container_code_buffers = dict()
@@ -66,7 +66,8 @@ class Generator():
                         
                         # Call the templater object to render the container templates with
                         # the generated nested state code
-                        container_code = self._templater.render_all(state_vars['template'], template_vars)
+                        # container_code = self._templater.render_all(state_vars['template'], template_vars)
+                        container_code = self._templater.render_all_blocks(state_vars['template'], template_vars)
                         
                         # Append relevant generated container code to respective 
                         if 'base_header' in container_code_buffers and 'base_header' in container_code:
@@ -76,11 +77,15 @@ class Generator():
                         
                         # Append the generated container code buffers to the respective base code sections
                         if 'base_header' in code_buffers and 'base_header' in container_code_buffers:
-                            code_buffers['base_header'].append(self._gen_code_string(container_code_buffers['base_header']))
-                        if 'body' in code_buffers:
+                            base_header_code = self._gen_code_string(container_code_buffers['base_header'])
+                            if base_header_code != '':
+                                code_buffers['base_header'].append(base_header_code)
+                        if 'body' in code_buffers and 'body' in container_code:
                             code_buffers['body'].append(container_code['body'])
                         if 'base_footer' in code_buffers and 'base_footer' in container_code_buffers:
-                            code_buffers['base_footer'].insert(0, self._gen_code_string(container_code_buffers['base_footer']))
+                            base_footer_code = self._gen_code_string(container_code_buffers['base_footer'])
+                            if base_footer_code != '':
+                                code_buffers['base_footer'].insert(0, base_footer_code)
                     
                     except Exception as e:
                         print(bcolors.WARNING +
@@ -101,21 +106,22 @@ class Generator():
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
                             if state_var != 'template' and state_var != '__line__':
-                                template_vars[state_var] = state_var_val
+                                template_vars[state_var] = self._strip_line_numbers(state_var_val)
                         
                         # Add the container name to template_vars so that states can
                         # refer to their parent containers in their templates
                         template_vars['container_name'] = container_name
                         
                         # Call the templater object to render the current state template
-                        state_code = self._templater.render_all(state_vars['template'], template_vars)
+                        # state_code = self._templater.render_all(state_vars['template'], template_vars)
+                        state_code = self._templater.render_all_blocks(state_vars['template'], template_vars)
                         
                         # Append the template for current state to smach_code buffer list
-                        if 'base_header' in code_buffers and 'base_header' in state_code:
+                        if 'base_header' in code_buffers and 'base_header' in state_code and state_code['base_header'] != '':
                             code_buffers['base_header'].append(state_code['base_header'])
-                        if 'body' in code_buffers:
+                        if 'body' in code_buffers and 'body' in state_code and state_code['body'] != '':
                             code_buffers['body'].append(state_code['body'])
-                        if 'base_footer' in code_buffers and 'base_footer' in state_code:
+                        if 'base_footer' in code_buffers and 'base_footer' in state_code and state_code['base_footer'] != '':
                             code_buffers['base_footer'].insert(0, state_code['base_footer'])
                     
                     except Exception as e:
@@ -129,11 +135,25 @@ class Generator():
         
         return code_buffers
     
+    #
+    # TODO: Refactor codebase to clean this up.
+    #       I.e., the output of the parser should probably be
+    #       a class unto itself that exposes methods such as this one.
+    #
+    def _strip_line_numbers(self, state_var_val):
+        """Strip any line number keys from state_var_val."""
+        try:
+            stripped_state_var_val = dict(state_var_val)
+            del stripped_state_var_val['__line__']
+            return stripped_state_var_val
+        except:
+            return state_var_val
+    
     def _gen_code_string(self, code_buffer):
         """Generate code string from code list buffer."""
         code_string = ''
         for code_snippet in code_buffer:
-            code_string = code_string + code_snippet + '\n\n'
+            code_string = code_string + code_snippet + '\n'
         return code_string
     
     def run(self, script):
@@ -160,7 +180,9 @@ class Generator():
             base_template_vars = dict()
             base_template_vars['name'] = script['name']
             base_template_vars['node_name'] = script['node_name']
-            base_template_vars['header'] = self._gen_code_string(base_code_buffers['base_header'])
+            base_template_vars['outcomes'] = script['outcomes']
+            base_header_code = self._gen_code_string(base_code_buffers['base_header'])
+            base_template_vars['header'] = base_header_code
             base_template_vars['body'] = self._gen_code_string(base_code_buffers['body'])
             base_template_vars['footer'] = self._gen_code_string(base_code_buffers['base_footer'])
             
