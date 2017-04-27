@@ -5,6 +5,16 @@ import rospy
 import smach
 import smach_ros
 
+# define state Bas
+class Bas(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['outcome3'])
+
+    def execute(self, userdata):
+        rospy.loginfo('Executing state BAS')
+        return 'outcome3'
+
+
 # define state Foo
 class Foo(smach.State):
     def __init__(self):
@@ -29,16 +39,6 @@ class Bar(smach.State):
         rospy.loginfo('Executing state BAR')
         return 'outcome1'
         
-
-
-# define state Bas
-class Bas(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['outcome3'])
-
-    def execute(self, userdata):
-        rospy.loginfo('Executing state BAS')
-        return 'outcome3'
 
 
 
