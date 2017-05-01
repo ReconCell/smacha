@@ -7,17 +7,21 @@
 # TEMPLATE: StateMachine
 #
 {% endblock header_comments %}
-{{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{outcome}}'{% if not loop.last %}, {% endif %}{% endfor %}])
+
+{% block body %}
+sm_{{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{outcome}}'{% if not loop.last %}, {% endif %}{% endfor %}])
       
 {{ name | lower() }}_sis = smach_ros.IntrospectionServer('{{ node_name }}', {{ name }}, '{{ sis_topic }}')
 {{ name | lower() }}_sis.start()
 
-with {{ name | lower() }}:
+with sm_{{ name | lower() }}:
 
     {{ body | indent(4) }}
 
-smach.StateMachine.add('{{ name }}', {{ name | lower() }},
+smach.StateMachine.add('{{ name }}', sm_{{ name | lower() }},
                        transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }})
+{% endblock body %}
+
 {% block footer_comments %}
 #
 # END: {{ name }}
