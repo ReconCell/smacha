@@ -3,23 +3,19 @@
 SMACHA is a [Jinja2](http://jinja.pocoo.org/docs/2.9/) and [YAML](http://yaml.org/)-based
 code templating, generation and scripting engine for [SMACH](http://wiki.ros.org/smach).
 
-## Why?
-
 [SMACH](http://wiki.ros.org/smach) is an exceptionally useful and comprehensive task-level architecture
 for state machine construction in [ROS](http://wiki.ros.org/)-based robot control systems.
 However, while it provides much in terms of power and flexibility, its overall task-level simplicity
 can often be obfuscated at the script-level by boilerplate code, intricate structure and lack
 of code reuse between state machine prototypes.
 
-SMACHA aims at distilling the task-level simplicity of SMACH into compact YAML-based scripts
+SMACHA (pronounced "smasha") aims at distilling the task-level simplicity of SMACH into compact YAML-based scripts
 in the foreground, while retaining all of its power and flexibility in Jinja2-based
 templates and a custom code generation engine in the background.
 
-## How?
+## SMACHAML Scripting
 
-### SMACHAML Scripting
-
-SMACHAML ("SMACH As Markup Language") scripts are YAML scripts for describing how SMACHA should
+SMACHAML ("SMACH As Markup Language", pronounced "smashamel") scripts are YAML scripts for describing how SMACHA should
 generate SMACH code. Here is the ["Nesting State Machines" example](http://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines)
 from the [SMACH Tutorials](http://wiki.ros.org/smach/Tutorials) described in SMACHAML:
 ```yaml
@@ -46,32 +42,32 @@ states:
 ```
 This demonstrates a reduction from 80 lines of raw SMACH code to 20 lines of SMACHAML. Nice.
 
-#### Base
+### Base
 
 The base of the script specifies a name for the overall state machine,
 the name of its base template, a name for its associated ROS node,
 a list of its possible outcomes, and list of its constituent states.
 
-#### Templates
+### Templates
 
 Each state, including the base, must specify a template from which its respective
 code should be generated.  More on that in the next section.
 
-#### States
+### States
 
 States may be specified as lists, specifying their transition order,
 and may also be [nested](http://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines)
 as described in the SMACH tutorials using appropriate combinations of
 template and states specification as seen in the example above.
 
-#### Outcomes
+### Outcomes
 
 Possible state outcomes may be specified as a list in each state.
 
-#### Transitions
+### Transitions
 Possible state transitions may be specified as a hash/dictionary in each state.
 
-### Jinja2 Templates
+## Jinja2 Templates
 
 [Jinja2](http://jinja.pocoo.org/docs/2.9/) templates are used to specify how code should be
 generated from SMACHAML scripts.
@@ -134,7 +130,7 @@ smach.StateMachine.add('{{ name }}', Foo(),
 {% block base_footer %}
 {% endblock base_footer %}
 ```
-#### Variables and Code Blocks
+### Variables and Code Blocks
 
 The `base_header` block in a state template is rendered into the `header` variable
 in the base template.
@@ -145,7 +141,7 @@ parent state or the base template.
 The `base_footer` block in a state template is rendered into the `footer` variable
 in the base template.
 
-#### Core Templates
+### Core Templates
 
 Default core templates are provided for many of the SMACH containers, as well as other
 SMACH constructs like action states.
@@ -155,7 +151,7 @@ See the [Usage](#Usage) section below for an example.
 
 TODO: Finish adding core templates and describing them here.
 
-### Code Generation
+## Code Generation
 
 The SMACHA code generator is a Python API that recursively processes SMACHAML scripts,
 manages Python code templates, and renders them to Python SMACH code.
