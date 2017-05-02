@@ -29,10 +29,12 @@ if __name__ == '__main__':
     
     arg_parser.add_argument('-c', '--comments',
                             action='store_true',
+                            default=False,
                             help='Include template header and footer comments in generated code.')
     
     arg_parser.add_argument('-v', '--verbose',
                             action='store_true',
+                            default=False,
                             help='Print verbose output to terminal.')
     
     args = arg_parser.parse_args()
