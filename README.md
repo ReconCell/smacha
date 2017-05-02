@@ -67,7 +67,7 @@ Possible state outcomes may be specified as a list in each state.
 ### Transitions
 Possible state transitions may be specified as a hash/dictionary in each state.
 
-## Jinja2 Templates
+## Jinja2 Templating
 
 [Jinja2](http://jinja.pocoo.org/docs/2.9/) templates are used to specify how code should be
 generated from SMACHAML scripts.
@@ -151,7 +151,7 @@ See the [Usage](#Usage) section below for an example.
 
 TODO: Finish adding core templates and describing them here.
 
-## Code Generation
+## Code Generation Engine
 
 The SMACHA code generator is a Python API that recursively processes SMACHAML scripts,
 manages Python code templates, and renders them to Python SMACH code.
