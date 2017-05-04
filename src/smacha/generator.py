@@ -181,6 +181,8 @@ class Generator():
             base_template_vars['name'] = script['name']
             base_template_vars['node_name'] = script['node_name']
             base_template_vars['outcomes'] = script['outcomes']
+            if 'userdata' in script:
+                base_template_vars['userdata'] = self._strip_line_numbers(script['userdata'])
             base_header_code = self._gen_code_string(base_code_buffers['base_header'])
             base_template_vars['header'] = base_header_code
             base_template_vars['body'] = self._gen_code_string(base_code_buffers['body'])

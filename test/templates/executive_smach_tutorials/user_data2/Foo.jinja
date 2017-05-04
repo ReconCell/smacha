@@ -1,0 +1,28 @@
+{% block base_header %}
+# define state Foo
+class Foo(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, 
+                             outcomes=['outcome1','outcome2'],
+                             input_keys=['foo_counter_in'],
+                             output_keys=['foo_counter_out'])
+
+    def execute(self, userdata):
+        rospy.loginfo('Executing state {{ name }}')
+        if userdata.foo_counter_in < 3:
+            userdata.foo_counter_out = userdata.foo_counter_in + 1
+            return 'outcome1'
+        else:
+            return 'outcome2'
+{% endblock base_header %}
+
+{% block body %}
+smach.StateMachine.add('{{ name }}', Foo(), 
+                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
+                                    {% endif %}{% endfor %}{{ '}' }},
+                       remapping={{ '{' }}{% for state_key, userdata_key in remapping.iteritems() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
+                                  {% endif %}{% endfor %}{{ '}' }})
+{% endblock body %}
+
+{% block base_footer %}
+{% endblock base_footer %}

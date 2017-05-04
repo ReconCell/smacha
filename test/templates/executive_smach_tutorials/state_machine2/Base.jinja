@@ -12,6 +12,11 @@ def main():
     
     # Create a SMACH state machine
     {{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
+    {% if userdata is defined %}
+    {% for userdatum_key, userdatum_val in userdata.iteritems() | sort %}
+    {{ name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
+    {% endfor %}
+    {% endif %}
     
     # Open the container
     with {{ name | lower() }}:

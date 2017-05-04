@@ -14,7 +14,7 @@ class TestGenerator(unittest.TestCase):
     debug_level = 1
 
     def __init__(self, *args, **kwargs):
-        self._base_path = os.path.dirname(__file__)
+        self._base_path = os.path.dirname(os.path.abspath(__file__))
         super(TestGenerator, self).__init__(*args, **kwargs)
     
     def _generate(self, smachaml_filename, template_dirs):
@@ -76,6 +76,15 @@ class TestGenerator(unittest.TestCase):
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/state_machine2.py') as original_file:
             generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/state_machine2.yml',
                                             [self._base_path + '/templates/executive_smach_tutorials/state_machine2'])
+            original_code = unicode(original_file.read())
+            self.assertTrue(self._compare(generated_code, original_code))
+    
+    def test_user_data2(self):
+        """Test user_data2.py"""
+        with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/user_data2.py') as original_file:
+            generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/user_data2.yml',
+                                            [self._base_path + '/templates/executive_smach_tutorials/user_data2',
+                                             self._base_path + '/templates/executive_smach_tutorials/state_machine2'])
             original_code = unicode(original_file.read())
             self.assertTrue(self._compare(generated_code, original_code))
     

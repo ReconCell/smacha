@@ -16,7 +16,7 @@ with sm_{{ name | lower() }}:
     {{ body | indent(4) }}
 
 smach.StateMachine.add('{{ name }}', sm_{{ name | lower() }},
-                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }})
+                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }})
 {% endblock body %}
 
 {% block footer_comments %}

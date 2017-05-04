@@ -1,0 +1,24 @@
+{% block base_header %}
+# define state Bar
+class Bar(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, 
+                             outcomes=['outcome1'],
+                             input_keys=['bar_counter_in'])
+        
+    def execute(self, userdata):
+        rospy.loginfo('Executing state {{ name }}')
+        rospy.loginfo('Counter = %f'%userdata.bar_counter_in)        
+        return 'outcome1'
+{% endblock base_header %}
+
+{% block body %}
+smach.StateMachine.add('{{ name }}', Bar(), 
+                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
+                                    {% endif %}{% endfor %}{{ '}' }},
+                       remapping={{ '{' }}{% for state_key, userdata_key in remapping.iteritems() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
+                                  {% endif %}{% endfor %}{{ '}' }})
+{% endblock body %}
+
+{% block base_footer %}
+{% endblock base_footer %}
