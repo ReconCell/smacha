@@ -13,7 +13,7 @@ class Bar(smach.State):
 {% endblock base_header %}
 
 {% block body %}
-smach.StateMachine.add('{{ name }}', Bar(), 
+smach.{{ parent_type }}.add('{{ name }}', Bar(), 
                        transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
                                     {% endif %}{% endfor %}{{ '}' }},
                        remapping={{ '{' }}{% for state_key, userdata_key in remapping.iteritems() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},

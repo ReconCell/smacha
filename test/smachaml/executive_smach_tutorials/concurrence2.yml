@@ -1,0 +1,20 @@
+--- # Concurrent States Tutorial SMACHAML script.
+name: sm_top
+template: Base
+node_name: smach_example_state_machine
+outcomes: [outcome6]
+states:
+  - BAS:
+      template: Bas
+      transitions: {outcome3: CON}
+  - CON:
+      template: Concurrence
+      outcomes: [outcome4, outcome5]
+      default_outcome: outcome4
+      outcome_map: {outcome5: {FOO: outcome2, BAR: outcome1}}
+      transitions: {outcome4: CON, outcome5: outcome6}
+      states:
+        - FOO:
+            template: Foo
+        - BAR:
+            template: Bar

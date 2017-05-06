@@ -87,7 +87,7 @@ class Templater():
         """
         Render all code templates for a given state.
 
-        This function search for all templates with file names beginning
+        This function searches for all templates with file names beginning
         with state_name and possibly proceeded by an underscore followed by a stub name,
         e.g. MyState.jinja, MyState_header.jinja, MyState_footer.jinja,
         render them all, and return the rendered code in a dict with 'body' + stub names
@@ -119,7 +119,10 @@ class Templater():
         # Render code for block
         block_code = ''
         for line in template.blocks[block](template.new_context(template_vars)):
-            block_code = block_code + line.strip('\n')
+            block_code = block_code + line
+
+        # Strip trailing whitespace from the block
+        block_code = block_code.rstrip()
         
         if block_code == '':
             return block_code

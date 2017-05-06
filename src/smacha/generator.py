@@ -14,14 +14,18 @@ class Generator():
         # Handle to the Jinja templater
         self._templater = templater
     
-    def _process_state_machine(self, code_buffers, container_name, state):
+    def _process_state_machine(self, code_buffers, parent_name, parent_template, parent_type, state):
         """Recursively process parsed yaml SMACHA script."""
         # Inspect state
         if type(state) is list:
             # Iterate through list of states
             for i_sub_state, sub_state in enumerate(state):
                 # Recursively process each state
-                code_buffers = self._process_state_machine(code_buffers, container_name, sub_state)
+                code_buffers = self._process_state_machine(code_buffers,
+                                                           parent_name,
+                                                           parent_template,
+                                                           parent_type,
+                                                           sub_state)
         
         elif type(state) is dict:
         
@@ -59,10 +63,23 @@ class Generator():
                         container_code_buffers['base_footer'] = list()
                         
                         # Recursively process nested states
-                        container_code_buffers = self._process_state_machine(container_code_buffers, state_name, state_vars['states'])
+                        # NOTE: For now, parent template will be the same as parent type
+                        # unless we're dealing with the base template. This may have to be accounted
+                        # for in a neater way later.
+                        container_code_buffers = self._process_state_machine(container_code_buffers,
+                                                                             state_name,
+                                                                             state_vars['template'],
+                                                                             state_vars['template'],
+                                                                             state_vars['states'])
                         
                         # Convert nested state code to strings
                         template_vars['body'] = self._gen_code_string(container_code_buffers['body'])
+                        
+                        # Add the parent name, template and type to template_vars so that states can
+                        # refer to their parent containers in their templates
+                        template_vars['parent_name'] = parent_name
+                        template_vars['parent_template'] = parent_template
+                        template_vars['parent_type'] = parent_type
                         
                         # Call the templater object to render the container templates with
                         # the generated nested state code
@@ -108,9 +125,11 @@ class Generator():
                             if state_var != 'template' and state_var != '__line__':
                                 template_vars[state_var] = self._strip_line_numbers(state_var_val)
                         
-                        # Add the container name to template_vars so that states can
+                        # Add the parent name, template and type to template_vars so that states can
                         # refer to their parent containers in their templates
-                        template_vars['container_name'] = container_name
+                        template_vars['parent_name'] = parent_name
+                        template_vars['parent_template'] = parent_template
+                        template_vars['parent_type'] = parent_type
                         
                         # Call the templater object to render the current state template
                         # state_code = self._templater.render_all(state_vars['template'], template_vars)
@@ -140,14 +159,17 @@ class Generator():
     #       I.e., the output of the parser should probably be
     #       a class unto itself that exposes methods such as this one.
     #
-    def _strip_line_numbers(self, state_var_val):
+    def _strip_line_numbers(self, script):
         """Strip any line number keys from state_var_val."""
         try:
-            stripped_state_var_val = dict(state_var_val)
-            del stripped_state_var_val['__line__']
-            return stripped_state_var_val
+            script = dict(script)
+            for script_key, script_val in script.items():
+                if isinstance(script_val, dict):
+                    script[script_key] = self._strip_line_numbers(script_val)
+            del script['__line__']
+            return script
         except:
-            return state_var_val
+            return script
     
     def _gen_code_string(self, code_buffer):
         """Generate code string from code list buffer."""
@@ -174,7 +196,13 @@ class Generator():
             base_code_buffers['base_header'] = list()
             base_code_buffers['body'] = list()
             base_code_buffers['base_footer'] = list()
-            base_code_buffers = self._process_state_machine(base_code_buffers, script['name'], script['states'])
+            # NOTE: For now, we explicitly state that the base is a parent of type
+            # 'StateMachine' here.  This may have to be handled in a neater way later.
+            base_code_buffers = self._process_state_machine(base_code_buffers,
+                                                            script['name'],
+                                                            script['template'],
+                                                            'StateMachine',
+                                                            script['states'])
             
             # Create and fill a dict for the base template variables
             base_template_vars = dict()

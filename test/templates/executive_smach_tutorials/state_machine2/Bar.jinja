@@ -10,8 +10,8 @@ class Bar(smach.State):
 {% endblock base_header %}
 
 {% block body %}
-smach.StateMachine.add('{{ name }}', Bar(), 
-                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }})
+smach.{{ parent_type }}.add('{{ name }}', Bar(){% if transitions is defined %}, 
+                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }}{% endif %})
 {% endblock body %}
 
 {% block base_footer %}

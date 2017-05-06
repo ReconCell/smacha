@@ -1,0 +1,34 @@
+{% block base_header %}
+{% endblock base_header %}
+
+{% block header_comments %}
+#----------------------------------------------------------------------------------------
+# BEGIN: {{ name }}
+# TEMPLATE: Concurrence
+#
+{% endblock header_comments %}
+
+{% block body %}
+sm_{{ name | lower() }} = smach.Concurrence(outcomes=[{% for outcome in outcomes %}'{{outcome}}'{% if not loop.last %}, {% endif %}{% endfor %}],
+                           default_outcome='{{ default_outcome }}',
+                           outcome_map={{ '{' }}{% for outcome_map_key, outcome_map_val in outcome_map.iteritems() | sort %}'{{ outcome_map_key }}':{% if outcome_map_val is mapping %}
+                               {{ '{' }} {% for outcome_map_sub_key, outcome_map_sub_val in outcome_map_val.iteritems() | sort %}'{{ outcome_map_sub_key }}': '{{ outcome_map_sub_val }}'{% if not loop.last %},
+                                 {% endif %}{% endfor %}{{ '}' }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }})
+
+with sm_{{ name | lower() }}:
+
+    {{ body | indent(4) }}
+
+smach.{{ parent_type }}.add('{{ name }}', sm_{{ name | lower() }},
+                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
+                                    {% endif %}{% endfor %}{{ '}' }})
+{% endblock body %}
+
+{% block footer_comments %}
+#
+# END: {{ name }}
+#----------------------------------------------------------------------------------------
+{% endblock footer_comments %}
+
+{% block base_footer %}
+{% endblock base_footer %}

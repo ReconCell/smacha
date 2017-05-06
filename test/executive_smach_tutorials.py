@@ -55,6 +55,24 @@ class TestGenerator(unittest.TestCase):
         code_a_stripped = [line.rstrip() for line in code_a_stripped]
         code_b_stripped = [line.rstrip() for line in code_b_stripped]
 
+        # Strip whitespace after commas from each line
+        #
+        # NOTE: The below commented code was intended to make this work for only expressions outside
+        # of quotations, but this is not currently robust and fixed for greediness.
+        # Sticking with the naive approach for the moment.
+        #
+        # sub_outside_quotes = r"('[^'\\]*(?:\\.[^\\]*)*'|\"[^\"\\]*(?:\\.[^\"\\]*)*\")|\b{0}\b"
+        # to_replace = ',\s+'
+        # strip_whitespace = lambda line: re.sub(sub_outside_quotes.format(to_replace), lambda m: m.group(1) if m.group(1) else ',', line)
+        strip_whitespace = lambda line: re.sub(',\s+', ',', line)
+        code_a_stripped = [strip_whitespace(line) for line in code_a_stripped]
+        code_b_stripped = [strip_whitespace(line) for line in code_b_stripped]
+        
+        # Strip whitespace before and after colons from each line
+        strip_whitespace = lambda line: re.sub('\s*\:\s*', ':', line)
+        code_a_stripped = [strip_whitespace(line) for line in code_a_stripped]
+        code_b_stripped = [strip_whitespace(line) for line in code_b_stripped]
+
         if self.debug_level > 1:
             print('\n' + file_a + ':\n')
             print(code_a_stripped)
@@ -77,7 +95,7 @@ class TestGenerator(unittest.TestCase):
             generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/state_machine2.yml',
                                             [self._base_path + '/templates/executive_smach_tutorials/state_machine2'])
             original_code = unicode(original_file.read())
-            self.assertTrue(self._compare(generated_code, original_code))
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_user_data2(self):
         """Test user_data2.py"""
@@ -86,7 +104,7 @@ class TestGenerator(unittest.TestCase):
                                             [self._base_path + '/templates/executive_smach_tutorials/user_data2',
                                              self._base_path + '/templates/executive_smach_tutorials/state_machine2'])
             original_code = unicode(original_file.read())
-            self.assertTrue(self._compare(generated_code, original_code))
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_state_machine_nesting2(self):
         """Test state_machine_nesting2.py"""
@@ -94,6 +112,16 @@ class TestGenerator(unittest.TestCase):
             generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/state_machine_nesting2.yml',
                                             [self._base_path + '/templates/executive_smach_tutorials/state_machine2',
                                              self._base_path + '/templates/executive_smach_tutorials/state_machine_nesting2'])
+            original_code = unicode(original_file.read())
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_concurrence2(self):
+        """Test concurrence2.py"""
+        with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/concurrence2.py') as original_file:
+            generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/concurrence2.yml',
+                                            [self._base_path + '/templates/executive_smach_tutorials/state_machine2',
+                                             self._base_path + '/templates/executive_smach_tutorials/state_machine_nesting2',
+                                             self._base_path + '/templates/executive_smach_tutorials/concurrence2'])
             original_code = unicode(original_file.read())
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
