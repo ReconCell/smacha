@@ -10,16 +10,13 @@
 
 {% block body %}
 sm_{{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{outcome}}'{% if not loop.last %}, {% endif %}{% endfor %}])
-      
-{{ name | lower() }}_sis = smach_ros.IntrospectionServer('{{ node_name }}', {{ name }}, '{{ sis_topic }}')
-{{ name | lower() }}_sis.start()
 
 with sm_{{ name | lower() }}:
 
     {{ body | indent(4) }}
 
-smach.StateMachine.add('{{ name }}', sm_{{ name | lower() }},
-                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }})
+smach.{{ parent_type }}.add('{{ name }}', sm_{{ name | lower() }},
+                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }})
 {% endblock body %}
 
 {% block footer_comments %}
@@ -29,5 +26,4 @@ smach.StateMachine.add('{{ name }}', sm_{{ name | lower() }},
 {% endblock footer_comments %}
 
 {% block base_footer %}
-{{name | lower() }}_sis.stop()
 {% endblock base_footer %}
