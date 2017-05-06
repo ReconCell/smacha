@@ -44,34 +44,26 @@ class TestGenerator(unittest.TestCase):
 
     def _compare(self, code_a, code_b, file_a='code_a', file_b='code_b'):
         """Diff compare code_a with code_b."""
-        # Strip (python agnostic!) whitespace and single-line comments from both code strings and convert to lists
+        # Strip single-line comments
+        code_a = re.sub('\s*#.*\n', '\n', code_a)
+        code_b = re.sub('\s*#.*\n', '\n', code_b)
+
+        # Squeeze whitespace after commas
+        code_a = re.sub(',\s+', ',', code_a)
+        code_b = re.sub(',\s+', ',', code_b)
+        
+        # Squeeze whitespace before and after colons
+        code_a = re.sub('\s*\:\s*', ':', code_a)
+        code_b = re.sub('\s*\:\s*', ':', code_b)
+
+        # Strip (python agnostic!) whitespace from both code strings and convert to lists
         code_a_stripped = [line for line in code_a.strip().splitlines() if line != '' and
-                                                                           re.match('^\s+$', line) is None and
-                                                                           re.match('^\s*#.*$', line) is None]
+                                                                           re.match('^\s+$', line) is None]
         code_b_stripped = [line for line in code_b.strip().splitlines() if line != '' and
-                                                                           re.match('^\s+$', line) is None and
-                                                                           re.match('^\s*#.*$', line) is None]
+                                                                           re.match('^\s+$', line) is None]
         # Strip trailing whitespace from each line
         code_a_stripped = [line.rstrip() for line in code_a_stripped]
         code_b_stripped = [line.rstrip() for line in code_b_stripped]
-
-        # Strip whitespace after commas from each line
-        #
-        # NOTE: The below commented code was intended to make this work for only expressions outside
-        # of quotations, but this is not currently robust and fixed for greediness.
-        # Sticking with the naive approach for the moment.
-        #
-        # sub_outside_quotes = r"('[^'\\]*(?:\\.[^\\]*)*'|\"[^\"\\]*(?:\\.[^\"\\]*)*\")|\b{0}\b"
-        # to_replace = ',\s+'
-        # strip_whitespace = lambda line: re.sub(sub_outside_quotes.format(to_replace), lambda m: m.group(1) if m.group(1) else ',', line)
-        strip_whitespace = lambda line: re.sub(',\s+', ',', line)
-        code_a_stripped = [strip_whitespace(line) for line in code_a_stripped]
-        code_b_stripped = [strip_whitespace(line) for line in code_b_stripped]
-        
-        # Strip whitespace before and after colons from each line
-        strip_whitespace = lambda line: re.sub('\s*\:\s*', ':', line)
-        code_a_stripped = [strip_whitespace(line) for line in code_a_stripped]
-        code_b_stripped = [strip_whitespace(line) for line in code_b_stripped]
 
         if self.debug_level > 1:
             print('\n' + file_a + ':\n')
