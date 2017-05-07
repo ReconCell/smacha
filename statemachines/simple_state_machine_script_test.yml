@@ -1,6 +1,7 @@
 --- # Test State Machine
 name: SM_TOP
 template: StateMachineBase
+manifest: smach_tutorials
 node_name: test_simple_action_state_machine
 states:
   - RECONFIGURE_HEXAPOD:

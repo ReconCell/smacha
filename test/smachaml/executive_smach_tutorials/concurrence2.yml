@@ -1,6 +1,7 @@
 --- # Concurrent States Tutorial SMACHAML script.
 name: sm_top
 template: Base
+manifest: smach_tutorials
 node_name: smach_example_state_machine
 outcomes: [outcome6]
 states:

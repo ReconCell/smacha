@@ -207,6 +207,8 @@ class Generator():
             # Create and fill a dict for the base template variables
             base_template_vars = dict()
             base_template_vars['name'] = script['name']
+            if 'manifest' in script:
+                base_template_vars['manifest'] = script['manifest']
             base_template_vars['node_name'] = script['node_name']
             base_template_vars['outcomes'] = script['outcomes']
             if 'userdata' in script:
