@@ -4,7 +4,7 @@ test:
   - apt-get install -y python-dev python-pip
   - pip install virtualenv
   - "# Test with python 2"
-  - virtualenv --system-site-packages venv2
+  - virtualenv --system-site-packages --python=/usr/bin/python2 venv2
   # NOTE: Installing these packages by hand is a
   # temporary solution.
   # TODO: Try setting up a runner with a ROS image.
