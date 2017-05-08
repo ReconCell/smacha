@@ -2,10 +2,12 @@ test:
   script:
   - apt-get update -qy
   - apt-get install -y python-dev python-pip
-  - pip install nose
+  - "# Test with python 2"
+  - virtualenv --system-site-packages venv2
   # NOTE: Installing these packages by hand is a
   # temporary solution.
   # TODO: Try setting up a runner with a ROS image.
-  - pip install pyyaml
-  - pip install jinja2
-  - nosetests test/executive_smach_tutorials.py
+  - venv2/bin/pip install nose
+  - venv2/bin/pip install pyyaml
+  - venv2/bin/pip install jinja2
+  - venv2/bin/nosetests test/executive_smach_tutorials.py
