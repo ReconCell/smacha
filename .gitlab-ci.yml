@@ -2,4 +2,5 @@ test:
   script:
   - apt-get update -qy
   - apt-get install -y python-dev python-pip
-  - nosetests test/executive_smach_tutorials.py  
+  - sudo pip install nose
+  - nosetests test/executive_smach_tutorials.py
