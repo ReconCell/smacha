@@ -22,6 +22,7 @@ from the [SMACH Tutorials](http://wiki.ros.org/smach/Tutorials) described in SMA
 --- # Nesting State Machines Tutorial SMACHAML script.
 name: sm_top
 template: Base
+manifest: smach_tutorials
 node_name: smach_example_state_machine
 outcomes: [outcome5]
 states:
@@ -76,7 +77,7 @@ The `Base` template from the above example is specified in a `Base.jinja` file a
 ```python
 #!/usr/bin/env python
 
-import roslib; roslib.load_manifest('smach_tutorials')
+import roslib; {% if manifest is defined %}roslib.load_manifest('smach_tutorials'){% endif %}
 import rospy
 import smach
 import smach_ros
@@ -88,6 +89,11 @@ def main():
     
     # Create a SMACH state machine
     {{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
+    {% if userdata is defined %}
+    {% for userdatum_key, userdatum_val in userdata.iteritems() | sort %}
+    {{ name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
+    {% endfor %}
+    {% endif %}
     
     # Open the container
     with {{ name | lower() }}:
@@ -109,22 +115,29 @@ The `Foo` template is specified in a `Foo.jinja` file and looks like this:
 # define state Foo
 class Foo(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['outcome1','outcome2'])
-        self.counter = 0
+        smach.State.__init__(self, 
+                             outcomes=['outcome1','outcome2']{% if remapping is defined %},
+                             input_keys=['foo_counter_in'],
+                             output_keys=['foo_counter_out']){% else %})
+        self.counter = 0{% endif %}
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state {{ name }}')
+        rospy.loginfo('Executing state {{ name }}'){% if remapping is defined %}
+        if userdata.foo_counter_in < 3:
+            userdata.foo_counter_out = userdata.foo_counter_in + 1{% else %}
         if self.counter < 3:
-            self.counter += 1
+            self.counter += 1{% endif %}
             return 'outcome1'
         else:
             return 'outcome2'
 {% endblock base_header %}
 
 {% block body %}
-smach.StateMachine.add('{{ name }}', Foo(), 
-                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
-                                    {% endif %}{% endfor %}{{ '}' }})
+smach.{{ parent_type }}.add('{{ name }}', Foo(){% if transitions is defined %}, 
+                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
+                                    {% endif %}{% endfor %}{{ '}' }}{% endif %}{% if remapping is defined %},
+                       remapping={{ '{' }}{% for state_key, userdata_key in remapping.iteritems() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
+                                  {% endif %}{% endfor %}{{ '}' }}{% endif %})
 {% endblock body %}
 
 {% block base_footer %}
