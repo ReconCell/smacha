@@ -179,7 +179,7 @@ where the generated code will be output to a file called `smacha_output.py`
 Example usage for the "Nesting State Machines" tutorial:
 ```
 roscd smacha/test
-rosrun smacha smacha smachaml/executive_smach_tutorials/state_machine_nesting2.yml -t templates/executive_smach_tutorials/state_machine2 templates/executive_smach_tutorials/state_machine_nesting2 -o state_machine_nesting2.py -v
+rosrun smacha smacha smachaml/executive_smach_tutorials/state_machine_nesting2.yml -t templates/executive_smach_tutorials -o state_machine_nesting2.py -v
 ```
 Here, the `-t` argument specifies custom template directories for this particular tutorial.
 In this case, two directories are specified such that templates from the preceding
