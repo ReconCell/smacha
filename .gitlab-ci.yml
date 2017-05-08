@@ -6,6 +6,6 @@ test:
   # NOTE: Installing these packages by hand is a
   # temporary solution.
   # TODO: Try setting up a runner with a ROS image.
-  - pip install yaml
+  - pip install pyyaml
   - pip install jinja2
   - nosetests test/executive_smach_tutorials.py
