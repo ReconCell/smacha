@@ -1,0 +1,24 @@
+{% extends "SimpleActionState.jinja" %}
+
+{% block base_header %}
+{% if 'smach_tutorials_msg_import_TestAction' not in defined_headers %}
+from smach_tutorials.msg import TestAction
+{% do defined_headers.append('smach_tutorials_msg_import_TestAction') %}
+{% endif %}
+{% if 'smach_tutorials_msg_import_TestGoal' not in defined_headers %}
+from smach_tutorials.msg import TestGoal
+{% do defined_headers.append('smach_tutorials_msg_import_TestGoal') %}
+{% endif %}
+{{ super() }}
+{% endblock base_header %}
+
+{%- block body %}
+# Add another simple action state. This will give a goal
+# that should abort the action state when it is received, so we
+# map 'aborted' for this state onto 'succeeded' for the state machine.
+{{ super() }}
+{% endblock body %}
+
+{% block base_footer %}
+{{ super() }}
+{% endblock base_footer %}

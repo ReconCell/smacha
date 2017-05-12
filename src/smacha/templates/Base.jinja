@@ -5,11 +5,16 @@ import rospy
 import smach
 import smach_ros
 
-{{ header }}
+{% set defined_headers = [] %}
+
+{% block base_header %}
+{{ base_header }}
+{% endblock base_header %}
 
 def main():
     rospy.init_node('{{ node_name }}')
-    
+   
+    {% block header %}
     # Create a SMACH state machine
     {{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
     {% if userdata is defined %}
@@ -17,16 +22,21 @@ def main():
     {{ name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
     {% endfor %}
     {% endif %}
+    {% endblock header %}
     
     # Open the container
     with {{ name | lower() }}:
         # Add states to the container
+        {%- block body %}
         {{ body | indent(8) }}
+        {% endblock body %}
     
     # Execute SMACH plan
     outcome = {{ name | lower() }}.execute()
-    
-    {{ footer | indent(4) }}
+   
+    {% block base_footer %}
+    {{ base_footer | indent(4) }}
+    {% endblock base_footer %}
 
 if __name__ == '__main__':
     main()

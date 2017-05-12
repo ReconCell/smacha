@@ -1,0 +1,25 @@
+{% block base_header %}
+{% if 'actionlib_import' not in defined_headers %}
+from actionlib import *
+{% do defined_headers.append('actionlib_import') %}
+{% endif %}
+{% endblock base_header %}
+
+{%- block body %}
+smach.{{ parent_type }}.add('{{ name }}',
+                            smach_ros.SimpleActionState('{{ action_server_namespace }}', {{ action }}{% if goal is defined %},
+                                                        goal = {{ goal }}{% elif goal_slots is defined %},
+                                                        goal_slots = [{% for goal_slot in goal_slots %}'{{ goal_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% elif goal_cb is defined %},
+                                                        goal_cb = {{ goal_cb }}{% if input_keys is defined %},
+                                                        input_keys = [{% for input_key in input_keys %}'{{ input_key }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}{% endif %}{% if result_slots is defined %},
+                                                        result_slots = [{% for result_slot in result_slots %}'{{ result_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% elif result_cb is defined %},
+                                                        result_cb = {{ result_cb }}{% if output_keys is defined %},
+                                                        output_keys = [{% for output_key in output_keys %}'{{ output_key }}'{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% endif %}){% if transitions is defined %},
+                            transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
+                                         {% endif %}{% endfor %}{{ '}' }}{% endif %}{% if remapping is defined %},
+                            remapping={{ '{' }}{% for state_key, userdata_key in remapping.iteritems() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
+                                       {% endif %}{% endfor %}{{ '}' }}{% endif %})
+{% endblock body %}
+
+{% block base_footer %}
+{% endblock base_footer %}

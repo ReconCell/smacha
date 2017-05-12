@@ -5,8 +5,9 @@ import rospy
 import smach
 import smach_ros
 
-from smach_tutorials.msg import TestAction, TestGoal
 from actionlib import *
+from smach_tutorials.msg import TestGoal
+from smach_tutorials.msg import TestAction
 from actionlib_msgs.msg import *
 
 
@@ -44,7 +45,7 @@ def main():
         # the outcome 'succeeded'
         smach.StateMachine.add('GOAL_DEFAULT',
                                smach_ros.SimpleActionState('test_action', TestAction),
-                               {'succeeded':'GOAL_STATIC'})
+                               transitions={'succeeded':'GOAL_STATIC'})
 
         # Add another simple action state. This will give a goal
         # that should abort the action state when it is received, so we
@@ -52,7 +53,7 @@ def main():
         smach.StateMachine.add('GOAL_STATIC',
                                smach_ros.SimpleActionState('test_action', TestAction,
                                                        goal = TestGoal(goal=1)),
-                               {'aborted':'GOAL_CB'})
+                               transitions={'aborted':'GOAL_CB'})
 
         
         # Add another simple action state. This will give a goal
@@ -66,7 +67,7 @@ def main():
         smach.StateMachine.add('GOAL_CB',
                                smach_ros.SimpleActionState('test_action', TestAction,
                                                        goal_cb = goal_callback),
-                               {'aborted':'succeeded'})
+                               transitions={'aborted':'succeeded'})
 
         # For more examples on how to set goals and process results, see 
         # executive_smach/smach_ros/tests/smach_actionlib.py

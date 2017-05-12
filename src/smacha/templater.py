@@ -4,6 +4,7 @@ from jinja2.ext import Extension
 
 import os
 import re
+import inspect
 
 __all__ = ['Templater']
 
@@ -61,13 +62,14 @@ class Templater():
         # Create an environment for reading and parsing templates
         if self._include_comments:
             self._template_env = jinja2.Environment(loader=self._template_loader,
+                                                    extensions = [jinja2.ext.do],
                                                     trim_blocks=False,
-                                                    lstrip_blocks=False)
+                                                    lstrip_blocks=True)
         else:
             self._template_env = jinja2.Environment(loader=self._template_loader,
-                                                    extensions = [SkipBlockExtension],
+                                                    extensions = [jinja2.ext.do, SkipBlockExtension],
                                                     trim_blocks=False,
-                                                    lstrip_blocks=False)
+                                                    lstrip_blocks=True)
             self._template_env.skip_blocks.append('header_comments')
             self._template_env.skip_blocks.append('footer_comments')
         
@@ -111,18 +113,41 @@ class Templater():
         
         return template_code
     
-    def render_block(self, template_name, template_vars, block):
+    def render_block(self, template_name, template_vars, target_block):
         """Render specific block from code template."""
         # Read the state template file into a template object using the environment object
         template = self._template_env.select_template([template_name, template_name + '.jinja'])
 
-        # Render code for block
-        block_code = ''
-        for line in template.blocks[block](template.new_context(template_vars)):
-            block_code = block_code + line
+        # For reasons not entirely clear, a temporary environment must be created
+        # to make this work.
+        template_env = jinja2.Environment(loader=self._template_loader,
+                                          extensions = [jinja2.ext.do, SkipBlockExtension],
+                                          trim_blocks=False,
+                                          lstrip_blocks=True)
 
+        # Be sure to also skip comment blocks here as required
+        if self._include_comments != True:
+            template_env.skip_blocks.append('header_comments')
+            template_env.skip_blocks.append('footer_comments')
+
+        # Append non-target blocks to environment skip_blocks list
+        for block_name, block in template.blocks.items():
+            if block_name != target_block:
+                template_env.skip_blocks.append(block_name)
+       
+        # Select the template from the temporary environment with
+        # the appropriate skip_blocks list for non-target blocks
+        target_block_template = template_env.select_template([template_name, template_name + '.jinja'])
+        
+        # Render code for remaining block
+        #
+        # TODO: Raise exception here if there is no remaining block!
+        #
+        block_code = target_block_template.render(**template_vars)
+        
         # Strip trailing whitespace from the block
-        block_code = block_code.rstrip()
+        # block_code = block_code.rstrip()
+        block_code = block_code.strip()
         
         if block_code == '':
             return block_code
@@ -138,3 +163,18 @@ class Templater():
         template_block_code = {block : self.render_block(template_name, template_vars, block) for block, _ in template.blocks.items()}
 
         return template_block_code
+
+    def get_template_vars(self, template_name, context = None):
+        """Get all variables defined in a template."""
+        # Read the state template file into a template object using the environment object
+        template = self._template_env.select_template([template_name, template_name + '.jinja'])
+
+        # Use Jinja2's module functionality to grab the template variables and create a dict comprehension
+        if context is not None:
+            template_module_vars = [template_var for template_var in dir(template.make_module(vars=context)) if not re.match('^_+.*', template_var)]
+            template_vars = { template_var : getattr(template.make_module(vars=context), template_var) for template_var in template_module_vars }
+        else:
+            template_module_vars = [template_var for template_var in dir(template.module) if not re.match('^_+.*', template_var)]
+            template_vars = { template_var : getattr(template.module, template_var) for template_var in template_module_vars }
+
+        return template_vars

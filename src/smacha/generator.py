@@ -14,18 +14,19 @@ class Generator():
         # Handle to the Jinja templater
         self._templater = templater
     
-    def _process_state_machine(self, code_buffers, parent_name, parent_template, parent_type, state):
+    def _process_state_machine(self, code_buffers, global_template_vars, parent_name, parent_template, parent_type, state):
         """Recursively process parsed yaml SMACHA script."""
         # Inspect state
         if type(state) is list:
             # Iterate through list of states
             for i_sub_state, sub_state in enumerate(state):
                 # Recursively process each state
-                code_buffers = self._process_state_machine(code_buffers,
-                                                           parent_name,
-                                                           parent_template,
-                                                           parent_type,
-                                                           sub_state)
+                code_buffers, global_template_vars = self._process_state_machine(code_buffers,
+                                                                                 global_template_vars,
+                                                                                 parent_name,
+                                                                                 parent_template,
+                                                                                 parent_type,
+                                                                                 sub_state)
         
         elif type(state) is dict:
         
@@ -59,18 +60,21 @@ class Generator():
                         # Initialise list buffers for smach code generated from nested container states
                         container_code_buffers = dict()
                         container_code_buffers['base_header'] = list()
+                        container_code_buffers['header'] = list()
                         container_code_buffers['body'] = list()
+                        container_code_buffers['footer'] = list()
                         container_code_buffers['base_footer'] = list()
                         
                         # Recursively process nested states
                         # NOTE: For now, parent template will be the same as parent type
                         # unless we're dealing with the base template. This may have to be accounted
                         # for in a neater way later.
-                        container_code_buffers = self._process_state_machine(container_code_buffers,
-                                                                             state_name,
-                                                                             state_vars['template'],
-                                                                             state_vars['template'],
-                                                                             state_vars['states'])
+                        container_code_buffers, global_template_vars = self._process_state_machine(container_code_buffers,
+                                                                                                   global_template_vars,
+                                                                                                   state_name,
+                                                                                                   state_vars['template'],
+                                                                                                   state_vars['template'],
+                                                                                                   state_vars['states'])
                         
                         # Convert nested state code to strings
                         template_vars['body'] = self._gen_code_string(container_code_buffers['body'])
@@ -80,15 +84,26 @@ class Generator():
                         template_vars['parent_name'] = parent_name
                         template_vars['parent_template'] = parent_template
                         template_vars['parent_type'] = parent_type
+
+                        # Add the global_template_vars to template_vars so that child templates
+                        # have access to variables defined in base templates
+                        template_vars.update(global_template_vars)
                         
                         # Call the templater object to render the container templates with
                         # the generated nested state code
                         # container_code = self._templater.render_all(state_vars['template'], template_vars)
                         container_code = self._templater.render_all_blocks(state_vars['template'], template_vars)
+
+                        # Update global_template_vars based on the child template
+                        global_template_vars.update(self._templater.get_template_vars(state_vars['template'], template_vars))
                         
                         # Append relevant generated container code to respective 
                         if 'base_header' in container_code_buffers and 'base_header' in container_code:
                             container_code_buffers['base_header'].insert(0, container_code['base_header'])
+                        if 'header' in container_code_buffers and 'header' in container_code:
+                            container_code_buffers['header'].insert(0, container_code['header'])
+                        if 'footer' in container_code_buffers and 'footer' in container_code:
+                            container_code_buffers['footer'].append(container_code['footer'])
                         if 'base_footer' in container_code_buffers and 'base_footer' in container_code:
                             container_code_buffers['base_footer'].append(container_code['base_footer'])
                         
@@ -97,8 +112,16 @@ class Generator():
                             base_header_code = self._gen_code_string(container_code_buffers['base_header'])
                             if base_header_code != '':
                                 code_buffers['base_header'].append(base_header_code)
+                        if 'header' in code_buffers and 'header' in container_code_buffers:
+                            header_code = self._gen_code_string(container_code_buffers['header'])
+                            if header_code != '':
+                                code_buffers['header'].append(header_code)
                         if 'body' in code_buffers and 'body' in container_code:
                             code_buffers['body'].append(container_code['body'])
+                        if 'footer' in code_buffers and 'footer' in container_code_buffers:
+                            footer_code = self._gen_code_string(container_code_buffers['footer'])
+                            if footer_code != '':
+                                code_buffers['footer'].insert(0, footer_code)
                         if 'base_footer' in code_buffers and 'base_footer' in container_code_buffers:
                             base_footer_code = self._gen_code_string(container_code_buffers['base_footer'])
                             if base_footer_code != '':
@@ -131,15 +154,26 @@ class Generator():
                         template_vars['parent_template'] = parent_template
                         template_vars['parent_type'] = parent_type
                         
+                        # Add the global_template_vars to template_vars so that child templates
+                        # have access to variables defined in base templates
+                        template_vars.update(global_template_vars)
+                        
                         # Call the templater object to render the current state template
                         # state_code = self._templater.render_all(state_vars['template'], template_vars)
                         state_code = self._templater.render_all_blocks(state_vars['template'], template_vars)
                         
+                        # Update global_template_vars based on the child template
+                        global_template_vars.update(self._templater.get_template_vars(state_vars['template'], template_vars))
+                        
                         # Append the template for current state to smach_code buffer list
                         if 'base_header' in code_buffers and 'base_header' in state_code and state_code['base_header'] != '':
                             code_buffers['base_header'].append(state_code['base_header'])
+                        if 'header' in code_buffers and 'header' in state_code and state_code['header'] != '':
+                            code_buffers['header'].append(state_code['header'])
                         if 'body' in code_buffers and 'body' in state_code and state_code['body'] != '':
                             code_buffers['body'].append(state_code['body'])
+                        if 'footer' in code_buffers and 'footer' in state_code and state_code['footer'] != '':
+                            code_buffers['footer'].insert(0, state_code['footer'])
                         if 'base_footer' in code_buffers and 'base_footer' in state_code and state_code['base_footer'] != '':
                             code_buffers['base_footer'].insert(0, state_code['base_footer'])
                     
@@ -152,7 +186,7 @@ class Generator():
         else:
             pass
         
-        return code_buffers
+        return code_buffers, global_template_vars
     
     #
     # TODO: Refactor codebase to clean this up.
@@ -196,28 +230,49 @@ class Generator():
             base_code_buffers['base_header'] = list()
             base_code_buffers['body'] = list()
             base_code_buffers['base_footer'] = list()
+            
+            # Add any variables defined in the base template to global_template_vars
+            global_template_vars = self._templater.get_template_vars(script['template'],
+                                                                     context = {'base_header':'', 'body':'', 'base_footer':''})
+            
             # NOTE: For now, we explicitly state that the base is a parent of type
             # 'StateMachine' here.  This may have to be handled in a neater way later.
-            base_code_buffers = self._process_state_machine(base_code_buffers,
-                                                            script['name'],
-                                                            script['template'],
-                                                            'StateMachine',
-                                                            script['states'])
+            base_code_buffers, global_template_vars = self._process_state_machine(base_code_buffers,
+                                                                                  global_template_vars,
+                                                                                  script['name'],
+                                                                                  script['template'],
+                                                                                  'StateMachine',
+                                                                                  script['states'])
             
             # Create and fill a dict for the base template variables
+            #
+            # TODO: Add exception handling for cases where certain template vars are necessary.
+            #
             base_template_vars = dict()
-            base_template_vars['name'] = script['name']
+            if 'name' in script:
+                base_template_vars['name'] = script['name']
             if 'manifest' in script:
                 base_template_vars['manifest'] = script['manifest']
-            base_template_vars['node_name'] = script['node_name']
-            base_template_vars['outcomes'] = script['outcomes']
+            if 'node_name' in script:
+                base_template_vars['node_name'] = script['node_name']
+            if 'outcomes' in script:
+                base_template_vars['outcomes'] = script['outcomes']
             if 'userdata' in script:
                 base_template_vars['userdata'] = self._strip_line_numbers(script['userdata'])
-            base_header_code = self._gen_code_string(base_code_buffers['base_header'])
-            base_template_vars['header'] = base_header_code
-            base_template_vars['body'] = self._gen_code_string(base_code_buffers['body'])
-            base_template_vars['footer'] = self._gen_code_string(base_code_buffers['base_footer'])
-            
+            if 'base_header' in base_code_buffers:
+                base_template_vars['base_header'] = self._gen_code_string(base_code_buffers['base_header']).strip()
+            if 'header' in base_code_buffers:
+                base_template_vars['header'] = self._gen_code_string(base_code_buffers['header']).strip()
+            if 'body' in base_code_buffers:
+                base_template_vars['body'] = self._gen_code_string(base_code_buffers['body']).strip()
+            if 'header' in base_code_buffers:
+                base_template_vars['footer'] = self._gen_code_string(base_code_buffers['footer']).strip()
+            if 'base_footer' in base_code_buffers:
+                base_template_vars['base_footer'] = self._gen_code_string(base_code_buffers['base_footer']).strip()
+
+            # Add updated global_template_vars to base_template_vars
+            base_template_vars.update(global_template_vars)
+
             # Render the base state machine template
             base_code = self._templater.render(script['template'], base_template_vars)
             
