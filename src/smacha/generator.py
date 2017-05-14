@@ -14,29 +14,26 @@ class Generator():
         # Handle to the Jinja templater
         self._templater = templater
     
-    def _process_state_machine(self, code_buffers, global_template_vars, parent_name, parent_template, parent_type, state):
+    def _process_script(self, code_buffers, global_template_vars, parent_vars, script):
         """Recursively process parsed yaml SMACHA script."""
-        # Inspect state
-        if isinstance(state, list):
+        # Inspect script for list of states
+        if isinstance(script, list):
             # Iterate through list of states
-            for i_sub_state, sub_state in enumerate(state):
+            for state_script in script:
                 # Recursively process each state
-                code_buffers, global_template_vars = self._process_state_machine(code_buffers,
-                                                                                 global_template_vars,
-                                                                                 parent_name,
-                                                                                 parent_template,
-                                                                                 parent_type,
-                                                                                 sub_state)
-        
-        elif isinstance(state, dict):
-        
-            # Check if the state is well-formed
-            if len(state.items()) > 2:
-                raise ParseException(error='Badly formed state!', line_number=state['__line__'])
+                code_buffers, global_template_vars = self._process_script(code_buffers,
+                                                                          global_template_vars,
+                                                                          parent_vars,
+                                                                          state_script)
+        # Inspect script for state dict
+        elif isinstance(script, dict):
+            # Check if the state script dict is well-formed
+            if len(script.items()) > 2:
+                raise ParseException(error='Badly formed state script!', line_number=script['__line__'])
             
             else:
-                # Find the state name and variables
-                for state_name, state_vars in state.items():
+                # Find the state name and variables in the state script
+                for state_name, state_vars in script.items():
                     if state_name != '__line__':
                       break
                 
@@ -64,26 +61,30 @@ class Generator():
                         container_code_buffers['body'] = list()
                         container_code_buffers['footer'] = list()
                         container_code_buffers['base_footer'] = list()
-                        
-                        # Recursively process nested states
-                        # NOTE: For now, parent template will be the same as parent type
+
+                        # Add template name, template and type to child_vars
+                        # NOTE: For now, child template will be the same as child type
                         # unless we're dealing with the base template. This may have to be accounted
                         # for in a neater way later.
-                        container_code_buffers, global_template_vars = self._process_state_machine(container_code_buffers,
-                                                                                                   global_template_vars,
-                                                                                                   state_name,
-                                                                                                   state_vars['template'],
-                                                                                                   state_vars['template'],
-                                                                                                   state_vars['states'])
+                        child_vars = dict()
+                        child_vars['name'] = state_name
+                        child_vars['template'] = state_vars['template']
+                        child_vars['type'] = state_vars['template']
+                        
+                        # Recursively process nested child states
+                        container_code_buffers, global_template_vars = self._process_script(container_code_buffers,
+                                                                                            global_template_vars,
+                                                                                            child_vars,
+                                                                                            state_vars['states'])
                         
                         # Convert nested state code to strings
                         template_vars['body'] = self._gen_code_string(container_code_buffers['body'])
                         
                         # Add the parent name, template and type to template_vars so that states can
                         # refer to their parent containers in their templates
-                        template_vars['parent_name'] = parent_name
-                        template_vars['parent_template'] = parent_template
-                        template_vars['parent_type'] = parent_type
+                        template_vars['parent_name'] = parent_vars['name']
+                        template_vars['parent_template'] = parent_vars['template']
+                        template_vars['parent_type'] = parent_vars['type']
 
                         # Add the global_template_vars to template_vars so that child templates
                         # have access to variables defined in base templates
@@ -133,7 +134,7 @@ class Generator():
                               str(e))
                         pass
                 
-                # Otherwise, assume we have hit a leaf.
+                # Otherwise, assume we have hit a leaf state
                 else:
                     # Process and render state code from leaf template
                     try:
@@ -150,9 +151,9 @@ class Generator():
                         
                         # Add the parent name, template and type to template_vars so that states can
                         # refer to their parent containers in their templates
-                        template_vars['parent_name'] = parent_name
-                        template_vars['parent_template'] = parent_template
-                        template_vars['parent_type'] = parent_type
+                        template_vars['parent_name'] = parent_vars['name']
+                        template_vars['parent_template'] = parent_vars['template']
+                        template_vars['parent_type'] = parent_vars['type']
                         
                         # Add the global_template_vars to template_vars so that child templates
                         # have access to variables defined in base templates
@@ -234,15 +235,19 @@ class Generator():
             # Add any variables defined in the base template to global_template_vars
             global_template_vars = self._templater.get_template_vars(script['template'],
                                                                      context = {'base_header':'', 'body':'', 'base_footer':''})
+
+            # Add base template name, template and type to parent_vars
+            parent_vars = dict()
+            parent_vars['name'] = script['name']
+            parent_vars['template'] = script['template']
+            parent_vars['type'] = 'StateMachine'
             
             # NOTE: For now, we explicitly state that the base is a parent of type
             # 'StateMachine' here.  This may have to be handled in a neater way later.
-            base_code_buffers, global_template_vars = self._process_state_machine(base_code_buffers,
-                                                                                  global_template_vars,
-                                                                                  script['name'],
-                                                                                  script['template'],
-                                                                                  'StateMachine',
-                                                                                  script['states'])
+            base_code_buffers, global_template_vars = self._process_script(base_code_buffers,
+                                                                           global_template_vars,
+                                                                           parent_vars,
+                                                                           script['states'])
             
             # Create and fill a dict for the base template variables
             #
