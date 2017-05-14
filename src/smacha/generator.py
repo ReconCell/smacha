@@ -17,7 +17,7 @@ class Generator():
     def _process_state_machine(self, code_buffers, global_template_vars, parent_name, parent_template, parent_type, state):
         """Recursively process parsed yaml SMACHA script."""
         # Inspect state
-        if type(state) is list:
+        if isinstance(state, list):
             # Iterate through list of states
             for i_sub_state, sub_state in enumerate(state):
                 # Recursively process each state
@@ -28,7 +28,7 @@ class Generator():
                                                                                  parent_type,
                                                                                  sub_state)
         
-        elif type(state) is dict:
+        elif isinstance(state, dict):
         
             # Check if the state is well-formed
             if len(state.items()) > 2:
@@ -216,7 +216,7 @@ class Generator():
         """Generate SMACH code from a parsed SMACHA yaml script."""
         
         # TODO: Clean up this logic
-        if type(script) is not dict:
+        if not isinstance(script, dict):
             raise ParseException(error='Invalid script formatting!')
         elif 'states' not in script:
             raise ParseException(error='Script does not contain states!')
