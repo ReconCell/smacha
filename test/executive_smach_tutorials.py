@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import unicode_literals
+
 import sys
 import argparse
 import os
@@ -86,7 +88,7 @@ class TestGenerator(unittest.TestCase):
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/state_machine2.py') as original_file:
             generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/state_machine2.yml',
                                             [self._base_path + '/templates/executive_smach_tutorials'])
-            original_code = unicode(original_file.read())
+            original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_user_data2(self):
@@ -94,7 +96,7 @@ class TestGenerator(unittest.TestCase):
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/user_data2.py') as original_file:
             generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/user_data2.yml',
                                             [self._base_path + '/templates/executive_smach_tutorials'])
-            original_code = unicode(original_file.read())
+            original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_state_machine_nesting2(self):
@@ -102,7 +104,7 @@ class TestGenerator(unittest.TestCase):
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/state_machine_nesting2.py') as original_file:
             generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/state_machine_nesting2.yml',
                                             [self._base_path + '/templates/executive_smach_tutorials'])
-            original_code = unicode(original_file.read())
+            original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_concurrence2(self):
@@ -110,7 +112,7 @@ class TestGenerator(unittest.TestCase):
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/concurrence2.py') as original_file:
             generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/concurrence2.yml',
                                             [self._base_path + '/templates/executive_smach_tutorials'])
-            original_code = unicode(original_file.read())
+            original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_actionlib2_test(self):
@@ -118,7 +120,7 @@ class TestGenerator(unittest.TestCase):
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/actionlib2_test.py') as original_file:
             generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/actionlib2_test.yml',
                                             [self._base_path + '/templates/executive_smach_tutorials'])
-            original_code = unicode(original_file.read())
+            original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
 
