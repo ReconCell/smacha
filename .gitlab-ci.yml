@@ -1,24 +1,31 @@
-test:
+test_python2:
+  image: python:2.7
   script:
-  - apt-get update -qy
-  - apt-get install -y python-dev python-pip
-  - apt-get install -y python3-dev python3-pip
-  - pip install virtualenv
-  - "# Test with python 2"
-  - virtualenv --system-site-packages --python=/usr/bin/python2 venv2
-  # NOTE: Installing these packages by hand is a
-  # temporary solution.
-  # TODO: Try setting up a runner with a ROS image.
-  - venv2/bin/pip install nose
-  - venv2/bin/pip install pyyaml
-  - venv2/bin/pip install jinja2
-  - venv2/bin/nosetests test/executive_smach_tutorials.py
-  - "# Test with python 3"
-  - virtualenv --system-site-packages --python=/usr/bin/python3 venv3
-  # NOTE: Installing these packages by hand is a
-  # temporary solution.
-  # TODO: Try setting up a runner with a ROS image.
-  - venv3/bin/pip install nose
-  - venv3/bin/pip install pyyaml
-  - venv3/bin/pip install jinja2
-  - venv3/bin/nosetests test/executive_smach_tutorials.py
+    - "# Test with python 2"
+    - apt-get update -qy
+    - apt-get install -y python-dev python-pip
+    - pip install virtualenv
+    - virtualenv --system-site-packages --python=/usr/bin/python2 venv2
+    - venv2/bin/pip install nose
+    - venv2/bin/pip install pyyaml
+    - venv2/bin/pip install jinja2
+    - venv2/bin/nosetests test/executive_smach_tutorials.py
+  tags:
+    - docker
+    - python2
+
+test_python3:
+  image: python:3.5
+  script:
+    - "# Test with python 3"
+    - apt-get update -qy
+    - apt-get install -y python3-dev python3-pip
+    - pip install virtualenv
+    - virtualenv --system-site-packages --python=/usr/bin/python3 venv3
+    - venv3/bin/pip install nose
+    - venv3/bin/pip install pyyaml
+    - venv3/bin/pip install jinja2
+    - venv3/bin/nosetests test/executive_smach_tutorials.py
+  tags:
+    - docker
+    - python3
