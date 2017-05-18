@@ -13,6 +13,7 @@ SMACHA (pronounced "smasha") aims at distilling the task-level simplicity of SMA
 in the foreground, while retaining all of its power and flexibility in Jinja2-based
 templates and a custom code generation engine in the background.
 
+
 ## SMACHAML Scripting
 
 SMACHAML ("SMACH As Markup Language", pronounced "smashamel") scripts are YAML scripts for describing how SMACHA should
@@ -43,11 +44,20 @@ states:
 ```
 This demonstrates a reduction from 80 lines of raw SMACH code to 20 lines of SMACHAML. Nice.
 
-### Base
 
-The base of the script specifies a name for the overall state machine,
-the name of its base template, a name for its associated ROS node,
-a list of its possible outcomes, and list of its constituent states.
+### Base Variables
+
+The base of the script specifies the following variables:
+
+* `name`: a name for the overall state machine,
+* `template`: the name of its base template,
+* `manifest` (optional): a name for an optional ROS manifest,
+* `node_name`: a name for its associated ROS node,
+* `outcomes`: a list of its possible outcomes,
+* `states`: list of its constituent states.
+
+Each of the states in the base script may, in turn, specify similar variables of
+their own, as discussed in the following sub-sections.
 
 ### Templates
 
@@ -68,9 +78,13 @@ Possible state outcomes may be specified as a list in each state.
 ### Transitions
 Possible state transitions may be specified as a hash/dictionary in each state.
 
+### Remappings
+Input-output remappings (not shown in the above example; see the [SMACH User Data Tutorial](http://wiki.ros.org/smach/Tutorials/User%20Data) for more details) may be specified as a hash/dictionary in each state.
+
 ## Jinja2 Templating
 
-[Jinja2](http://jinja.pocoo.org/docs/2.9/) templates are used to specify how code should be
+[Jinja2](http://jinja.pocoo.org/docs/2.9/) is a powerful template engine for Python.
+Jinja2 templates are used to specify how code should be
 generated from SMACHAML scripts.
 The `Base` template from the above example is specified in a `Base.jinja` file and looks like this:
 
@@ -82,28 +96,38 @@ import rospy
 import smach
 import smach_ros
 
-{{ header }}
+{% set defined_headers = [] %}
+
+{% block base_header %}
+{{ base_header }}
+{% endblock base_header %}
 
 def main():
     rospy.init_node('{{ node_name }}')
-    
+   
+    {% block header %}
     # Create a SMACH state machine
     {{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
     {% if userdata is defined %}
-    {% for userdatum_key, userdatum_val in userdata.iteritems() | sort %}
+    {% for userdatum_key, userdatum_val in userdata.items() | sort %}
     {{ name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
     {% endfor %}
     {% endif %}
+    {% endblock header %}
     
     # Open the container
     with {{ name | lower() }}:
         # Add states to the container
+        {%- block body %}
         {{ body | indent(8) }}
+        {% endblock body %}
     
     # Execute SMACH plan
     outcome = {{ name | lower() }}.execute()
-    
-    {{ footer | indent(4) }}
+   
+    {% block base_footer %}
+    {{ base_footer | indent(4) }}
+    {% endblock base_footer %}
 
 if __name__ == '__main__':
     main()
@@ -134,35 +158,87 @@ class Foo(smach.State):
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}', Foo(){% if transitions is defined %}, 
-                       transitions={{ '{' }}{% for outcome, transition in transitions.iteritems() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
+                       transitions={{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
                                     {% endif %}{% endfor %}{{ '}' }}{% endif %}{% if remapping is defined %},
-                       remapping={{ '{' }}{% for state_key, userdata_key in remapping.iteritems() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
+                       remapping={{ '{' }}{% for state_key, userdata_key in remapping.items() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
                                   {% endif %}{% endfor %}{{ '}' }}{% endif %})
 {% endblock body %}
 
 {% block base_footer %}
 {% endblock base_footer %}
 ```
-### Variables and Code Blocks
-
-The `base_header` block in a state template is rendered into the `header` variable
-in the base template.
-
-The `body` block in a state template is rendered into the `body` variable of either its
-parent state or the base template.
-
-The `base_footer` block in a state template is rendered into the `footer` variable
-in the base template.
 
 ### Core Templates
 
 Default core templates are provided for many of the SMACH containers, as well as other
 SMACH constructs like action states.
 
-These core templates may be overridden or augmented by custom user-specified templates.
-See the [Usage](#Usage) section below for an example.
+So far, the following core templates are present and functional:
 
-TODO: Finish adding core templates and describing them here.
+* `Base.jinja`: This is the core base template used for specifying the bare bones of a
+a Python SMACH state machine script.
+
+* `StateMachine.jinja`: This is the core template used for inserting a [StateMachine container](http://wiki.ros.org/smach/Tutorials/StateMachine%20container).
+
+* `Concurrence.jinja`: This is the core template used for inserting a [Concurrence container](http://wiki.ros.org/smach/Tutorials/Concurrence%20container).
+
+* `SimpleActionState.jinja`: This is the core template used for inserting a [SimpleActionState](http://wiki.ros.org/smach/Tutorials/SimpleActionState).
+
+
+### Core Code Generation Variables and Code Blocks
+
+There are a number of core code generation variables and code blocks present in the core
+templates that enable the code generation engine to produce code in the appropriate places.
+
+* `base_header` block: The `base_header` block in a state template is rendered into the `base_header` variable
+in the `base_header` block in the base template.
+
+* `header` block: The `header` block in a state template is rendered into the `header` variable
+in the `header` block of either its parent template or the base template depending on its nesting depth.
+
+* `body` block: The `body` block in a state template is rendered into the `body` variable in the `body` block
+of either its parent state or the base template depending on its nesting depth.
+
+* `footer` block: The `footer` block in a state template is rendered into the `footer` variable in the `footer`
+block of either its parent template or the base template depending on its nesting depth
+(not currently implemented in the above example).
+
+* `base_footer` block: The `base_footer` block in a state template is rendered into the `base_footer` variable
+in the `base_footer` block of the base template.
+
+Note that all of the above code generation variables and code blocks may be either
+removed, modified or arbitrarily customized within the API for particular use-cases.
+The code insertion order may also be specified within the API, i.e. code may be either
+prepended or appended to a variable.
+
+### Overriding Core Templates, Variables and Blocks via Template Inheritance
+
+Jinja2 provides powerful template functionality, including the ability to extend templates
+via [template inheritance](http://wiki.ros.org/smach/Tutorials/SimpleActionState),
+such that their constituent code blocks may be overridden or extended as required.
+SMACHA aims to incorporate as much of this functionality as possible,
+thus the core templates may be overridden or augmented by custom user-specified templates 
+via the usual Jinja2 template inheritance mechanisms, with some caveats.
+
+This works in the usual way using the following Jinja2 variables and expressions:
+
+* `{% extends "<template_name>" %}`: When this expression appears at the top of a template,
+the template will inherit from the template specified by `<template_name>`.
+
+* `{{ super() }}`: When this expression appears inside a block, the code from the same block
+specified by the parent template will be rendered at its position in the child template.
+
+Caveats: if a state template contains blocks, but does not contain an `{{ extends }}` expression at
+the top of a template, it is implied that the code for the blocks will be rendered into
+variables and blocks with the same names as the blocks in the state template as dictated
+by the SMACHAML script and as defined usually either by the base template or container templates.
+This behaviour is specific to SMACHA and is not present in Jinja2.
+See the [Core Code Generation Variables and Code Blocks](#Core Code Generation Variables and Code Blocks)
+for examples of how this behaviour works with core code generation variables and blocks.
+
+See the [Usage](#Usage) section below for an example of how such custom templates may be
+included when generating code via the command-line in practice.
+
 
 ## Code Generation Engine
 
@@ -176,10 +252,12 @@ A ROS wrapper may eventually be written to allow the generator to be launched as
 node that exposes services and generates SMACH code over ROS topics, but this has not yet
 been implemented.
 
+
 ## Installation
 
 Simply clone into the `src` directory of your catkin workspace and run `catkin_make` from the
 root of the workspace.
+
 
 ## Usage
 In the simplest case, using default core templates, SMACHA can be invoked on a `my_script.yml`
@@ -194,10 +272,8 @@ Example usage for the "Nesting State Machines" tutorial:
 roscd smacha/test
 rosrun smacha smacha smachaml/executive_smach_tutorials/state_machine_nesting2.yml -t templates/executive_smach_tutorials -o state_machine_nesting2.py -v
 ```
-Here, the `-t` argument specifies custom template directories for this particular tutorial.
-In this case, two directories are specified such that templates from the preceding
-["Simple State Machine" tutorial](http://wiki.ros.org/smach/Tutorials/Simple%20State%20Machine)
-may be reused.
+Here, the `-t` argument specifies custom template directories for this particular tutorial,
+which may contain templates that override the core templates.
 
 The `-o` argument specifies a custom name for the generated output file.
 
@@ -211,8 +287,10 @@ roscd smacha/teset
 nosetests executive_smach_tutorials.py
 ```
 
+
 ## Contributors
 SMACHA is developed and maintained by [Barry Ridge](https://barog.net/).
+
 
 ## Acknowledgements
 SMACHA was developed for the [EU H2020 ReconCell Project](http://www.reconcell.eu/).
