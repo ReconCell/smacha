@@ -48,12 +48,14 @@ This demonstrates a reduction from 80 lines of raw SMACH code to 20 lines of SMA
 ### Base Variables
 
 The base of the script specifies the following variables:
+
 * `name`: a name for the overall state machine,
 * `template`: the name of its base template,
 * `manifest` (optional): a name for an optional ROS manifest,
 * `node_name`: a name for its associated ROS node,
 * `outcomes`: a list of its possible outcomes,
 * `states`: list of its constituent states.
+
 Each of the states in the base script may, in turn, specify similar variables of
 their own, as discussed in the following sub-sections.
 
