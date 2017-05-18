@@ -2,6 +2,8 @@ test_python2:
   image: python:2.7
   script:
     - "# Test with python 2"
+    - apt-get update -qy
+    - apt-get install -y python-dev python-pip
     - pip install virtualenv
     - virtualenv --system-site-packages --python=/usr/bin/python2 venv2
     - venv2/bin/pip install nose
@@ -16,6 +18,8 @@ test_python3:
   image: python:3.5
   script:
     - "# Test with python 3"
+    - apt-get update -qy
+    - apt-get install -y python3-dev python3-pip
     - pip install virtualenv
     - virtualenv --system-site-packages --python=/usr/bin/python3 venv3
     - venv3/bin/pip install nose
