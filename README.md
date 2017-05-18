@@ -233,7 +233,7 @@ the top of a template, it is implied that the code for the blocks will be render
 variables and blocks with the same names as the blocks in the state template as dictated
 by the SMACHAML script and as defined usually either by the base template or container templates.
 This behaviour is specific to SMACHA and is not present in Jinja2.
-See the [Core Code Generation Variables and Code Blocks](#Core Code Generation Variables and Code Blocks)
+See the [Core Code Generation Variables and Code Blocks Section](#core-code-generation-variables-and-code-blocks)
 for examples of how this behaviour works with core code generation variables and blocks.
 
 See the [Usage](#Usage) section below for an example of how such custom templates may be
