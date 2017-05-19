@@ -13,6 +13,9 @@ SMACHA (pronounced "smasha") aims at distilling the task-level simplicity of SMA
 in the foreground, while retaining all of its power and flexibility in Jinja2-based
 templates and a custom code generation engine in the background.
 
+## Overview
+
+![SMACHA API Overview](doc/smacha_overview.svg "SMACHA API Overview")
 
 ## SMACHAML Scripting
 
@@ -62,7 +65,7 @@ their own, as discussed in the following sub-sections.
 ### Templates
 
 Each state, including the base, must specify a template from which its respective
-code should be generated.  More on that in the next section.
+code should be generated.  More on that in the [next section](https://repo.ijs.si/reconcell/smacha#jinja2-templating).
 
 ### States
 
@@ -236,7 +239,7 @@ This behaviour is specific to SMACHA and is not present in Jinja2.
 See the [Core Code Generation Variables and Code Blocks Section](#core-code-generation-variables-and-code-blocks)
 for examples of how this behaviour works with core code generation variables and blocks.
 
-See the [Usage](#Usage) section below for an example of how such custom templates may be
+See the [Usage Section](#Usage) below for an example of how such custom templates may be
 included when generating code via the command-line in practice.
 
 
