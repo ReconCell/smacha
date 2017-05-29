@@ -17,7 +17,7 @@ Output:
     [INFO] : State machine terminating 'BAZ':'done':'succeeded'
 """
 
-import roslib; roslib.load_manifest('smach_tutorials')
+import roslib; roslib.load_manifest('smacha')
 import rospy
 import smach
 import smach_ros

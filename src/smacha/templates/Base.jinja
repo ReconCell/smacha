@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import roslib; {% if manifest is defined %}roslib.load_manifest('smach_tutorials'){% endif %}
+import roslib; {% if manifest is defined %}roslib.load_manifest('{{ manifest }}'){% endif %}
 import rospy
 import smach
 import smach_ros

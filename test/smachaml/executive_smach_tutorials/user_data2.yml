@@ -1,7 +1,7 @@
 --- # User Data Passing Tutorial SMACHAML script.
 name: sm
 template: Base
-manifest: smach_tutorials
+manifest: smacha
 node_name: smach_example_state_machine
 outcomes: [outcome4]
 userdata: {sm_counter: 0}

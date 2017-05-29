@@ -1,7 +1,7 @@
 --- # Simple Action States Tutorial SMACHAML script.
 name: sm0
 template: BaseWithTestServer
-manifest: smach_tutorials
+manifest: smacha
 node_name: smach_example_actionlib
 outcomes: [succeeded, aborted, preempted]
 states:

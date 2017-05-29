@@ -3,9 +3,9 @@
 {% block base_header %}
 {{ super() }}
 
-{% if 'smach_tutorials_msg_import_TestAction' not in defined_headers %}
-from smach_tutorials.msg import TestAction
-{% do defined_headers.append('smach_tutorials_msg_import_TestAction') %}
+{% if 'smacha_msg_import_TestAction' not in defined_headers %}
+from smacha.msg import TestAction
+{% do defined_headers.append('smacha_msg_import_TestAction') %}
 {% endif %}
 {% if 'actionlib_msgs_msg_import' not in defined_headers %}
 from actionlib_msgs.msg import *

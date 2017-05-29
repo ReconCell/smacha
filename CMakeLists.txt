@@ -9,6 +9,8 @@ project(smacha)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  actionlib_msgs
+  actionlib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -64,12 +66,19 @@ catkin_python_setup()
 #   Action1.action
 #   Action2.action
 # )
+add_action_files(
+  DIRECTORY test/executive_smach_tutorials/smach_tutorials/action
+  FILES Test.action
+)
 
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
 #   std_msgs  # Or other packages containing msgs
 # )
+generate_messages(
+  DEPENDENCIES actionlib_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
