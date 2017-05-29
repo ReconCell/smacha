@@ -9,6 +9,7 @@ import smacha
 import re
 import difflib
 import unittest
+import stat
 
 class TestGenerator(unittest.TestCase):
 
@@ -41,6 +42,9 @@ class TestGenerator(unittest.TestCase):
         if self.write_output_files:
             with open(smachaml_filename + '.py', 'w') as smach_file:
                 smach_file.write(smach_code)
+            os.chmod(smachaml_filename + '.py',
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
+                        stat.S_IRGRP | stat.S_IXGRP)
 
         return smach_code
 
