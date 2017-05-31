@@ -126,6 +126,14 @@ class TestGenerator(unittest.TestCase):
                                             [self._base_path + '/templates/executive_smach_tutorials'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_service_test(self):
+        """Test service_test.py"""
+        with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/service_test.py') as original_file:
+            generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/service_test.yml',
+                                            [self._base_path + '/templates/executive_smach_tutorials'])
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
 
 if __name__=="__main__":

@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   actionlib_msgs
   actionlib
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -59,6 +60,10 @@ catkin_python_setup()
 #   Service1.srv
 #   Service2.srv
 # )
+add_service_files(
+  DIRECTORY test/executive_smach_tutorials/smach_tutorials/srv
+  FILES GripperSrv.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -77,7 +82,7 @@ add_action_files(
 #   std_msgs  # Or other packages containing msgs
 # )
 generate_messages(
-  DEPENDENCIES actionlib_msgs
+  DEPENDENCIES actionlib_msgs geometry_msgs
 )
 
 ################################################
