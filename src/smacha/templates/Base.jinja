@@ -1,3 +1,5 @@
+{% set defined_headers = [] %}
+{%- block base_header %}
 #!/usr/bin/env python
 
 import roslib; {% if manifest is defined %}roslib.load_manifest('{{ manifest }}'){% endif %}
@@ -5,9 +7,6 @@ import rospy
 import smach
 import smach_ros
 
-{% set defined_headers = [] %}
-
-{% block base_header %}
 {{ base_header }}
 {% endblock base_header %}
 
