@@ -259,6 +259,9 @@ class Generator():
 
             # Render the base state machine template
             base_code = self._templater.render(script['template'], base_template_vars)
+
+            # Strip whitespace
+            base_code = base_code.strip()
             
             return base_code
 
