@@ -187,6 +187,8 @@ a Python SMACH state machine script.
 
 * `SimpleActionState.jinja`: This is the core template used for inserting a [SimpleActionState](http://wiki.ros.org/smach/Tutorials/SimpleActionState).
 
+* `ServiceState.jinja`: This is the core template used for inserting a [ServiceState](http://wiki.ros.org/smach/Tutorials/ServiceState).
+
 
 ### Core Code Generation Variables and Code Blocks
 
