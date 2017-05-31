@@ -1,13 +1,13 @@
 {% extends "SimpleActionState.jinja" %}
 
 {% block base_header %}
-{% if 'smach_tutorials_msg_import_TestAction' not in defined_headers %}
-from smach_tutorials.msg import TestAction
-{% do defined_headers.append('smach_tutorials_msg_import_TestAction') %}
+{% if 'smacha_msg_import_TestAction' not in defined_headers %}
+from smacha.msg import TestAction
+{% do defined_headers.append('smacha_msg_import_TestAction') %}
 {% endif %}
-{% if 'smach_tutorials_msg_import_TestGoal' not in defined_headers %}
-from smach_tutorials.msg import TestGoal
-{% do defined_headers.append('smach_tutorials_msg_import_TestGoal') %}
+{% if 'smacha_msg_import_TestGoal' not in defined_headers %}
+from smacha.msg import TestGoal
+{% do defined_headers.append('smacha_msg_import_TestGoal') %}
 {% endif %}
 {{ super() }}
 {% endblock base_header %}

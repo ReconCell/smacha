@@ -284,10 +284,31 @@ The `-v` argument tells SMACHA to print verbose processing output to the termina
 
 Further arguments and options may be explored by running `rosrun smacha smacha -h` or `rosrun smacha smacha --help`.
 
+## Testing
 Tests may be performed by running:
 ```
-roscd smacha/teset
+roscd smacha/test
+```
+followed by
+```
 nosetests executive_smach_tutorials.py
+```
+or
+```
+python executive_smach_tutorials.py
+```
+
+Passing the `-h` argument as follows will bring up a list of some other options:
+```
+python executive_smach_tutorials.py -h
+```
+Passing the `-w` argument will write the generated output files to disk, which can subsequently be run as follows, e.g. for the `state_machine_nesting2.py` example:
+```
+rosrun smacha state_machine_nesting2.yml.py
+```
+To run the original file script, use the following command:
+```
+rosrun smacha state_machine_nesting2.py
 ```
 
 

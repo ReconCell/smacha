@@ -9,6 +9,7 @@ import smacha
 import re
 import difflib
 import unittest
+import stat
 
 class TestGenerator(unittest.TestCase):
 
@@ -41,6 +42,9 @@ class TestGenerator(unittest.TestCase):
         if self.write_output_files:
             with open(smachaml_filename + '.py', 'w') as smach_file:
                 smach_file.write(smach_code)
+            os.chmod(smachaml_filename + '.py',
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
+                        stat.S_IRGRP | stat.S_IXGRP)
 
         return smach_code
 
@@ -119,6 +123,14 @@ class TestGenerator(unittest.TestCase):
         """Test actionlib2_test.py"""
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/actionlib2_test.py') as original_file:
             generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/actionlib2_test.yml',
+                                            [self._base_path + '/templates/executive_smach_tutorials'])
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_service_test(self):
+        """Test service_test.py"""
+        with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/service_test.py') as original_file:
+            generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/service_test.yml',
                                             [self._base_path + '/templates/executive_smach_tutorials'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))

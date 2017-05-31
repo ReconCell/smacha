@@ -1,0 +1,34 @@
+--- # Service States Tutorial SMACHAML script.
+name: sm0
+template: BaseWithGripperSrv
+manifest: smacha
+node_name: smach_example_actionlib_service_state
+outcomes: [succeeded, aborted, preempted]
+userdata: {max_effort: 9.0, position: Point(), gripper_input: 9.0}
+states:
+  - TRIGGER_GRIPPER_EMPTY_REQUEST:
+      template: ServiceState
+      service_namespace: gripper_srv
+      service: GripperSrv
+      transitions: {succeeded: TRIGGER_GRIPPER_FIXED_REQUEST}
+  - TRIGGER_GRIPPER_FIXED_REQUEST:
+      template: ServiceState
+      service_namespace: gripper_srv
+      service: GripperSrv
+      request: GripperSrvRequest(4.0, Point())
+      transitions: {succeeded: TRIGGER_GRIPPER_USER_DATA_REQUEST}
+  - TRIGGER_GRIPPER_USER_DATA_REQUEST:
+      template: ServiceState
+      service_namespace: gripper_srv
+      service: GripperSrv
+      userdata: {max_effort: 9.0, position: Point()}
+      request_slots: ['max_effort', 'position']
+      transitions: {succeeded: TRIGGER_GRIPPER_REQUEST_CALLBACK}
+  - TRIGGER_GRIPPER_REQUEST_CALLBACK:
+      template: GripperSrvRequestCB
+      service_namespace: gripper_srv
+      service: GripperSrv
+      userdata: {gripper_input: 9.0}
+      request_cb: gripper_request_cb
+      input_keys: [gripper_input]
+      transitions: {succeeded: succeeded}
