@@ -1,5 +1,5 @@
 {% set defined_headers = [] %}
-{%- block base_header %}
+{% block base_header %}
 #!/usr/bin/env python
 
 import roslib; {% if manifest is defined %}roslib.load_manifest('{{ manifest }}'){% endif %}
@@ -10,32 +10,36 @@ import smach_ros
 {{ base_header }}
 {% endblock base_header %}
 
-def main():
-    rospy.init_node('{{ node_name }}')
+{% block def %}
+def {% if func_name is defined %}{{ func_name | lower() }}{% else %}main{% endif %}():
+    rospy.init_node('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}')
+{% endblock def %}
    
     {% block header %}
-    # Create a SMACH state machine
     {{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
     {% if userdata is defined %}
     {% for userdatum_key, userdatum_val in userdata.items() | sort %}
     {{ name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
     {% endfor %}
     {% endif %}
-    {% endblock header %}
     
-    # Open the container
     with {{ name | lower() }}:
-        # Add states to the container
+    {% endblock header %}
         {%- block body %}
         {{ body | indent(8) }}
         {% endblock body %}
+
+        {% block footer %}
+        {{ footer | indent(8) }}
+        {% endblock footer %}
     
-    # Execute SMACH plan
+    {% block base_footer %}
     outcome = {{ name | lower() }}.execute()
    
-    {% block base_footer %}
     {{ base_footer | indent(4) }}
     {% endblock base_footer %}
 
+{% block main %}
 if __name__ == '__main__':
-    main()
+    {% if func_name is defined %}{{ func_name | lower() }}{% else %}main{% endif %}()
+{% endblock main %}

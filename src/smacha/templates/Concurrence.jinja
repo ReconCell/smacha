@@ -1,12 +1,12 @@
 {% block base_header %}
 {% endblock base_header %}
 
-{% block header_comments %}
+{% block upper_comments %}
 #----------------------------------------------------------------------------------------
 # BEGIN: {{ name }}
 # TEMPLATE: Concurrence
 #
-{% endblock header_comments %}
+{% endblock upper_comments %}
 
 {% block body %}
 sm_{{ name | lower() }} = smach.Concurrence(outcomes=[{% for outcome in outcomes %}'{{outcome}}'{% if not loop.last %}, {% endif %}{% endfor %}],
@@ -25,11 +25,11 @@ smach.{{ parent_type }}.add('{{ name }}', sm_{{ name | lower() }},
                                     {% endif %}{% endfor %}{{ '}' }})
 {% endblock body %}
 
-{% block footer_comments %}
+{% block lower_comments %}
 #
 # END: {{ name }}
 #----------------------------------------------------------------------------------------
-{% endblock footer_comments %}
+{% endblock lower_comments %}
 
 {% block base_footer %}
 {% endblock base_footer %}

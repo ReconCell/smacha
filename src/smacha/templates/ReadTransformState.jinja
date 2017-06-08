@@ -1,13 +1,13 @@
-{% block header_comments %}
+{% block upper_comments %}
 #----------------------------------------------------------------------------------------
 # BEGIN: {{ name }}
 # TEMPLATE: ReadTransformState
 #
-{% endblock header_comments %}
+{% endblock upper_comments %}
 smach.StateMachine.add('{{ name }}', TFListenerState('{{ target_frame }}', '{{ source_frame }}', '{{ transform_output }}'),
                                                                         transitions={'succeeded':'{{ succeeded }}'},
                                                                         remapping={'{{ transform_output }}':'{{ transform_output }}'})
-{% block footer_comments %}
+{% block lower_comments %}
 # END: {{ name }}
 #----------------------------------------------------------------------------------------
-{% endblock footer_comments %}
+{% endblock lower_comments %}

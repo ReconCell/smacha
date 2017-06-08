@@ -70,8 +70,8 @@ class Templater():
                                                     extensions = [jinja2.ext.do, SkipBlockExtension],
                                                     trim_blocks=False,
                                                     lstrip_blocks=True)
-            self._template_env.skip_blocks.append('header_comments')
-            self._template_env.skip_blocks.append('footer_comments')
+            self._template_env.skip_blocks.append('upper_comments')
+            self._template_env.skip_blocks.append('lower_comments')
         
         pass
     
@@ -127,8 +127,8 @@ class Templater():
 
         # Be sure to also skip comment blocks here as required
         if self._include_comments != True:
-            template_env.skip_blocks.append('header_comments')
-            template_env.skip_blocks.append('footer_comments')
+            template_env.skip_blocks.append('upper_comments')
+            template_env.skip_blocks.append('lower_comments')
 
         # Append non-target blocks to environment skip_blocks list
         for block_name, block in template.blocks.items():
