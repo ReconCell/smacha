@@ -1,5 +1,10 @@
+{% include "State.jinja" %}
+
 {% block base_header %}
 {% endblock base_header %}
+
+{% block header %}
+{% endblock header %}
 
 {%- block body %}
 smach.{{ parent_type }}.add('{{ name }}',
@@ -16,6 +21,9 @@ smach.{{ parent_type }}.add('{{ name }}',
                             remapping={{ '{' }}{% for state_key, userdata_key in remapping.items() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
                                        {% endif %}{% endfor %}{{ '}' }}{% endif %})
 {% endblock body %}
+
+{% block footer %}
+{% endblock footer %}
 
 {% block base_footer %}
 {% endblock base_footer %}

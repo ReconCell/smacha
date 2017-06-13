@@ -15,8 +15,9 @@ with sm_{{ name | lower() }}:
 
     {{ body | indent(4) }}
 
-smach.{{ parent_type }}.add('{{ name }}', sm_{{ name | lower() }},
-                       transitions={{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }})
+smach.{{ parent_type }}.add('{{ name }}', sm_{{ name | lower() }}{% if transitions is defined %},
+{{ 'transitions=' | indent(23, true) }}{{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
+{{ '' | indent(36, true) }}{% endif %}{% endfor %}{{ '}' }}{% endif %})
 {% endblock body %}
 
 {% block lower_comments %}

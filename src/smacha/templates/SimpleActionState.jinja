@@ -1,3 +1,5 @@
+{% include "State.jinja" %}
+
 {% block base_header %}
 {% if 'actionlib_import' not in defined_headers %}
 from actionlib import *
@@ -5,21 +7,27 @@ from actionlib import *
 {% endif %}
 {% endblock base_header %}
 
+{% block header %}
+{% endblock header %}
+
 {%- block body %}
 smach.{{ parent_type }}.add('{{ name }}',
-                            smach_ros.SimpleActionState('{{ action_server_namespace }}', {{ action }}{% if goal is defined %},
-                                                        goal = {{ goal }}{% elif goal_slots is defined %},
-                                                        goal_slots = [{% for goal_slot in goal_slots %}'{{ goal_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% elif goal_cb is defined %},
-                                                        goal_cb = {{ goal_cb }}{% if input_keys is defined %},
-                                                        input_keys = [{% for input_key in input_keys %}'{{ input_key }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}{% endif %}{% if result_slots is defined %},
-                                                        result_slots = [{% for result_slot in result_slots %}'{{ result_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% elif result_cb is defined %},
-                                                        result_cb = {{ result_cb }}{% if output_keys is defined %},
-                                                        output_keys = [{% for output_key in output_keys %}'{{ output_key }}'{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% endif %}){% if transitions is defined %},
-                            transitions={{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
-                                         {% endif %}{% endfor %}{{ '}' }}{% endif %}{% if remapping is defined %},
-                            remapping={{ '{' }}{% for state_key, userdata_key in remapping.items() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
-                                       {% endif %}{% endfor %}{{ '}' }}{% endif %})
+{{ '' | indent(23, true) }}smach_ros.SimpleActionState('{{ action_server_namespace }}', {{ action }}{% if goal is defined %},
+                                                      goal = {{ goal }}{% elif goal_slots is defined %},
+                                                      goal_slots = [{% for goal_slot in goal_slots %}'{{ goal_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% elif goal_cb is defined %},
+                                                      goal_cb = {{ goal_cb }}{% if input_keys is defined %},
+                                                      input_keys = [{% for input_key in input_keys %}'{{ input_key }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}{% endif %}{% if result_slots is defined %},
+                                                      result_slots = [{% for result_slot in result_slots %}'{{ result_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% elif result_cb is defined %},
+                                                      result_cb = {{ result_cb }}{% if output_keys is defined %},
+                                                      output_keys = [{% for output_key in output_keys %}'{{ output_key }}'{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% endif %}){% if transitions is defined %},
+{{ 'transitions=' | indent(23, true) }}{{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
+{{ '' | indent(36, true) }}{% endif %}{% endfor %}{{ '}' }}{% endif %}{% if remapping is defined %},
+{{ 'remapping=' | indent(23, true) }}{{ '{' }}{% for state_key, userdata_key in remapping.items() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
+{{ '' | indent(34, true) }}{% endif %}{% endfor %}{{ '}' }}{% endif %})
 {% endblock body %}
+
+{% block footer %}
+{% endblock footer %}
 
 {% block base_footer %}
 {% endblock base_footer %}

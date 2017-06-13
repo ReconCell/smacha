@@ -1,0 +1,25 @@
+{% block base_header %}
+{% endblock base_header %}
+
+{% block def %}
+{% endblock def %}
+
+{% block header %}
+{% if userdata is defined %}
+{% for userdatum_key, userdatum_val in userdata.items() | sort %}
+{{ parent_name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
+{% endfor %}
+{% endif %}
+{% endblock header %}
+
+{% block body %}
+{% endblock body %}
+
+{% block footer %}
+{% endblock footer %}
+
+{% block base_footer %}
+{% endblock base_footer %}
+
+{% block main %}
+{% endblock main %}

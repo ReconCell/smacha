@@ -28,9 +28,9 @@ def main():
     sm0 = smach.StateMachine(outcomes=['succeeded','aborted','preempted'])
    
     # Set userdata
-    sm0.userdata.gripper_input = 9.0
     sm0.userdata.max_effort = 9.0
     sm0.userdata.position = Point()
+    sm0.userdata.gripper_input = 9.0
 
     # Open the container
     with sm0:
