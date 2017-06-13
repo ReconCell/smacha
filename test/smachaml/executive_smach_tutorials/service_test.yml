@@ -4,7 +4,6 @@ template: BaseWithGripperSrv
 manifest: smacha
 node_name: smach_example_actionlib_service_state
 outcomes: [succeeded, aborted, preempted]
-userdata: {max_effort: 9.0, position: Point(), gripper_input: 9.0}
 states:
   - TRIGGER_GRIPPER_EMPTY_REQUEST:
       template: ServiceState

@@ -9,7 +9,7 @@ class Generator():
     """SMACH code generator."""
     def __init__(self, templater, verbose=False,
                     base_vars =
-                        ['name', 'manifest', 'node_name', 'outcomes', 'userdata'],
+                        ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
                     buffer_names =
                         ['base_header', 'def', 'header', 'body', 'footer', 'base_footer', 'main'],
                     container_insertion_order = 

@@ -11,7 +11,7 @@ import smach_ros
 {% endblock base_header %}
 
 {% block def %}
-def {% if func_name is defined %}{{ func_name | lower() }}{% else %}main{% endif %}():
+def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}():
     rospy.init_node('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}')
 {% endblock def %}
    
@@ -22,6 +22,8 @@ def {% if func_name is defined %}{{ func_name | lower() }}{% else %}main{% endif
     {{ name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
     {% endfor %}
     {% endif %}
+    
+    {{ header | indent(4) }}
     
     with {{ name | lower() }}:
     {% endblock header %}
@@ -41,5 +43,5 @@ def {% if func_name is defined %}{{ func_name | lower() }}{% else %}main{% endif
 
 {% block main %}
 if __name__ == '__main__':
-    {% if func_name is defined %}{{ func_name | lower() }}{% else %}main{% endif %}()
+    {% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}()
 {% endblock main %}
