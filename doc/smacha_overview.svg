@@ -237,10 +237,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
-     inkscape:cx="448.14837"
-     inkscape:cy="148.97194"
+     inkscape:cx="469.26625"
+     inkscape:cy="150.15466"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g4597"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1176"
@@ -265,7 +265,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -431,16 +431,16 @@
              x="126.12645"
              style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.391325px;line-height:125%;font-family:'Myriad Pro';-inkscape-font-specification:'Sans Italic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
              xml:space="preserve"><tspan
+               id="tspan4418"
                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro'"
                y="761.75836"
                x="126.12645"
-               id="tspan4173-7-9"
-               sodipodi:role="line">SMACHAML</tspan><tspan
-               id="tspan4418"
+               sodipodi:role="line">Script</tspan><tspan
                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro'"
                y="789.7475"
                x="126.12645"
-               sodipodi:role="line">Script</tspan></text>
+               sodipodi:role="line"
+               id="tspan4316">(YAML)</tspan></text>
           <g
              transform="matrix(0.87584486,0,0,0.87584486,-11.424848,257.2244)"
              id="g4453">
@@ -507,16 +507,16 @@
              x="136.73305"
              style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.391325px;line-height:125%;font-family:'Myriad Pro';-inkscape-font-specification:'Sans Italic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
              xml:space="preserve"><tspan
+               id="tspan4418-1"
                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro'"
                y="525.8877"
                x="136.73305"
-               id="tspan4173-7-9-6"
-               sodipodi:role="line">Jinja2</tspan><tspan
-               id="tspan4418-1"
+               sodipodi:role="line">Templates</tspan><tspan
                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro'"
                y="553.87683"
                x="136.73305"
-               sodipodi:role="line">Templates</tspan></text>
+               sodipodi:role="line"
+               id="tspan4314">(Jinja2)</tspan></text>
           <g
              transform="matrix(0.87584486,0,0,0.87584486,-0.81825253,21.353711)"
              id="g4453-8">
@@ -574,12 +574,12 @@
              x="824.64691"
              y="672.06464"
              style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro'"
-             id="tspan4567">Python</tspan><tspan
+             id="tspan4418-2">Code</tspan><tspan
              sodipodi:role="line"
              x="824.64691"
              y="700.05383"
              style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro'"
-             id="tspan4418-2">Code</tspan></text>
+             id="tspan4322">(Python)</tspan></text>
         <path
            style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.75168967;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 833.07722,733.89493 95.55158,0"
@@ -620,7 +620,7 @@
          sodipodi:role="line"
          id="tspan15939"
          x="258.95438"
-         y="591.56256"></tspan></text>
+         y="591.56256" /></text>
     <text
        xml:space="preserve"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:'Myriad Pro';-inkscape-font-specification:'Sans Italic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"

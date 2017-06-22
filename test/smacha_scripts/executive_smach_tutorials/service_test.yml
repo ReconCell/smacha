@@ -1,4 +1,4 @@
---- # Service States Tutorial SMACHAML script.
+--- # Service States Tutorial SMACHA script.
 name: sm0
 template: BaseWithGripperSrv
 manifest: smacha

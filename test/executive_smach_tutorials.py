@@ -20,14 +20,14 @@ class TestGenerator(unittest.TestCase):
         self._base_path = os.path.dirname(os.path.abspath(__file__))
         super(TestGenerator, self).__init__(*args, **kwargs)
     
-    def _generate(self, smachaml_filename, template_dirs):
-        """Generate smach code using smachaml file and templates."""
+    def _generate(self, smacha_script_filename, template_dirs):
+        """Generate smach code using smacha yaml script file and templates."""
         # Load parser
         parser = smacha.Parser()
         
-        # Load and parse smachaml script
-        with open(smachaml_filename) as smachaml_file:
-            smachaml_script = parser.parse(smachaml_file)
+        # Load and parse smacha yaml script
+        with open(smacha_script_filename) as smacha_script_file:
+            smacha_script = parser.parse(smacha_script_file)
         
         # Load template processor
         templater = smacha.Templater(template_dirs)
@@ -36,13 +36,13 @@ class TestGenerator(unittest.TestCase):
         generator = smacha.Generator(templater, verbose=False)
         
         # Generate the SMACH code
-        smach_code = generator.run(smachaml_script)
+        smach_code = generator.run(smacha_script)
         
         # Write the final output to a SMACH python file
         if self.write_output_files:
-            with open(smachaml_filename + '.py', 'w') as smach_file:
+            with open(smacha_script_filename + '.py', 'w') as smach_file:
                 smach_file.write(smach_code)
-            os.chmod(smachaml_filename + '.py',
+            os.chmod(smacha_script_filename + '.py',
                         stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
                         stat.S_IRGRP | stat.S_IXGRP)
 
@@ -90,48 +90,48 @@ class TestGenerator(unittest.TestCase):
     def test_state_machine2(self):
         """Test state_machine2.py"""
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/state_machine2.py') as original_file:
-            generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/state_machine2.yml',
-                                            [self._base_path + '/templates/executive_smach_tutorials'])
+            generated_code = self._generate(self._base_path + '/smacha_scripts/executive_smach_tutorials/state_machine2.yml',
+                                            [self._base_path + '/smacha_templates/executive_smach_tutorials'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_user_data2(self):
         """Test user_data2.py"""
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/user_data2.py') as original_file:
-            generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/user_data2.yml',
-                                            [self._base_path + '/templates/executive_smach_tutorials'])
+            generated_code = self._generate(self._base_path + '/smacha_scripts/executive_smach_tutorials/user_data2.yml',
+                                            [self._base_path + '/smacha_templates/executive_smach_tutorials'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_state_machine_nesting2(self):
         """Test state_machine_nesting2.py"""
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/state_machine_nesting2.py') as original_file:
-            generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/state_machine_nesting2.yml',
-                                            [self._base_path + '/templates/executive_smach_tutorials'])
+            generated_code = self._generate(self._base_path + '/smacha_scripts/executive_smach_tutorials/state_machine_nesting2.yml',
+                                            [self._base_path + '/smacha_templates/executive_smach_tutorials'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_concurrence2(self):
         """Test concurrence2.py"""
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/concurrence2.py') as original_file:
-            generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/concurrence2.yml',
-                                            [self._base_path + '/templates/executive_smach_tutorials'])
+            generated_code = self._generate(self._base_path + '/smacha_scripts/executive_smach_tutorials/concurrence2.yml',
+                                            [self._base_path + '/smacha_templates/executive_smach_tutorials'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_actionlib2_test(self):
         """Test actionlib2_test.py"""
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/actionlib2_test.py') as original_file:
-            generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/actionlib2_test.yml',
-                                            [self._base_path + '/templates/executive_smach_tutorials'])
+            generated_code = self._generate(self._base_path + '/smacha_scripts/executive_smach_tutorials/actionlib2_test.yml',
+                                            [self._base_path + '/smacha_templates/executive_smach_tutorials'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
     def test_service_test(self):
         """Test service_test.py"""
         with open(self._base_path + '/executive_smach_tutorials/smach_tutorials/examples/service_test.py') as original_file:
-            generated_code = self._generate(self._base_path + '/smachaml/executive_smach_tutorials/service_test.yml',
-                                            [self._base_path + '/templates/executive_smach_tutorials'])
+            generated_code = self._generate(self._base_path + '/smacha_scripts/executive_smach_tutorials/service_test.yml',
+                                            [self._base_path + '/smacha_templates/executive_smach_tutorials'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
