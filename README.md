@@ -17,13 +17,13 @@ templates and a custom code generation engine in the background.
 
 ![SMACHA API Overview](doc/smacha_overview.png "SMACHA API Overview")
 
-## SMACHAML Scripting
+## SMACHA Scripts
 
-SMACHAML ("SMACH As Markup Language", pronounced "smashamel") scripts are YAML scripts for describing how SMACHA should
+SMACHA scripts are YAML files that describe how SMACHA should
 generate SMACH code. Here is the ["Nesting State Machines" example](http://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines)
-from the [SMACH Tutorials](http://wiki.ros.org/smach/Tutorials) described in SMACHAML:
+from the [SMACH Tutorials](http://wiki.ros.org/smach/Tutorials) described in a SMACHA script:
 ```yaml
---- # Nesting State Machines Tutorial SMACHAML script.
+--- # Nesting State Machines Tutorial SMACHA script.
 name: sm_top
 template: Base
 manifest: smach_tutorials
@@ -45,7 +45,7 @@ states:
             template: Bar
             transitions: {outcome1: FOO}
 ```
-This demonstrates a reduction from 80 lines of raw SMACH code to 20 lines of SMACHAML. Nice.
+This demonstrates a reduction from 80 lines of raw SMACH code to 20 lines of SMACHA script. Nice.
 
 
 ### Base Variables
@@ -88,7 +88,7 @@ Input-output remappings (not shown in the above example; see the [SMACH User Dat
 
 [Jinja2](http://jinja.pocoo.org/docs/2.9/) is a powerful template engine for Python.
 Jinja2 templates are used to specify how code should be
-generated from SMACHAML scripts.
+generated from SMACHA scripts.
 The `Base` template from the above example is specified in a `Base.jinja` file and looks like this:
 
 ```python
@@ -236,7 +236,7 @@ specified by the parent template will be rendered at its position in the child t
 Caveats: if a state template contains blocks, but does not contain an `{{ extends }}` expression at
 the top of a template, it is implied that the code for the blocks will be rendered into
 variables and blocks with the same names as the blocks in the state template as dictated
-by the SMACHAML script and as defined usually either by the base template or container templates.
+by the SMACHA script and as defined usually either by the base template or container templates.
 This behaviour is specific to SMACHA and is not present in Jinja2.
 See the [Core Code Generation Variables and Code Blocks Section](#core-code-generation-variables-and-code-blocks)
 for examples of how this behaviour works with core code generation variables and blocks.
@@ -247,7 +247,7 @@ included when generating code via the command-line in practice.
 
 ## Code Generation Engine
 
-The SMACHA code generator is a Python API that recursively processes SMACHAML scripts,
+The SMACHA code generator is a Python API that recursively processes SMACHA scripts,
 manages Python code templates, and renders them to Python SMACH code.
 
 The API can either be imported and used in Python projects or invoked as a command-line
@@ -266,7 +266,7 @@ root of the workspace.
 
 ## Usage
 In the simplest case, using default core templates, SMACHA can be invoked on a `my_script.yml`
-SMACHAML file as follows:
+SMACHA script file as follows:
 ```
 rosrun smacha smacha my_script.yml
 ```

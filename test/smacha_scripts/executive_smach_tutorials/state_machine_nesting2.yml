@@ -1,4 +1,4 @@
---- # Nesting State Machines Tutorial SMACHAML script.
+--- # Nesting State Machines Tutorial SMACHA script.
 name: sm_top
 template: Base
 manifest: smacha

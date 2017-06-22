@@ -1,4 +1,4 @@
---- # Simple Action States Tutorial SMACHAML script.
+--- # Simple Action States Tutorial SMACHA script.
 name: sm0
 template: BaseWithTestServer
 manifest: smacha
