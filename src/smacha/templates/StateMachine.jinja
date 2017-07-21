@@ -6,7 +6,9 @@
 {% endblock upper_comments %}
 
 {% block body %}
-sm_{{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{outcome}}'{% if not loop.last %}, {% endif %}{% endfor %}])
+sm_{{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% if input_keys is defined %},
+                                             input_keys=[{% for input_key in input_keys %}'{{ input_key }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}{% if output_keys is defined %},
+                                             output_keys=[{% for output_key in output_keys %}'{{ output_key }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %})
 
 with sm_{{ name | lower() }}:
 
