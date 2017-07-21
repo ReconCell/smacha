@@ -32,6 +32,11 @@ if __name__ == '__main__':
                             default=False,
                             help='Include template header and footer comments in generated code.')
     
+    arg_parser.add_argument('-i', '--introspection-server',
+                            action='store_true',
+                            default=False,
+                            help='Include an introspection server (for use with smach_viewer) in generated code.')
+    
     arg_parser.add_argument('-v', '--verbose',
                             action='store_true',
                             default=False,
@@ -45,9 +50,11 @@ if __name__ == '__main__':
     # Load and parse SMACHA script
     with open(args.script_file) as smacha_file:
         smacha_script = parser.parse(smacha_file)
-    
+
     # Load template processor
-    templater = smacha.Templater(args.template_dirs, include_comments=args.comments)
+    templater = smacha.Templater(args.template_dirs,
+                                 include_comments=args.comments,
+                                 include_introspection_server=args.introspection_server)
     
     # Load code generator
     generator = smacha.Generator(templater, verbose=args.verbose)

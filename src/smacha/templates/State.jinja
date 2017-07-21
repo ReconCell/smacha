@@ -1,7 +1,7 @@
 {% block header %}
 {% if userdata is defined %}
 {% for userdatum_key, userdatum_val in userdata.items() | sort %}
-{{ parent_name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
+{{ parent_name | lower() }}.userdata.{{ userdatum_key | lower() }} = {% if userdatum_val is not_string %}{{ userdatum_val }}{% else %}'{{ userdatum_val }}'{% endif %}
 {% endfor %}
 {% endif %}
 {% endblock header %}

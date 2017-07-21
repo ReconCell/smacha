@@ -1,6 +1,7 @@
 # Jinja2 for templating & code generation
 import jinja2
 from jinja2.ext import Extension
+from jinja2.tests import *
 
 import os
 import re
@@ -46,11 +47,56 @@ class SkipBlockExtension(Extension):
                         skip_level = 0
 
 
+def not_string(value):
+    """
+    Custom test function to check if a template variable is not a string.
+
+    If the value passed in is in fact a string, it first checks to see
+    if it looks like a viable expression.  Thus, if it looks like a reference
+    to an object member (i.e. contains any dots) or if it looks like a function
+    call or object instantiation (i.e. contains an expression followed by wrapping
+    parentheses, it returns true, otherwise it returns false.
+
+    To force a string, the expression may be wrapped in backslash-escaped single quotes
+    (e.g. \'expression\') in the SMACHA YAML script and the above behaviour will
+    be overridden, i.e. this function will return false.
+    """
+    def is_number(s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
+
+    if isinstance(value, list):
+        return True
+    elif isinstance(value, dict):
+        return True
+    elif test_number(value):
+        return True
+    elif isinstance(value, str):
+        if is_number(value):
+            return True
+        elif re.match('\'.*\'', value):
+            return False
+        # This one could, and should, be improved:
+        elif re.match(r'\D+[.]\D+', value):
+            return True
+        elif re.match(r'.*\(.*\)', value):
+            return True
+   
+    # Probably safest to fall back to a string assumption in most other cases:
+    return False
+
+
 class Templater():
     """Jinja template processor."""
-    def __init__(self, template_dirs=[], include_comments=False):
+    def __init__(self, template_dirs=[], include_comments=False, include_introspection_server=False):
         # Flag to enable rendering of header and footer comments in templates
         self._include_comments = include_comments
+
+        # Flag to enable inclusion of introspection server (for use with smach_viewer)
+        self._include_introspection_server = include_introspection_server
 
         # Create list of any custom user-defined template dirs + default template dir
         self._template_dirs = template_dirs + [os.path.dirname(__file__) + '/templates']
@@ -59,22 +105,28 @@ class Templater():
         template_loaders = [jinja2.FileSystemLoader(template_dir) for template_dir in self._template_dirs]
         self._template_loader = jinja2.ChoiceLoader(template_loaders)
 
-        # Create an environment for reading and parsing templates
-        if self._include_comments:
-            self._template_env = jinja2.Environment(loader=self._template_loader,
-                                                    extensions = [jinja2.ext.do],
-                                                    trim_blocks=False,
-                                                    lstrip_blocks=True)
-        else:
-            self._template_env = jinja2.Environment(loader=self._template_loader,
-                                                    extensions = [jinja2.ext.do, SkipBlockExtension],
-                                                    trim_blocks=False,
-                                                    lstrip_blocks=True)
+        # Create an environment for reading and parsing templates, including
+        # the SkipBlockExtension class to allow for skipping certain blocks.
+        self._template_env = jinja2.Environment(loader=self._template_loader,
+                                                extensions = [jinja2.ext.do, SkipBlockExtension],
+                                                trim_blocks=False,
+                                                lstrip_blocks=True)
+
+        # Skip comment blocks as required
+        if self._include_comments == False:
             self._template_env.skip_blocks.append('upper_comments')
             self._template_env.skip_blocks.append('lower_comments')
+       
+        # Skip introspection server blocks as required
+        if self._include_introspection_server == False:
+            self._template_env.skip_blocks.append('introspection_server')
+            self._template_env.skip_blocks.append('spin')
+
+        # Register custom tests with the environment
+        self._template_env.tests['not_string'] = not_string
         
         pass
-    
+
     def render(self, template_name, template_vars):
         """Render code template."""
         # Read the state template file into a template object using the environment object
@@ -126,9 +178,17 @@ class Templater():
                                           lstrip_blocks=True)
 
         # Be sure to also skip comment blocks here as required
-        if self._include_comments != True:
+        if self._include_comments == False:
             template_env.skip_blocks.append('upper_comments')
             template_env.skip_blocks.append('lower_comments')
+        
+        # Be sure to also skip introspection server blocks here as required
+        if self._include_introspection_server == False:
+            template_env.skip_blocks.append('introspection_server')
+            template_env.skip_blocks.append('spin')
+
+        # Register custom tests with the environment
+        template_env.tests['not_string'] = not_string
 
         # Append non-target blocks to environment skip_blocks list
         for block_name, block in template.blocks.items():
