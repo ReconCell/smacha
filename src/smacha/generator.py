@@ -89,6 +89,10 @@ class Generator():
                         for buffer_name in self._buffer_names:
                             container_script_vars[buffer_name] = list()
 
+                        # Add appropriate script_vars to container_script_vars so that child templates
+                        # have access to variables defined in base templates
+                        container_script_vars.update({x: script_vars[x] for x in script_vars if x not in self._buffer_names})
+                        
                         # Add parent container template name, template and type
                         # NOTE: For now, parent template will be the same as parent type
                         # unless we're dealing with the base template. This may have to be accounted
@@ -112,7 +116,7 @@ class Generator():
 
                         # Update script_vars based on the container state template
                         script_vars.update(self._templater.get_template_vars(state_vars['template'], template_vars))
-                        
+
                         # Add generated container code to respective container code buffers
                         for buffer_name, insertion_order in self._container_insertion_order.items():
                             if buffer_name != 'body':
