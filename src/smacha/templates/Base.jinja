@@ -23,6 +23,8 @@ import smach_ros
 {% block main_def %}
 def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}():
     rospy.init_node('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}')
+
+    {{ main_def | indent(4) }}
 {% endblock main_def %}
    
 {% block header %}
