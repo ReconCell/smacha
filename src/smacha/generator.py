@@ -11,11 +11,14 @@ class Generator():
                     base_vars =
                         ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
                     buffer_names =
-                        ['base_header', 'def', 'header', 'body', 'footer', 'base_footer', 'main'],
+                        ['base_header', 'imports', 'defs', 'class_defs', 'main_def',
+                         'header', 'body', 'footer', 'base_footer', 'main'],
                     container_insertion_order = 
-                        ['prepend', 'prepend', 'prepend', 'append', 'append', 'append', 'append'],
+                        ['prepend', 'prepend', 'prepend', 'prepend', 'prepend',
+                         'prepend', 'append', 'append', 'append', 'append'],
                     buffer_insertion_order =
-                        ['append', 'append', 'append', 'append', 'prepend', 'prepend', 'prepend']):
+                        ['append', 'append', 'append', 'append', 'append',
+                         'append', 'append', 'prepend', 'prepend', 'prepend']):
         # Flag to enable verbose output to terminal 
         self._verbose = verbose
 

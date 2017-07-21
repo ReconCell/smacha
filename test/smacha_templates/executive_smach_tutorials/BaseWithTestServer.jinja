@@ -1,8 +1,7 @@
 {% extends "Base.jinja" %}
 
-{% block base_header %}
+{% block imports %}
 {{ super() }}
-
 {% if 'smacha_msg_import_TestAction' not in defined_headers %}
 from smacha.msg import TestAction
 {% do defined_headers.append('smacha_msg_import_TestAction') %}
@@ -11,7 +10,10 @@ from smacha.msg import TestAction
 from actionlib_msgs.msg import *
 {% do defined_headers.append('actionlib_msgs_msg_import') %}
 {% endif %}
+{% endblock imports %}
 
+{% block class_defs %}
+{{ super() }}
 # Create a trivial action server
 class TestServer:
     def __init__(self,name):
@@ -26,17 +28,13 @@ class TestServer:
             self._sas.set_aborted()
         elif msg.goal == 2:
             self._sas.set_preempted()
-{% endblock base_header %}
+{% endblock class_defs %}
 
 {% block header %}
     # Start an action server
     server = TestServer('test_action')
 {{ super() }}
 {% endblock header %}
-
-{%- block body %}
-{{ super() }}
-{% endblock body %}
 
 {% block base_footer %}
 {{ super() }}

@@ -1,8 +1,7 @@
 {% extends "Base.jinja" %}
 
-{% block base_header %}
+{% block imports %}
 {{ super() }}
-
 {% if 'smacha_srv_import_GripperSrv' not in defined_headers %}
 from smacha.srv import GripperSrv
 {% do defined_headers.append('smacha_srv_import_GripperSrv') %}
@@ -19,7 +18,10 @@ from smacha.srv import GripperSrvResponse
 from geometry_msgs.msg import *
 {% do defined_headers.append('geometry_msgs_msg_import') %}
 {% endif %}
+{% endblock imports %}
 
+{% block defs %}
+{{ super() }}
 def gripper_srv(req):
     if req.max_effort > 5.0:
         print('gripper_srv() returning True')
@@ -27,17 +29,13 @@ def gripper_srv(req):
     else:
         print('gripper_srv() returning False')
         return GripperSrvResponse(False)
-{% endblock base_header %}
+{% endblock defs %}
 
 {% block header %}
     # Register a gripper service
     s = rospy.Service('gripper_srv', GripperSrv, gripper_srv)
 {{ super() }}
 {% endblock header %}
-
-{%- block body %}
-{{ super() }}
-{% endblock body %}
 
 {% block base_footer %}
 {{ super() }}
