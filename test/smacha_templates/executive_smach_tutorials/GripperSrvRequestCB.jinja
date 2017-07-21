@@ -1,18 +1,18 @@
 {% extends "ServiceState.jinja" %}
 
-{% block base_header %}
+{% block imports %}
 {% if 'smacha_srv_import_GripperSrvRequest' not in defined_headers %}
 from smacha.srv import GripperSrvRequest
 {% do defined_headers.append('smacha_srv_import_GripperSrvRequest') %}
 {% endif %}
 {{ super() }}
-{% endblock base_header %}
+{% endblock imports %}
 
 {% block header %}
 {{ super() }}
 {% endblock header %}
 
-{%- block body %}
+{% block body %}
 @smach.cb_interface(input_keys=['gripper_input'])
 def gripper_request_cb(userdata, request):
    gripper_request = GripperSrvRequest()

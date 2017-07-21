@@ -1,4 +1,4 @@
-{% block base_header %}
+{% block class_defs %}
 # define state Bas
 class Bas(smach.State):
     def __init__(self):
@@ -7,12 +7,9 @@ class Bas(smach.State):
     def execute(self, userdata):
         rospy.loginfo('Executing state {{ name }}')
         return 'outcome3'
-{% endblock base_header %}
+{% endblock class_defs %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}', Bas(),
                        transitions={{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }})
 {% endblock body %}
-
-{% block base_footer %}
-{% endblock base_footer %}

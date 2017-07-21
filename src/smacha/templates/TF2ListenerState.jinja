@@ -1,6 +1,6 @@
 {% include "State.jinja" %}
 
-{% block base_header %}
+{% block class_defs %}
 {% if 'class_TF2ListenerState' not in defined_headers %}
 class TF2ListenerState(smach.State):
     def __init__(self, target_frame, source_frame, output_key, time=rospy.Time(0), duration=rospy.Duration(1)):
@@ -30,7 +30,10 @@ class TF2ListenerState(smach.State):
         return {% if successful_outcome is defined %}'{{ successful_outcome }}{% else %}'succeeded'{% endif %}
 {% do defined_headers.append('class_TF2ListenerState') %}
 {% endif %}
-{% endblock base_header %}
+{% endblock class_defs %}
+
+{% block header %}
+{% endblock header %}
 
 {% block body %}
 smach.StateMachine.add('READ_HEXAPOD_CURRENT_POSE', TF2ListenerState('{{ target_frame }}', '{{ source_frame }}', '{{ output_key }}'){% if transitions is defined %},
