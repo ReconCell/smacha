@@ -33,7 +33,7 @@ class TestGenerator(unittest.TestCase):
         templater = smacha.Templater(template_dirs)
         
         # Load code generator
-        generator = smacha.Generator(templater, verbose=False)
+        generator = smacha.Generator(parser, templater, verbose=False)
         
         # Generate the SMACH code
         smach_code = generator.run(smacha_script)
