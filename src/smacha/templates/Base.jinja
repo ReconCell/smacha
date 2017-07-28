@@ -1,3 +1,4 @@
+{% from "Utils.jinja" import render_userdata %}
 {% set defined_headers = [] %}
 {% block base_header %}
 #!/usr/bin/env python
@@ -27,20 +28,14 @@ def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main
     {{ main_def | indent(4) }}
 {% endblock main_def %}
    
-{% block header %}
+{% block body %}
     {{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
-    {% if userdata is defined %}
-    {% for userdatum_key, userdatum_val in userdata.items() | sort %}
-    {{ name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
-    {% endfor %}
-    {% endif %}
-    
-    {{ header | indent(4) }}
-    
-    with {{ name | lower() }}:
-{% endblock header %}
 
-{%- block body %}
+    {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) | indent(4) }}{% endif %}
+    {{ header[name] | indent(4) }}
+
+    with {{ name | lower() }}:
+
         {{ body | indent(8) }}
 {% endblock body %}
 
