@@ -100,6 +100,8 @@ class Templater():
 
         # Create list of any custom user-defined template dirs + default template dir
         self._template_dirs = template_dirs + [os.path.join(os.path.dirname(os.path.realpath(__file__)), '/templates')]
+        print('Templater(): self._template_dirs: {}'.format(self._template_dirs))
+        print('Templater(): os.listdir(self._template_dirs): {}'.format(os.listdir(self._template_dirs)))
 
         # Create template loader for the template directories
         template_loaders = [jinja2.FileSystemLoader(template_dir) for template_dir in self._template_dirs]
@@ -197,6 +199,8 @@ class Templater():
        
         # Select the template from the temporary environment with
         # the appropriate skip_blocks list for non-target blocks
+        print('Templater(): render(): self._template_dirs: {}'.format(self._template_dirs))
+        print('Templater(): render(): os.listdir(self._template_dirs): {}'.format(os.listdir(self._template_dirs)))
         target_block_template = template_env.select_template([template_name, template_name + '.jinja'])
         
         # Render code for remaining block
@@ -217,6 +221,8 @@ class Templater():
     def render_all_blocks(self, template_name, template_vars):
         """Render all blocks from code template."""
         # Read the state template file into a template object using the environment object
+        print('Templater(): render_all_blocks(): self._template_dirs: {}'.format(self._template_dirs))
+        print('Templater(): render_all_blocks(): os.listdir(self._template_dirs): {}'.format(os.listdir(self._template_dirs)))
         template = self._template_env.select_template([template_name, template_name + '.jinja'])
 
         # Render template code for each of the template blocks
