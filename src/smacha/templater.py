@@ -99,6 +99,9 @@ class Templater():
         self._include_introspection_server = include_introspection_server
 
         # Create list of any custom user-defined template dirs + default template dir
+        print('Templater.__init__(): os.path.dirname(__file__): {}'.format(os.path.dirname(__file__)))
+        print('Templater.__init__(): os.path.dirname(os.path.realpath(__file__)): {}'.format(os.path.dirname(os.path.realpath(__file__))))
+        print('Templater.__init__(): os.path.dirname(os.path.abspath(__file__)): {}'.format(os.path.dirname(os.path.abspath(__file__))))
         self._template_dirs = template_dirs + [os.path.dirname(__file__) + '/templates']
 
         # Create template loader for the template directories
