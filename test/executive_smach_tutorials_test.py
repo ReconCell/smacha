@@ -17,6 +17,7 @@ class TestGenerator(unittest.TestCase):
     debug_level = 1
 
     def __init__(self, *args, **kwargs):
+        print('TestGenerator.__init__(): os.environ: {}: '.format(os.environ))
         print('TestGenerator.__init__(): os.path.dirname(__file__): {}'.format(os.path.dirname(__file__)))                                                                                                                   
         print('TestGenerator.__init__(): os.path.dirname(os.path.realpath(__file__)): {}'.format(os.path.dirname(os.path.realpath(__file__))))
         print('TestGenerator.__init__(): os.path.dirname(os.path.abspath(__file__)): {}'.format(os.path.dirname(os.path.abspath(__file__))))
