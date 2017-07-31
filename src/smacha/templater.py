@@ -99,7 +99,7 @@ class Templater():
         self._include_introspection_server = include_introspection_server
 
         # Create list of any custom user-defined template dirs + default template dir
-        self._template_dirs = template_dirs + [os.path.dirname(__file__) + '/templates']
+        self._template_dirs = template_dirs + [os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates')]
 
         # Create template loader for the template directories
         template_loaders = [jinja2.FileSystemLoader(template_dir) for template_dir in self._template_dirs]

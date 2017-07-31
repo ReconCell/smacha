@@ -200,6 +200,11 @@ install(PROGRAMS
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
+install(DIRECTORY
+  src/smacha/templates/
+  DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}/templates
+  FILES_MATCHING PATTERN "*.jinja"
+)
 
 #############
 ## Testing ##
@@ -212,4 +217,4 @@ install(PROGRAMS
 # endif()
 
 ## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
+catkin_add_nosetests(test)
