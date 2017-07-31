@@ -17,10 +17,6 @@ class TestGenerator(unittest.TestCase):
     debug_level = 1
 
     def __init__(self, *args, **kwargs):
-        print('TestGenerator.__init__(): os.environ: {}: '.format(os.environ))
-        print('TestGenerator.__init__(): os.path.dirname(__file__): {}'.format(os.path.dirname(__file__)))                                                                                                                   
-        print('TestGenerator.__init__(): os.path.dirname(os.path.realpath(__file__)): {}'.format(os.path.dirname(os.path.realpath(__file__))))
-        print('TestGenerator.__init__(): os.path.dirname(os.path.abspath(__file__)): {}'.format(os.path.dirname(os.path.abspath(__file__))))
         super(TestGenerator, self).__init__(*args, **kwargs)
     
     def _generate(self, smacha_script_filename, template_dirs):
@@ -92,9 +88,6 @@ class TestGenerator(unittest.TestCase):
 
     def test_state_machine2(self):
         """Test state_machine2.py"""
-        print('test_state_machine2: os.path.dirname(__file__): {}'.format(os.path.dirname(__file__)))                                                                                                                   
-        print('test_state_machine2: os.path.dirname(os.path.realpath(__file__)): {}'.format(os.path.dirname(os.path.realpath(__file__))))
-        print('test_state_machine2: os.path.dirname(os.path.abspath(__file__)): {}'.format(os.path.dirname(os.path.abspath(__file__))))
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(base_path + '/executive_smach_tutorials/smach_tutorials/examples/state_machine2.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/executive_smach_tutorials/state_machine2.yml',
@@ -104,9 +97,6 @@ class TestGenerator(unittest.TestCase):
     
     def test_user_data2(self):
         """Test user_data2.py"""
-        print('test_user_data2: os.path.dirname(__file__): {}'.format(os.path.dirname(__file__)))                                                                                                                   
-        print('test_user_data2: os.path.dirname(os.path.realpath(__file__)): {}'.format(os.path.dirname(os.path.realpath(__file__))))
-        print('test_user_data2: os.path.dirname(os.path.abspath(__file__)): {}'.format(os.path.dirname(os.path.abspath(__file__))))
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(base_path + '/executive_smach_tutorials/smach_tutorials/examples/user_data2.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/executive_smach_tutorials/user_data2.yml',
@@ -116,9 +106,6 @@ class TestGenerator(unittest.TestCase):
     
     def test_state_machine_nesting2(self):
         """Test state_machine_nesting2.py"""
-        print('test_state_machine_nesting2: os.path.dirname(__file__): {}'.format(os.path.dirname(__file__)))                                                                                                                   
-        print('test_state_machine_nesting2: os.path.dirname(os.path.realpath(__file__)): {}'.format(os.path.dirname(os.path.realpath(__file__))))
-        print('test_state_machine_nesting2: os.path.dirname(os.path.abspath(__file__)): {}'.format(os.path.dirname(os.path.abspath(__file__))))
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(base_path + '/executive_smach_tutorials/smach_tutorials/examples/state_machine_nesting2.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/executive_smach_tutorials/state_machine_nesting2.yml',
@@ -128,9 +115,6 @@ class TestGenerator(unittest.TestCase):
     
     def test_concurrence2(self):
         """Test concurrence2.py"""
-        print('test_concurrence2: os.path.dirname(__file__): {}'.format(os.path.dirname(__file__)))                                                                                                                   
-        print('test_concurrence2: os.path.dirname(os.path.realpath(__file__)): {}'.format(os.path.dirname(os.path.realpath(__file__))))
-        print('test_concurrence2: os.path.dirname(os.path.abspath(__file__)): {}'.format(os.path.dirname(os.path.abspath(__file__))))
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(base_path + '/executive_smach_tutorials/smach_tutorials/examples/concurrence2.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/executive_smach_tutorials/concurrence2.yml',
@@ -140,9 +124,6 @@ class TestGenerator(unittest.TestCase):
     
     def test_actionlib2_test(self):
         """Test actionlib2_test.py"""
-        print('test_actionlib2_test: os.path.dirname(__file__): {}'.format(os.path.dirname(__file__)))                                                                                                                   
-        print('test_actionlib2_test: os.path.dirname(os.path.realpath(__file__)): {}'.format(os.path.dirname(os.path.realpath(__file__))))
-        print('test_actionlib2_test: os.path.dirname(os.path.abspath(__file__)): {}'.format(os.path.dirname(os.path.abspath(__file__))))
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(base_path + '/executive_smach_tutorials/smach_tutorials/examples/actionlib2_test.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/executive_smach_tutorials/actionlib2_test.yml',
@@ -152,9 +133,6 @@ class TestGenerator(unittest.TestCase):
     
     def test_service_test(self):
         """Test service_test.py"""
-        print('test_service_test: os.path.dirname(__file__): {}'.format(os.path.dirname(__file__)))                                                                                                                   
-        print('test_service_test: os.path.dirname(os.path.realpath(__file__)): {}'.format(os.path.dirname(os.path.realpath(__file__))))
-        print('test_service_test: os.path.dirname(os.path.abspath(__file__)): {}'.format(os.path.dirname(os.path.abspath(__file__))))
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(base_path + '/executive_smach_tutorials/smach_tutorials/examples/service_test.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/executive_smach_tutorials/service_test.yml',
