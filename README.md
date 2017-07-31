@@ -1,5 +1,7 @@
 # SMACHA
 
+[![Build Status](https://travis-ci.org/ReconCell/smacha.svg?branch=master)](https://travis-ci.org/ReconCell/smacha)
+
 SMACHA is a [Jinja2](http://jinja.pocoo.org/docs/2.9/) and [YAML](http://yaml.org/)-based
 code templating, generation and scripting engine for [SMACH](http://wiki.ros.org/smach).
 
