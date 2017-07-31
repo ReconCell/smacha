@@ -31,11 +31,11 @@ def gripper_srv(req):
         return GripperSrvResponse(False)
 {% endblock defs %}
 
-{% block header %}
+{% block main_def %}
+{{ super() }}
     # Register a gripper service
     s = rospy.Service('gripper_srv', GripperSrv, gripper_srv)
-{{ super() }}
-{% endblock header %}
+{% endblock main_def %}
 
 {% block base_footer %}
 {{ super() }}

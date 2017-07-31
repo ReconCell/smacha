@@ -30,11 +30,11 @@ class TestServer:
             self._sas.set_preempted()
 {% endblock class_defs %}
 
-{% block header %}
+{% block main_def %}
+{{ super() }}
     # Start an action server
     server = TestServer('test_action')
-{{ super() }}
-{% endblock header %}
+{% endblock main_def %}
 
 {% block base_footer %}
 {{ super() }}

@@ -1,18 +1,21 @@
 import smacha
 
 from smacha.util import bcolors
-from smacha.util import ParseException
+from smacha.exceptions import ParsingError
 
 __all__ = ['Generator']
 
 class Generator():
     """SMACH code generator."""
-    def __init__(self, templater, verbose=False,
+    def __init__(self, parser, templater, verbose=False,
                     base_vars =
                         ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
                     buffer_names =
                         ['base_header', 'imports', 'defs', 'class_defs', 'main_def',
                          'header', 'body', 'footer', 'execute', 'base_footer', 'main'],
+                    buffer_types =
+                        ['list', 'list', 'list', 'list', 'list',
+                         'dict', 'list', 'list', 'list', 'list', 'list'],
                     container_insertion_order = 
                         ['prepend', 'prepend', 'prepend', 'prepend', 'prepend',
                          'prepend', 'append', 'append', 'append', 'append', 'append'],
@@ -22,6 +25,9 @@ class Generator():
         # Flag to enable verbose output to terminal 
         self._verbose = verbose
 
+        # Handle to the YAML script parser
+        self._parser = parser
+
         # Handle to the Jinja templater
         self._templater = templater
 
@@ -30,7 +36,14 @@ class Generator():
 
         # Initialise a list of names of code buffers to be processed
         self._buffer_names = buffer_names
+        
+        # Initialise a list of types of code buffers to be processed
+        self._buffer_types = buffer_types
 
+        #
+        # TODO: Review and appropriately fix all of this prepend/append
+        # stuff. As of right now, they are hap-hazardly defined and
+        # probably quite brittle. Hopefully the intention is clear though.
         #
         # TODO: Add exception handling below for input validation
         #
@@ -57,7 +70,7 @@ class Generator():
         elif isinstance(script, dict):
             # Check if the state script dict is well-formed
             if len(script.items()) > 2:
-                raise ParseException(error='Badly formed state script!', line_number=script['__line__'])
+                raise ParsingError(error='Badly formed state script!', line_number=script['__line__'])
             
             else:
                 # Find the state name and variables in the state script
@@ -65,7 +78,7 @@ class Generator():
                     if state_name != '__line__':
                       break
                 
-                # If we have state_vars that contain a 'states' key,
+                # If state_vars contains a 'states' key,
                 # we're dealing with a nested SMACH container.
                 if 'states' in state_vars:
                     # Process and render state code from nested container template
@@ -86,26 +99,39 @@ class Generator():
                         container_script_vars = dict()
                         
                         # Add list buffers for smach code generated from nested container states
-                        for buffer_name in self._buffer_names:
-                            container_script_vars[buffer_name] = list()
+                        for buffer_name, buffer_type in zip(self._buffer_names, self._buffer_types):
+                            if buffer_type == 'dict':
+                                container_script_vars[buffer_name] = dict()
+                            else:
+                                container_script_vars[buffer_name] = list()
 
                         # Add appropriate script_vars to container_script_vars so that child templates
                         # have access to variables defined in base templates
                         container_script_vars.update({x: script_vars[x] for x in script_vars if x not in self._buffer_names})
                         
-                        # Add parent container template name, template and type
+                        # Add parent container template name, state machine name, template and type
                         # NOTE: For now, parent template will be the same as parent type
                         # unless we're dealing with the base template. This may have to be accounted
                         # for in a neater way later.
                         container_script_vars['parent_name'] = state_name
+                        if 'sm_name' in state_vars:
+                            container_script_vars['parent_sm_name'] = state_vars['sm_name']
+                        else:
+                            container_script_vars['parent_sm_name'] = 'sm_' + state_name.lower()
                         container_script_vars['parent_template'] = state_vars['template']
                         container_script_vars['parent_type'] = state_vars['template']
                         
                         # Recursively process nested child states
                         container_script_vars = self._process_script(state_vars['states'], container_script_vars)
-                        
+
                         # Convert nested state body code to string
-                        template_vars['body'] = self._gen_code_string(container_script_vars['body'])
+                        for buffer_name in self._buffer_names:
+                            if isinstance(container_script_vars[buffer_name], dict):
+                                template_vars[buffer_name] = dict()
+                                for parent_key, buffer_val in container_script_vars[buffer_name].items():
+                                    template_vars[buffer_name][parent_key] = self._gen_code_string(buffer_val)
+                            else:
+                                template_vars[buffer_name] = self._gen_code_string(container_script_vars[buffer_name])
                         
                         # Add appropriate script_vars to template_vars so that child templates
                         # have access to variables defined in base templates
@@ -119,8 +145,15 @@ class Generator():
 
                         # Add generated container code to respective container code buffers
                         for buffer_name, insertion_order in self._container_insertion_order.items():
-                            if buffer_name != 'body':
-                                if buffer_name in container_script_vars and buffer_name in container_code:
+                            if buffer_name in container_script_vars and buffer_name in container_code:
+                                if isinstance(container_script_vars[buffer_name], dict):
+                                    if state_name not in container_script_vars[buffer_name]:
+                                        container_script_vars[buffer_name][state_name] = list()
+                                    if insertion_order == 'prepend':
+                                        container_script_vars[buffer_name][state_name].insert(0, container_code[buffer_name])
+                                    else:
+                                        container_script_vars[buffer_name][state_name].append(container_code[buffer_name])
+                                else:
                                     if insertion_order == 'prepend':
                                         container_script_vars[buffer_name].insert(0, container_code[buffer_name])
                                     else:
@@ -128,21 +161,101 @@ class Generator():
                         
                         # Generate code strings from container code buffers and add to respective parent code buffers
                         for buffer_name, insertion_order in self._buffer_insertion_order.items():
-                            if buffer_name == 'body' and buffer_name in script_vars and buffer_name in container_code:
+                            if buffer_name in script_vars and buffer_name in container_code:
                                 buffer_code = container_code[buffer_name]
                             elif buffer_name in script_vars and buffer_name in container_script_vars:
-                                buffer_code = self._gen_code_string(container_script_vars[buffer_name])
+                                if isinstance(container_script_vars[buffer_name], dict):
+                                    buffer_code = dict()
+                                    for parent_key, buffer_val in container_script_vars[buffer_name].items():
+                                        buffer_code[parent_key] = self._gen_code_string(buffer_val)
+                                else:
+                                    buffer_code = self._gen_code_string(container_script_vars[buffer_name])
                             else:
                                 continue
-                            if insertion_order == 'prepend':
-                                script_vars[buffer_name].insert(0, buffer_code)
+
+                            if isinstance(script_vars[buffer_name], dict) and isinstance(buffer_code, dict):
+                                for parent_key, buffer_val in buffer_code.items():
+                                    if parent_key not in script_vars[buffer_name]:
+                                        script_vars[buffer_name][parent_key] = list()
+                                    if insertion_order == 'prepend':
+                                        script_vars[buffer_name][parent_key].insert(0, buffer_val)
+                                    else:
+                                        script_vars[buffer_name][parent_key].append(buffer_val)
                             else:
-                                script_vars[buffer_name].append(buffer_code)
+                                if buffer_code != '':
+                                    if insertion_order == 'prepend':
+                                        script_vars[buffer_name].insert(0, buffer_code)
+                                    else:
+                                        script_vars[buffer_name].append(buffer_code)
                                         
                     
                     except Exception as e:
                         print(bcolors.WARNING +
                               'WARNING: Error processing template for nested container state \'' + state_name + '\': ' + bcolors.ENDC +
+                              str(e))
+                        pass
+
+                # If state_vars contains a 'script' key,
+                # we're dealing with an included sub-script.
+                #
+                # NOTE: The code for the below case was written in haste while approaching
+                # a deadline and much could, and probably should, be improved with respect
+                # to error-handling and input validation.  For instance, the YAML line
+                # numbering scheme is probably now broken with this addition.
+                # TODO: Consider upgrading the yaml parser to ruamel in light of this.
+                #
+                elif 'script' in state_vars:
+                    # Process included sub-script
+                    try:
+                        if self._verbose:
+                            print(bcolors.OKBLUE + bcolors.BOLD + bcolors.UNDERLINE +
+                                  'Processing state \'' + state_name + '\'' +
+                                  ' with incluced sub-script \'' + state_vars['script'] + '\'' + bcolors.ENDC)
+                        
+                        # Parse the included sub-script
+                        sub_script = self._parser.parse(state_vars['script'])
+
+                        # Check its validity - it should only be a one-item list.
+                        if not isinstance(sub_script, list):
+                            raise ParsingError(error='Invalid script formatting- included script does not contain a list!')
+                        elif len(sub_script) != 1:
+                            raise ParsingError(error='Invalid script formatting- included script should only contain a single state!')
+                        else:
+                            sub_script = sub_script[0]
+                            pass
+
+                        # Find and replace the state name in the state sub-script
+                        for sub_script_state_name, sub_script_state_vars in sub_script.items():
+                            if sub_script_state_name != '__line__':
+                              break
+                        sub_script[state_name] = sub_script.pop(sub_script_state_name)
+
+                        # Find and replace sub-script variables with current state variables
+                        # (i.e. variables defined by the state that called the sub-script)
+                        #
+                        # Certain sub-script variables (i.e. 'input_keys', 'output_keys', 'outcomes')
+                        # should not be re-defined, as doing so would break modularity.
+                        #
+                        # If 'remapping' is defined in the current state variables,
+                        # then it should be defined in the sub-script variables, even if it was
+                        # not originally present there, as doing otherwise would break modularity.
+                        #
+                        # The presence/non-presence of 'transitions' should be taken care of in the
+                        # sub-script, since certain containers (e.g. Concurrence) do not define
+                        # transitions.
+                        for state_var, state_var_val in state_vars.items():
+                            if state_var not in ['__line__', 'states', 'template', 'script', 'input_keys', 'output_keys', 'outcomes']:
+                                if state_var in sub_script[state_name].keys() or state_var == 'remapping':
+                                    sub_script[state_name][state_var] = state_var_val
+
+                        # Continue processing with the included sub-script now substituted in
+                        # for the current state with potentially re-defined state variables
+                        # appropriately remapped.
+                        script_vars = self._process_script(sub_script, script_vars)
+                    
+                    except Exception as e:
+                        print(bcolors.WARNING +
+                              'WARNING: Error processing included script for state \'' + state_name + '\': ' + bcolors.ENDC +
                               str(e))
                         pass
                 
@@ -174,10 +287,18 @@ class Generator():
                         # Add generated code from leaf state code buffers to respective parent code buffers
                         for buffer_name, insertion_order in self._buffer_insertion_order.items():
                             if buffer_name in script_vars and buffer_name in state_code and state_code[buffer_name] != '':
-                                if insertion_order == 'prepend':
-                                    script_vars[buffer_name].insert(0, state_code[buffer_name])
+                                if isinstance(script_vars[buffer_name], dict):
+                                    if script_vars['parent_name'] not in script_vars[buffer_name]:
+                                        script_vars[buffer_name][script_vars['parent_name']] = list()
+                                    if insertion_order == 'prepend':
+                                        script_vars[buffer_name][script_vars['parent_name']].insert(0, state_code[buffer_name])
+                                    else:
+                                        script_vars[buffer_name][script_vars['parent_name']].append(state_code[buffer_name])
                                 else:
-                                    script_vars[buffer_name].append(state_code[buffer_name])
+                                    if insertion_order == 'prepend':
+                                        script_vars[buffer_name].insert(0, state_code[buffer_name])
+                                    else:
+                                        script_vars[buffer_name].append(state_code[buffer_name])
                     
                     except Exception as e:
                       print(bcolors.WARNING +
@@ -219,32 +340,49 @@ class Generator():
         
         # TODO: Clean up this logic
         if not isinstance(script, dict):
-            raise ParseException(error='Invalid script formatting!')
+            raise ParsingError(error='Invalid script formatting!')
         elif 'states' not in script:
-            raise ParseException(error='Script does not contain states!')
+            raise ParsingError(error='Script does not contain states!')
         else:
             # Start processing states from the script
             if self._verbose:
-                print(bcolors.HEADER + 'Processing state machine' + bcolors.ENDC)
+                print(bcolors.HEADER + bcolors.BOLD + bcolors.UNDERLINE + 'Processing state machine' + bcolors.ENDC)
 
             # Initialise dict of variables needed for script processing
             script_vars = dict()
             
-            # Add base parent template name, template and type
+            # Add base parent template name, state machine name, template and type
             # NOTE: For now, we explicitly state that the base is a parent of type
             # 'StateMachine' here.  This may have to be handled in a neater way later.
             script_vars['parent_name'] = script['name']
+            if 'sm_name' in script_vars:
+                script_vars['parent_sm_name'] = script_vars['sm_name']
+            else:
+                script_vars['parent_sm_name'] = script['name'].lower()
             script_vars['parent_template'] = script['template']
             script_vars['parent_type'] = 'StateMachine'
             
             # Add list buffers in which to store generated smach code
-            script_vars.update({ x : list() for x in self._buffer_names })
+            # script_vars.update({ x : list() for x in self._buffer_names })
+            for buffer_name, buffer_type in zip(self._buffer_names, self._buffer_types):
+                if buffer_type == 'dict':
+                    script_vars[buffer_name] = dict()
+                else:
+                    script_vars[buffer_name] = list()
             
             # Add any variables defined in the base template to script_vars
             #
             # TODO: Throw exception here if any of these clash with the canononical variables.
             # 
-            script_vars.update(self._templater.get_template_vars(script['template'], context = { x : '' for x in self._buffer_names }))
+            context = dict()
+            context['name'] = script['name']
+            for buffer_name, buffer_type in zip(self._buffer_names, self._buffer_types):
+                if buffer_type == 'dict':
+                    context[buffer_name] = dict()
+                    context[buffer_name][script['name']] = ''
+                else:
+                    context[buffer_name] = ''
+            script_vars.update(self._templater.get_template_vars(script['template'], context = context))
 
             # Process base template states script
             script_vars = self._process_script(script['states'], script_vars)
@@ -259,8 +397,15 @@ class Generator():
             base_template_vars.update({ x : self._strip_line_numbers(script[x]) for x in script if x in self._base_vars })
 
             # Generate code strings from the code buffers and add them to base_template_vars
-            base_template_vars.update({ x : self._gen_code_string(script_vars[x]).strip() for x in script_vars if x in self._buffer_names })
-
+            for script_var_name, script_var_val in script_vars.items():
+                if script_var_name in self._buffer_names:
+                    if isinstance(script_var_val, dict):
+                        base_template_vars[script_var_name] = dict()
+                        for parent_name, buffer_val in script_var_val.items():
+                            base_template_vars[script_var_name][parent_name] = self._gen_code_string(buffer_val).strip()
+                    else:
+                        base_template_vars[script_var_name] = self._gen_code_string(script_var_val).strip()
+                        
             # Add updated script_vars to base_template_vars
             base_template_vars.update({ x : script_vars[x] for x in script_vars if x not in self._buffer_names })
 

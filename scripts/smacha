@@ -21,6 +21,13 @@ if __name__ == '__main__':
                             default=[],
                             help='Custom SMACHA template directories (directories containing jinja files).')
     
+    arg_parser.add_argument('-s', '--scripts',
+                            nargs = '*',
+                            dest='script_dirs',
+                            action='store',
+                            default=[],
+                            help='SMACHA script directories (directories containing yaml files).')
+    
     arg_parser.add_argument('-o', '--output',
                             dest='output_file',
                             action='store',
@@ -45,7 +52,7 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
     
     # Load parser
-    parser = smacha.Parser()
+    parser = smacha.Parser(script_dirs = args.script_dirs)
     
     # Load and parse SMACHA script
     with open(args.script_file) as smacha_file:
@@ -57,7 +64,7 @@ if __name__ == '__main__':
                                  include_introspection_server=args.introspection_server)
     
     # Load code generator
-    generator = smacha.Generator(templater, verbose=args.verbose)
+    generator = smacha.Generator(parser, templater, verbose=args.verbose)
     
     # Generate the SMACH code
     smach_code = generator.run(smacha_script)
