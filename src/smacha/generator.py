@@ -109,11 +109,15 @@ class Generator():
                         # have access to variables defined in base templates
                         container_script_vars.update({x: script_vars[x] for x in script_vars if x not in self._buffer_names})
                         
-                        # Add parent container template name, template and type
+                        # Add parent container template name, state machine name, template and type
                         # NOTE: For now, parent template will be the same as parent type
                         # unless we're dealing with the base template. This may have to be accounted
                         # for in a neater way later.
                         container_script_vars['parent_name'] = state_name
+                        if 'sm_name' in state_vars:
+                            container_script_vars['parent_sm_name'] = state_vars['sm_name']
+                        else:
+                            container_script_vars['parent_sm_name'] = 'sm_' + state_name.lower()
                         container_script_vars['parent_template'] = state_vars['template']
                         container_script_vars['parent_type'] = state_vars['template']
                         
@@ -304,7 +308,7 @@ class Generator():
         
         else:
             pass
-       
+        
         return script_vars
     
     #
@@ -347,10 +351,14 @@ class Generator():
             # Initialise dict of variables needed for script processing
             script_vars = dict()
             
-            # Add base parent template name, template and type
+            # Add base parent template name, state machine name, template and type
             # NOTE: For now, we explicitly state that the base is a parent of type
             # 'StateMachine' here.  This may have to be handled in a neater way later.
             script_vars['parent_name'] = script['name']
+            if 'sm_name' in script_vars:
+                script_vars['parent_sm_name'] = script_vars['sm_name']
+            else:
+                script_vars['parent_sm_name'] = script['name'].lower()
             script_vars['parent_template'] = script['template']
             script_vars['parent_type'] = 'StateMachine'
             
@@ -378,7 +386,7 @@ class Generator():
 
             # Process base template states script
             script_vars = self._process_script(script['states'], script_vars)
-
+            
             # Initialise a dict for the base template variables and code buffers
             base_template_vars = dict()
 

@@ -1,5 +1,7 @@
 {% from "Utils.jinja" import render_userdata %}
 
+{% set sm_name = ['sm_', name | lower()] | join() %}
+
 {% block upper_comments %}
 #----------------------------------------------------------------------------------------
 # BEGIN: {{ name }}
@@ -8,7 +10,7 @@
 {% endblock upper_comments %}
 
 {% block body %}
-{{ name | lower() }} = smach.Concurrence(outcomes=[{% for outcome in outcomes %}'{{outcome}}'{% if not loop.last %}, {% endif %}{% endfor %}],
+{{ sm_name }} = smach.Concurrence(outcomes=[{% for outcome in outcomes %}'{{outcome}}'{% if not loop.last %}, {% endif %}{% endfor %}],
                            default_outcome='{{ default_outcome }}',
                            outcome_map={{ '{' }}{% for outcome_map_key, outcome_map_val in outcome_map.items() | sort %}{% if outcome_map_val is mapping %}'{{ outcome_map_key }}':
                                            {{ '{' }} {% for outcome_map_sub_key, outcome_map_sub_val in outcome_map_val.items() | sort %}'{{ outcome_map_sub_key }}': '{{ outcome_map_sub_val }}'{% if not loop.last %},
@@ -18,13 +20,13 @@
                            output_keys=[{% for output_key in output_keys %}'{{ output_key }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %})
 
 {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) }}{% endif %}
-{{ header[name] }}
+{% if name in header %}{{ header[name] }}{% endif %}
 
-with {{ name | lower() }}:
+with {{ sm_name }}:
 
     {{ body | indent(4) }}
 
-smach.{{ parent_type }}.add('{{ name }}', {{ name | lower() }}{% if transitions is defined and parent_type != 'Concurrence' %},
+smach.{{ parent_type }}.add('{{ name }}', {{ sm_name }}{% if transitions is defined and parent_type != 'Concurrence' %},
 {{ 'transitions=' | indent(23, true) }}{{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
 {{ '' | indent(36, true) }}{% endif %}{% endfor %}{{ '}' }}{% endif %}{% if remapping is defined %},
 {{ 'remapping=' | indent(23, true) }}{{ '{' }}{% for state_key, userdata_key in remapping.items() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},

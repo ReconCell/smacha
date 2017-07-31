@@ -1,5 +1,5 @@
 {% from "Utils.jinja" import render_userdata %}
 
 {% block header %}
-{% if userdata is defined %}{{ render_userdata(parent_name | lower(), userdata) }}{% endif %}
+{% if userdata is defined %}{{ render_userdata(parent_sm_name, userdata) }}{% endif %}
 {% endblock header %}
