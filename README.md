@@ -1,9 +1,9 @@
 # SMACHA
 
-[![Build Status](https://travis-ci.org/ReconCell/smacha.svg?branch=master)](https://travis-ci.org/ReconCell/smacha)
+[![Build Status](https://travis-ci.org/ReconCell/smacha.svg?branch=dev)](https://travis-ci.org/ReconCell/smacha)
 
-SMACHA is a [Jinja2](http://jinja.pocoo.org/docs/2.9/) and [YAML](http://yaml.org/)-based
-code templating, generation and scripting engine for [SMACH](http://wiki.ros.org/smach).
+SMACHA is a [YAML](http://yaml.org/) and [Jinja2](http://jinja.pocoo.org/docs/2.9/)-based
+meta-scripting, templating, and code generation engine for [SMACH](http://wiki.ros.org/smach).
 
 [SMACH](http://wiki.ros.org/smach) is an exceptionally useful and comprehensive task-level architecture
 for state machine construction in [ROS](http://wiki.ros.org/)-based robot control systems.
@@ -11,7 +11,7 @@ However, while it provides much in terms of power and flexibility, its overall t
 can often be obfuscated at the script-level by boilerplate code, intricate structure and lack
 of code reuse between state machine prototypes.
 
-SMACHA (pronounced "smasha") aims at distilling the task-level simplicity of SMACH into compact YAML-based scripts
+SMACHA (short for "State Machine Assembler", pronounced "smasha") aims at distilling the task-level simplicity of SMACH into compact YAML-based scripts
 in the foreground, while retaining all of its power and flexibility in Jinja2-based
 templates and a custom code generation engine in the background.
 
@@ -64,27 +64,25 @@ The base of the script specifies the following variables:
 Each of the states in the base script may, in turn, specify similar variables of
 their own, as discussed in the following sub-sections.
 
-### Templates
-
-Each state, including the base, must specify a template from which its respective
-code should be generated.  More on that in the [next section](https://repo.ijs.si/reconcell/smacha#jinja2-templating).
-
 ### States
 
-States may be specified as lists, specifying their transition order,
+Each state, including the base, must specify a template from which its respective
+code should be generated.
+States may be specified as lists specifying their transition order
 and may also be [nested](http://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines)
 as described in the SMACH tutorials using appropriate combinations of
-template and states specification as seen in the example above.
+template and state specifications as seen in the example above.
 
-### Outcomes
+#### Outcomes
+Possible state outcomes may be specified as a list in the base state machine and in each container state.
 
-Possible state outcomes may be specified as a list in each state.
+#### Transitions
+Possible state transitions may be specified as an associative array (hash/dictionary) in each state.
 
-### Transitions
-Possible state transitions may be specified as a hash/dictionary in each state.
-
-### Remappings
-Input-output remappings (not shown in the above example; see the [SMACH User Data Tutorial](http://wiki.ros.org/smach/Tutorials/User%20Data) for more details) may be specified as a hash/dictionary in each state.
+#### Remappings
+Input and output remappings of user data
+(not shown in the above example; see the [SMACH User Data Tutorial](http://wiki.ros.org/smach/Tutorials/User%20Data) for more details)
+may be specified as an associative array in each state.
 
 ## Jinja2 Templating
 
@@ -94,124 +92,131 @@ generated from SMACHA scripts.
 The `Base` template from the above example is specified in a `Base.jinja` file and looks like this:
 
 ```python
-#!/usr/bin/env python
-
-import roslib; {% if manifest is defined %}roslib.load_manifest('smach_tutorials'){% endif %}
-import rospy
-import smach
-import smach_ros
-
+{% from "Utils.jinja" import render_userdata %}
 {% set defined_headers = [] %}
-
 {% block base_header %}
+#!/usr/bin/env python
 {{ base_header }}
 {% endblock base_header %}
 
-def main():
-    rospy.init_node('{{ node_name }}')
+{% block imports %}
+import roslib; {% if manifest is defined %}roslib.load_manifest('{{ manifest }}'){% endif %}
+import rospy
+import smach
+import smach_ros
+{{ imports }}
+{% endblock imports %}
+
+{% block defs %}
+{{ defs }}
+{% endblock defs %}
+
+{% block class_defs %}
+{{ class_defs }}
+{% endblock class_defs %}
+
+{% if name is defined %}{% set sm_name = name | lower() %}{% else %}{% set sm_name = 'sm' %}{% endif %}
+
+{% block main_def %}
+def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}():
+    rospy.init_node('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}')
+
+    {{ main_def | indent(4) }}
+{% endblock main_def %}
    
-    {% block header %}
-    # Create a SMACH state machine
-    {{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
-    {% if userdata is defined %}
-    {% for userdatum_key, userdatum_val in userdata.items() | sort %}
-    {{ name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
-    {% endfor %}
-    {% endif %}
-    {% endblock header %}
-    
-    # Open the container
-    with {{ name | lower() }}:
-        # Add states to the container
-        {%- block body %}
-        {{ body | indent(8) }}
-        {% endblock body %}
-    
-    # Execute SMACH plan
-    outcome = {{ name | lower() }}.execute()
-   
-    {% block base_footer %}
-    {{ base_footer | indent(4) }}
-    {% endblock base_footer %}
-
-if __name__ == '__main__':
-    main()
-```
-
-The `Foo` template is specified in a `Foo.jinja` file and looks like this:
-```python
-{% block base_header %}
-# define state Foo
-class Foo(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, 
-                             outcomes=['outcome1','outcome2']{% if remapping is defined %},
-                             input_keys=['foo_counter_in'],
-                             output_keys=['foo_counter_out']){% else %})
-        self.counter = 0{% endif %}
-
-    def execute(self, userdata):
-        rospy.loginfo('Executing state {{ name }}'){% if remapping is defined %}
-        if userdata.foo_counter_in < 3:
-            userdata.foo_counter_out = userdata.foo_counter_in + 1{% else %}
-        if self.counter < 3:
-            self.counter += 1{% endif %}
-            return 'outcome1'
-        else:
-            return 'outcome2'
-{% endblock base_header %}
-
 {% block body %}
-smach.{{ parent_type }}.add('{{ name }}', Foo(){% if transitions is defined %}, 
-                       transitions={{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
-                                    {% endif %}{% endfor %}{{ '}' }}{% endif %}{% if remapping is defined %},
-                       remapping={{ '{' }}{% for state_key, userdata_key in remapping.items() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
-                                  {% endif %}{% endfor %}{{ '}' }}{% endif %})
+    {{ sm_name }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
+
+    {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) | indent(4) }}{% endif %}
+    {% if name in header %}{{ header[name] | indent(4, true) }}{% endif %}
+
+    with {{ sm_name }}:
+
+        {{ body | indent(8) }}
 {% endblock body %}
 
+{% block footer %}
+        {{ footer | indent(8) }}
+{% endblock footer %}
+
+{% block introspection_server %}
+    sis = smach_ros.IntrospectionServer('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}', {{ name | lower() }}, '/{{ name }}')
+    sis.start()
+{% endblock introspection_server %}
+
+{% block execute %}
+    {{ execute | indent(4) }}
+
+    outcome = {{ sm_name }}.execute()
+{% endblock execute %}    
+
+{% block spin %}   
+    rospy.spin()
+{% endblock spin %}
+
 {% block base_footer %}
+    {{ base_footer | indent(4) }}
 {% endblock base_footer %}
+
+{% block main %}
+if __name__ == '__main__':
+{{ '' | indent(4, true) }}{% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}()
+{% endblock main %}
 ```
 
 ### Core Templates
 
-Default core templates are provided for many of the SMACH containers, as well as other
-SMACH constructs like action states.
+SMACHA provides default core templates for many of the SMACH states and containers,
+as well as for other useful constructs.
 
 So far, the following core templates are present and functional:
 
-* `Base.jinja`: This is the core base template used for specifying the bare bones of a
+* `Base.jinja`: the core base template used for specifying the bare bones of a
 a Python SMACH state machine script.
 
-* `StateMachine.jinja`: This is the core template used for inserting a [StateMachine container](http://wiki.ros.org/smach/Tutorials/StateMachine%20container).
+* `State.jinja`: contains functionality common to all states, e.g. userdata specification.
 
-* `Concurrence.jinja`: This is the core template used for inserting a [Concurrence container](http://wiki.ros.org/smach/Tutorials/Concurrence%20container).
+* `StateMachine.jinja`: the core template used for inserting a [StateMachine container](http://wiki.ros.org/smach/Tutorials/StateMachine%20container).
 
-* `SimpleActionState.jinja`: This is the core template used for inserting a [SimpleActionState](http://wiki.ros.org/smach/Tutorials/SimpleActionState).
+* `Concurrence.jinja`: the core template used for inserting a [Concurrence container](http://wiki.ros.org/smach/Tutorials/Concurrence%20container).
 
-* `ServiceState.jinja`: This is the core template used for inserting a [ServiceState](http://wiki.ros.org/smach/Tutorials/ServiceState).
+* `ServiceState.jinja`: the core template used for inserting a [ServiceState](http://wiki.ros.org/smach/Tutorials/ServiceState).
 
+* `SimpleActionState.jinja`: the core template used for inserting a [SimpleActionState](http://wiki.ros.org/smach/Tutorials/SimpleActionState).
+
+* `TF2ListenerState.jinja`: used for reading TF2 transforms.
 
 ### Core Code Generation Variables and Code Blocks
 
 There are a number of core code generation variables and code blocks present in the core
 templates that enable the code generation engine to produce code in the appropriate places.
 
-* `base_header` block: The `base_header` block in a state template is rendered into the `base_header` variable
-in the `base_header` block in the base template.
+* `base_header` block: used to specify any code that must appear near the top of the program script.
 
-* `header` block: The `header` block in a state template is rendered into the `header` variable
-in the `header` block of either its parent template or the base template depending on its nesting depth.
+* `defs` block: used to position function definitions.
+  
+* `class_defs` block: used to position class definitions.
+  
+* `main_def` block: used to position the main function definition.
 
-* `body` block: The `body` block in a state template is rendered into the `body` variable in the `body` block
+* `header` block: the `header` block in a state template is rendered into the `header` variable
+of either its parent template or the base template depending on its nesting depth.
+
+* `body` block: The `body` block in a state template is rendered into the `body` variable
 of either its parent state or the base template depending on its nesting depth.
 
-* `footer` block: The `footer` block in a state template is rendered into the `footer` variable in the `footer`
-block of either its parent template or the base template depending on its nesting depth
-(not currently implemented in the above example).
+* `footer` block: The `footer` block in a state template is rendered into the `footer` variable
+of either its parent template or the base template depending on its nesting depth.
+  
+* `execute` block: used to position the code necessary for executing the state machine.
 
-* `base_footer` block: The `base_footer` block in a state template is rendered into the `base_footer` variable
-in the `base_footer` block of the base template.
+* `base_footer` block: used to specify any code that must appear near the bottom of the program script.
+  
+* `main` block: used to specify the code necessary to execute the main function.
+
+Some additional blocks may be optionally included, such as the *introspection_server*
+and ROS *spin* blocks, if an introspection server is required for use with the SMACH viewer,
+or *comment* blocks, used to decorate the generated source code.
 
 Note that all of the above code generation variables and code blocks may be either
 removed, modified or arbitrarily customized within the API for particular use-cases.
@@ -230,16 +235,22 @@ via the usual Jinja2 template inheritance mechanisms, with some caveats.
 This works in the usual way using the following Jinja2 variables and expressions:
 
 * `{% extends "<template_name>" %}`: When this expression appears at the top of a template,
-the template will inherit from the template specified by `<template_name>`.
+the template will inherit code blocks from the parent template specified by `<template_name>`.
 
 * `{{ super() }}`: When this expression appears inside a block, the code from the same block
-specified by the parent template will be rendered at its position in the child template.
-
+in the parent template as specified by `{% extends %}` will be rendered at its position.
+  
+* `{% include "<template_name>" %}`: When this expression appears at the top of a template,
+    the template will include all code from the template specified by `<template_name>`.
+  
 Caveats: if a state template contains blocks, but does not contain an `{{ extends }}` expression at
 the top of a template, it is implied that the code for the blocks will be rendered into
 variables and blocks with the same names as the blocks in the state template as dictated
 by the SMACHA script and as defined usually either by the base template or container templates.
 This behaviour is specific to SMACHA and is not present in Jinja2.
+In the current implementation, only base templates use the `{% extends %}`
+inheritance mechanism, whereas state and container templates use the
+`{% include %}` mechanism to inherit code from other templates.
 See the [Core Code Generation Variables and Code Blocks Section](#core-code-generation-variables-and-code-blocks)
 for examples of how this behaviour works with core code generation variables and blocks.
 
