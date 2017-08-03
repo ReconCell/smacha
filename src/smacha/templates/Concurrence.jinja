@@ -1,4 +1,4 @@
-{% from "Utils.jinja" import render_userdata %}
+{% from "Utils.jinja" import render_outcomes, render_outcome_map, render_input_keys, render_output_keys, render_userdata, render_transitions, render_remapping %}
 
 {% set sm_name = ['sm_', name | lower()] | join() %}
 
@@ -10,14 +10,11 @@
 {% endblock upper_comments %}
 
 {% block body %}
-{{ sm_name }} = smach.Concurrence(outcomes=[{% for outcome in outcomes %}'{{outcome}}'{% if not loop.last %}, {% endif %}{% endfor %}],
-                           default_outcome='{{ default_outcome }}',
-                           outcome_map={{ '{' }}{% for outcome_map_key, outcome_map_val in outcome_map.items() | sort %}{% if outcome_map_val is mapping %}'{{ outcome_map_key }}':
-                                           {{ '{' }} {% for outcome_map_sub_key, outcome_map_sub_val in outcome_map_val.items() | sort %}'{{ outcome_map_sub_key }}': '{{ outcome_map_sub_val }}'{% if not loop.last %},
-                                             {% endif %}{% endfor %}{{ '}' }}{% else %}                                        '{{ outcome_map_key }}': '{{ outcome_map_val }}'{% endif %}{% if not loop.last %},
-{% endif %}{% endfor %}{{ '}' }}{% if input_keys is defined %},
-                           input_keys=[{% for input_key in input_keys %}'{{ input_key }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}{% if output_keys is defined %},
-                           output_keys=[{% for output_key in output_keys %}'{{ output_key }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %})
+{{ sm_name }} = smach.Concurrence({{ render_outcomes(outcomes) }},
+{{ 'default_outcome=' | indent(35, true) }}'{{ default_outcome }}',
+{{ render_outcome_map(outcome_map) }}{% if input_keys is defined %},
+{{ render_input_keys(input_keys, indent=35) }}{% endif %}{% if output_keys is defined %},
+{{ render_output_keys(output_keys) }}{% endif %})
 
 {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) }}{% endif %}
 {% if name in header %}{{ header[name] }}{% endif %}
@@ -27,10 +24,8 @@ with {{ sm_name }}:
     {{ body | indent(4) }}
 
 smach.{{ parent_type }}.add('{{ name }}', {{ sm_name }}{% if transitions is defined and parent_type != 'Concurrence' %},
-{{ 'transitions=' | indent(23, true) }}{{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
-{{ '' | indent(36, true) }}{% endif %}{% endfor %}{{ '}' }}{% endif %}{% if remapping is defined %},
-{{ 'remapping=' | indent(23, true) }}{{ '{' }}{% for state_key, userdata_key in remapping.items() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
-{{ '' | indent(34, true) }}{% endif %}{% endfor %}{{ '}' }}{% endif %})
+{{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
+{{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}
 
 {% block lower_comments %}
