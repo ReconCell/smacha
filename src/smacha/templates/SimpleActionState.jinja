@@ -1,3 +1,5 @@
+{% from "Utils.jinja" import render_goal_slots, render_input_keys, render_result_slots, render_output_keys, render_transitions, render_remapping %}
+
 {% include "State.jinja" %}
 
 {% block imports %}
@@ -13,15 +15,13 @@ from actionlib import *
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
 {{ '' | indent(23, true) }}smach_ros.SimpleActionState('{{ action_server_namespace }}', {{ action }}{% if goal is defined %},
-                                                      goal = {{ goal }}{% elif goal_slots is defined %},
-                                                      goal_slots = [{% for goal_slot in goal_slots %}'{{ goal_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% elif goal_cb is defined %},
-                                                      goal_cb = {{ goal_cb }}{% if input_keys is defined %},
-                                                      input_keys = [{% for input_key in input_keys %}'{{ input_key }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}{% endif %}{% if result_slots is defined %},
-                                                      result_slots = [{% for result_slot in result_slots %}'{{ result_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% elif result_cb is defined %},
-                                                      result_cb = {{ result_cb }}{% if output_keys is defined %},
-                                                      output_keys = [{% for output_key in output_keys %}'{{ output_key }}'{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% endif %}){% if transitions is defined %},
-{{ 'transitions=' | indent(23, true) }}{{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
-{{ '' | indent(36, true) }}{% endif %}{% endfor %}{{ '}' }}{% endif %}{% if remapping is defined %},
-{{ 'remapping=' | indent(23, true) }}{{ '{' }}{% for state_key, userdata_key in remapping.items() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
-{{ '' | indent(34, true) }}{% endif %}{% endfor %}{{ '}' }}{% endif %})
+{{ 'goal = ' | indent(51, true) }}{{ goal }}{% elif goal_slots is defined %},
+{{ render_goal_slots(goal_slots) }}{% elif goal_cb is defined %},
+{{ 'goal_cb = ' | indent(51, true) }}{{ goal_cb }}{% if input_keys is defined %},
+{{ render_input_keys(input_keys) }}{% endif %}{% endif %}{% if result_slots is defined %},
+{{ render_result_slots(result_slots) }}{% elif result_cb is defined %},
+{{ 'result_cb = ' | indent(51, true) }}{{ result_cb }}{% if output_keys is defined %},
+{{ render_output_keys(output_keys) }}{% endif %}{% endif %}){% if transitions is defined %},
+{{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
+{{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}
