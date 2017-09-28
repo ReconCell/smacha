@@ -25,14 +25,12 @@
 #
 # Macro for rendering 'goal_slots' in state instantiations.
 #
-{% macro render_goal_slots(goal_slots, indent=51) %}
-{{ 'goal_slots = ' | indent(indent, true) }}[{% for goal_slot in goal_slots %}'{{ goal_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
+{% macro render_goal_slots(goal_slots, indent=51) %}{{ 'goal_slots = ' | indent(indent, true) }}[{% for goal_slot in goal_slots %}'{{ goal_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
 
 #
 # Macro for rendering 'result_slots' in state instantiations.
 #
-{% macro render_result_slots(result_slots, indent=51) %}
-{{ 'result_slots = ' | indent(indent, true) }}[{% for result_slot in result_slots %}'{{ result_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
+{% macro render_result_slots(result_slots, indent=51) %}{{ 'result_slots = ' | indent(indent, true) }}[{% for result_slot in result_slots %}'{{ result_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
 
 #
 # Macro for rendering 'request_slots' in state instantiations.
