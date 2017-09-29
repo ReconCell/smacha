@@ -1,4 +1,6 @@
+{% from "Utils.tpl" import render_userdata %}
 {% set defined_headers = [] %}
+{% set local_vars = [] %}
 {% block base_header %}
 #!/usr/bin/env python
 {{ base_header }}
@@ -20,6 +22,8 @@ import smach_ros
 {{ class_defs }}
 {% endblock class_defs %}
 
+{% if name is defined %}{% set sm_name = name | lower() %}{% else %}{% set sm_name = 'sm' %}{% endif %}
+
 {% block main_def %}
 def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}():
     rospy.init_node('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}')
@@ -27,20 +31,14 @@ def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main
     {{ main_def | indent(4) }}
 {% endblock main_def %}
    
-{% block header %}
-    {{ name | lower() }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
-    {% if userdata is defined %}
-    {% for userdatum_key, userdatum_val in userdata.items() | sort %}
-    {{ name | lower() }}.userdata.{{ userdatum_key | lower() }} = {{ userdatum_val }}
-    {% endfor %}
-    {% endif %}
-    
-    {{ header | indent(4) }}
-    
-    with {{ name | lower() }}:
-{% endblock header %}
+{% block body %}
+    {{ sm_name }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
 
-{%- block body %}
+    {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) | indent(4) }}{% endif %}
+    {% if name in header %}{{ header[name] | indent(4, true) }}{% endif %}
+
+    with {{ sm_name }}:
+
         {{ body | indent(8) }}
 {% endblock body %}
 
@@ -56,7 +54,7 @@ def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main
 {% block execute %}
     {{ execute | indent(4) }}
 
-    outcome = {{ name | lower() }}.execute()
+    outcome = {{ sm_name }}.execute()
 {% endblock execute %}    
 
 {% block spin %}   

@@ -1,3 +1,5 @@
+{% from "Utils.tpl" import render_transitions, render_remapping %}
+
 {% block class_defs %}
 # define state Foo
 class Foo(smach.State):
@@ -21,8 +23,6 @@ class Foo(smach.State):
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}', Foo(){% if transitions is defined %}, 
-                       transitions={{ '{' }}{% for outcome, transition in transitions.items() | sort %}'{{ outcome }}':'{{ transition }}'{% if not loop.last %},
-                                    {% endif %}{% endfor %}{{ '}' }}{% endif %}{% if remapping is defined %},
-                       remapping={{ '{' }}{% for state_key, userdata_key in remapping.items() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
-                                  {% endif %}{% endfor %}{{ '}' }}{% endif %})
+{{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
+{{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}
