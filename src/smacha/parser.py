@@ -1,7 +1,5 @@
-# Yaml for script parsing
 import os
 import yaml
-import errno
 from yaml.composer import Composer
 from yaml.constructor import Constructor
 from smacha.exceptions import ScriptNotFoundError
@@ -9,7 +7,7 @@ from smacha.exceptions import ScriptNotFoundError
 __all__ = ['Parser']
 
 class Parser():
-    """SMACHA script parser."""
+    """YAML script parser."""
 
     def __init__(self, script_dirs=[]):
         self._loader = None
@@ -17,10 +15,8 @@ class Parser():
         pass
 
     def load_script(self, script):
-        """Search for the specified SMACHA YAML script file and load it."""
-        script_filename = script.split('/')[-1]
-        for script_dir in self._script_dirs:
-            filename = os.path.join(script_dir, script_filename)
+        """Search for the specified YAML script file and load it."""
+        def read_contents(filename):
             try:
                 f = open(filename, 'rb')
             except IOError as e:
@@ -28,13 +24,27 @@ class Parser():
                 pass
 
             if f is None:
-                continue
+                return None
             try:
                 contents = f.read()
             finally:
                 f.close()
+            
+            return contents
 
+        if os.path.isfile(script):
+            filename = script
+            contents = read_contents(filename)
             return contents, filename
+        else:
+            script_filename = script.split('/')[-1]
+            for script_dir in self._script_dirs:
+                filename = os.path.join(script_dir, script_filename)
+                contents = read_contents(filename)
+                if contents is None:
+                    continue
+                return contents, filename
+
         raise ScriptNotFoundError(script)
 
     def select_script(self, names):
@@ -68,19 +78,31 @@ class Parser():
         return mapping
     
     def parse(self, script):
-        """Parse SMACHA YAML script."""
-        if isinstance(script, file):
-            script_buffer = script
-        elif isinstance(script, str):
+        """Parse YAML script."""
+        try:
             script_buffer, _ = self.select_script([script, script + '.yml'])
-        else:
-            raise ScriptNotFoundError(script)
+            self._loader = yaml.Loader(script_buffer)
+        except Exception:
+            try:
+                self._loader = yaml.Loader(script)
+            except Exception:
+                raise ScriptNotFoundError(script)
 
-        self._loader = yaml.Loader(script_buffer)
-        
         self._loader.compose_node = self._compose_node
         self._loader.construct_mapping = self._construct_mapping
         
         parsed_script = self._loader.get_single_data()
         
         return parsed_script
+
+    def strip_line_numbers(self, script):
+        """Strip any line number keys from script."""
+        try:
+            script = dict(script)
+            for script_key, script_val in script.items():
+                if isinstance(script_val, dict):
+                    script[script_key] = self.strip_line_numbers(script_val)
+            del script['__line__']
+            return script
+        except:
+            return script
