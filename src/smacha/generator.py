@@ -21,7 +21,8 @@ class Generator():
                          'prepend', 'append', 'append', 'append', 'append', 'append'],
                     buffer_insertion_order =
                         ['append', 'append', 'append', 'append', 'append',
-                         'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend']):
+                         'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
+                    local_var_lists = ['local_vars']):
         # Flag to enable verbose output to terminal 
         self._verbose = verbose
 
@@ -56,6 +57,13 @@ class Generator():
         self._buffer_insertion_order = dict()
         for i_buffer, buffer_name in enumerate(self._buffer_names):
             self._buffer_insertion_order[buffer_name] = buffer_insertion_order[i_buffer]
+
+        # Initialise a list of local variable list names (a singleton of of ['local_vars'] by default)
+        # that are intended to contain variable names in templates that should be
+        # non-persistent between states (i.e. local).
+        # Variables that are set in templates that are not contained in these lists are assumed
+        # to be persistent between states (i.e. global) by default.
+        self._local_var_lists = local_var_lists 
     
     def _process_script(self, script, script_vars):
         """Recursively process parsed yaml SMACHA script."""
@@ -141,7 +149,14 @@ class Generator():
                         container_code = self._templater.render_all_blocks(state_vars['template'], template_vars)
 
                         # Update script_vars based on the container state template
-                        script_vars.update(self._templater.get_template_vars(state_vars['template'], template_vars))
+                        template_vars_update = self._templater.get_template_vars(state_vars['template'], template_vars)
+                        # Delete local variables
+                        for local_var_list in self._local_var_lists:
+                            if local_var_list in template_vars_update:
+                                for local_var in template_vars_update[local_var_list]:
+                                    if local_var in template_vars_update:
+                                        del template_vars_update[local_var]
+                        script_vars.update(template_vars_update)
 
                         # Add generated container code to respective container code buffers
                         for buffer_name, insertion_order in self._container_insertion_order.items():
@@ -282,7 +297,14 @@ class Generator():
                         state_code = self._templater.render_all_blocks(state_vars['template'], template_vars)
 
                         # Update script_vars based on the leaf state template
-                        script_vars.update(self._templater.get_template_vars(state_vars['template'], template_vars))
+                        template_vars_update = self._templater.get_template_vars(state_vars['template'], template_vars)
+                        # Delete local variables
+                        for local_var_list in self._local_var_lists:
+                            if local_var_list in template_vars_update:
+                                for local_var in template_vars_update[local_var_list]:
+                                    if local_var in template_vars_update:
+                                        del template_vars_update[local_var]
+                        script_vars.update(template_vars_update)
                         
                         # Add generated code from leaf state code buffers to respective parent code buffers
                         for buffer_name, insertion_order in self._buffer_insertion_order.items():
@@ -374,6 +396,7 @@ class Generator():
             #
             # TODO: Throw exception here if any of these clash with the canononical variables.
             # 
+            # Create context
             context = dict()
             context['name'] = script['name']
             for buffer_name, buffer_type in zip(self._buffer_names, self._buffer_types):
@@ -382,7 +405,15 @@ class Generator():
                     context[buffer_name][script['name']] = ''
                 else:
                     context[buffer_name] = ''
-            script_vars.update(self._templater.get_template_vars(script['template'], context = context))
+            # Get template vars using context
+            template_vars_update = self._templater.get_template_vars(script['template'], context = context)
+            # Delete local variables
+            for local_var_list in self._local_var_lists:
+                if local_var_list in template_vars_update:
+                    for local_var in template_vars_update[local_var_list]:
+                        if local_var in template_vars_update:
+                            del template_vars_update[local_var]
+            script_vars.update(template_vars_update)
 
             # Process base template states script
             script_vars = self._process_script(script['states'], script_vars)
