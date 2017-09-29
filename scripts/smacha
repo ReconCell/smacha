@@ -7,8 +7,8 @@ import smacha
 
 if __name__ == '__main__':
     # Parse arguments
-    arg_parser = argparse.ArgumentParser(description='SMACHA: Jinja-based code templating, ' +
-                                                     'generation and scripting for SMACH.')
+    arg_parser = argparse.ArgumentParser(description='SMACHA: Meta-scripting, templating and code generation ' +
+                                                     'for rapid SMACH state machine assembly.')
     
     arg_parser.add_argument('script_file',
                             action='store',
@@ -19,7 +19,7 @@ if __name__ == '__main__':
                             dest='template_dirs',
                             action='store',
                             default=[],
-                            help='Custom SMACHA template directories (directories containing jinja files).')
+                            help='Custom SMACHA template directories (directories containing .tpl template files).')
     
     arg_parser.add_argument('-s', '--scripts',
                             nargs = '*',
