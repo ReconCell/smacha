@@ -9,7 +9,7 @@ test_python2:
     - venv2/bin/pip install nose
     - venv2/bin/pip install pyyaml
     - venv2/bin/pip install jinja2
-    - venv2/bin/nosetests test/executive_smach_tutorials.py
+    - venv2/bin/nosetests test/executive_smach_tutorials_test.py
   tags:
     - docker
     - python2
@@ -25,7 +25,7 @@ test_python3:
     - venv3/bin/pip install nose
     - venv3/bin/pip install pyyaml
     - venv3/bin/pip install jinja2
-    - venv3/bin/nosetests test/executive_smach_tutorials.py
+    - venv3/bin/nosetests test/executive_smach_tutorials_test.py
   tags:
     - docker
     - python3
