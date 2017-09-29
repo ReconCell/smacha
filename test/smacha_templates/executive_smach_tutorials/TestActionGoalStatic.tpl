@@ -1,4 +1,4 @@
-{% extends "SimpleActionState.jinja" %}
+{% extends "SimpleActionState.tpl" %}
 
 {% block imports %}
 {% if 'smacha_msg_import_TestAction' not in defined_headers %}

@@ -1,4 +1,4 @@
-{% from "Utils.jinja" import render_userdata %}
+{% from "Utils.tpl" import render_userdata %}
 
 {% set local_vars = [] %}
 

@@ -1,4 +1,4 @@
-{% extends "ServiceState.jinja" %}
+{% extends "ServiceState.tpl" %}
 
 {% block imports %}
 {% if 'smacha_srv_import_GripperSrvRequest' not in defined_headers %}

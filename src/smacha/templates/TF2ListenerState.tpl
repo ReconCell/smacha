@@ -1,6 +1,6 @@
-{% from "Utils.jinja" import render_transitions %}
+{% from "Utils.tpl" import render_transitions %}
 
-{% include "State.jinja" %}
+{% include "State.tpl" %}
 
 {% block imports %}
 {% if 'import_tf2_ros' not in defined_headers %}

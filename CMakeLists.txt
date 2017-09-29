@@ -203,7 +203,7 @@ install(PROGRAMS
 install(DIRECTORY
   src/smacha/templates/
   DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}/templates
-  FILES_MATCHING PATTERN "*.jinja"
+  FILES_MATCHING PATTERN "*.tpl"
 )
 
 #############

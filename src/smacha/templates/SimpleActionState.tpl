@@ -1,6 +1,6 @@
-{% from "Utils.jinja" import render_goal_slots, render_input_keys, render_result_slots, render_output_keys, render_transitions, render_remapping %}
+{% from "Utils.tpl" import render_goal_slots, render_input_keys, render_result_slots, render_output_keys, render_transitions, render_remapping %}
 
-{% include "State.jinja" %}
+{% include "State.tpl" %}
 
 {% block imports %}
 {% if 'actionlib_import' not in defined_headers %}

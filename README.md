@@ -89,10 +89,10 @@ may be specified as an associative array in each state.
 [Jinja2](http://jinja.pocoo.org/docs/2.9/) is a powerful template engine for Python.
 Jinja2 templates are used to specify how code should be
 generated from SMACHA scripts.
-The `Base` template from the above example is specified in a `Base.jinja` file and looks like this:
+The `Base` template from the above example is specified in a `Base.tpl` file and looks like this:
 
 ```python
-{% from "Utils.jinja" import render_userdata %}
+{% from "Utils.tpl" import render_userdata %}
 {% set defined_headers = [] %}
 {% block base_header %}
 #!/usr/bin/env python
@@ -171,20 +171,20 @@ as well as for other useful constructs.
 
 So far, the following core templates are present and functional:
 
-* `Base.jinja`: the core base template used for specifying the bare bones of a
+* `Base.tpl`: the core base template used for specifying the bare bones of a
 a Python SMACH state machine script.
 
-* `State.jinja`: contains functionality common to all states, e.g. userdata specification.
+* `State.tpl`: contains functionality common to all states, e.g. userdata specification.
 
-* `StateMachine.jinja`: the core template used for inserting a [StateMachine container](http://wiki.ros.org/smach/Tutorials/StateMachine%20container).
+* `StateMachine.tpl`: the core template used for inserting a [StateMachine container](http://wiki.ros.org/smach/Tutorials/StateMachine%20container).
 
-* `Concurrence.jinja`: the core template used for inserting a [Concurrence container](http://wiki.ros.org/smach/Tutorials/Concurrence%20container).
+* `Concurrence.tpl`: the core template used for inserting a [Concurrence container](http://wiki.ros.org/smach/Tutorials/Concurrence%20container).
 
-* `ServiceState.jinja`: the core template used for inserting a [ServiceState](http://wiki.ros.org/smach/Tutorials/ServiceState).
+* `ServiceState.tpl`: the core template used for inserting a [ServiceState](http://wiki.ros.org/smach/Tutorials/ServiceState).
 
-* `SimpleActionState.jinja`: the core template used for inserting a [SimpleActionState](http://wiki.ros.org/smach/Tutorials/SimpleActionState).
+* `SimpleActionState.tpl`: the core template used for inserting a [SimpleActionState](http://wiki.ros.org/smach/Tutorials/SimpleActionState).
 
-* `TF2ListenerState.jinja`: used for reading TF2 transforms.
+* `TF2ListenerState.tpl`: used for reading TF2 transforms.
 
 ### Core Code Generation Variables and Code Blocks
 

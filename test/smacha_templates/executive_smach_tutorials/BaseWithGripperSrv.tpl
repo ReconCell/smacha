@@ -1,4 +1,4 @@
-{% extends "Base.jinja" %}
+{% extends "Base.tpl" %}
 
 {% block imports %}
 {{ super() }}

@@ -1,6 +1,6 @@
-{% from "Utils.jinja" import render_request_slots, render_input_keys, render_response_slots, render_output_keys, render_transitions, render_remapping %}
+{% from "Utils.tpl" import render_request_slots, render_input_keys, render_response_slots, render_output_keys, render_transitions, render_remapping %}
 
-{% include "State.jinja" %}
+{% include "State.tpl" %}
 
 {% block header %}
 {% endblock header %}
