@@ -2,12 +2,18 @@
 
 {% include "State.tpl" %}
 
+{% block base_header %}
+{% endblock base_header %}
+
 {% block imports %}
 {% if 'import_tf2_ros' not in defined_headers %}
 import tf2_ros
 {% do defined_headers.append('import_tf2_ros') %}
 {% endif %}
 {% endblock imports %}
+
+{% block defs %}
+{% endblock defs %}
 
 {% block class_defs %}
 {% if 'class_TF2ListenerState' not in defined_headers %}
@@ -44,8 +50,26 @@ class TF2ListenerState(smach.State):
 {% block header %}
 {% endblock header %}
 
+{% block main_def %}
+{% endblock main_def %}
+
 {% block body %}
 smach.StateMachine.add('READ_HEXAPOD_CURRENT_POSE', TF2ListenerState('{{ target_frame }}', '{{ source_frame }}', '{{ output_key }}'){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %},
 {{ 'remapping=' | indent(23, true) }}{'{{ output_key }}':'{{ output_key }}'})
 {% endblock body %}
+
+{% block footer %}
+{% endblock footer %}
+
+{% block execute %}
+{% endblock execute %}
+
+{% block spin %}
+{% endblock spin %}
+
+{% block base_footer %}
+{% endblock base_footer %}
+
+{% block main %}
+{% endblock main %}
