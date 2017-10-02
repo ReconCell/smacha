@@ -101,7 +101,7 @@ class Generator():
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
                             if state_var != 'states' and state_var != 'template' and state_var != '__line__':
-                                template_vars[state_var] = self._strip_line_numbers(state_var_val)
+                                template_vars[state_var] = self._parser.strip_line_numbers(state_var_val)
                         
                         # Initialise dict of container script vars
                         container_script_vars = dict()
@@ -287,7 +287,7 @@ class Generator():
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
                             if state_var != 'template' and state_var != '__line__':
-                                template_vars[state_var] = self._strip_line_numbers(state_var_val)
+                                template_vars[state_var] = self._parser.strip_line_numbers(state_var_val)
                         
                         # Add appropriate script_vars to template_vars so that the current leaf state template
                         # has access to variables defined in base templates
@@ -332,23 +332,6 @@ class Generator():
             pass
         
         return script_vars
-    
-    #
-    # TODO: Refactor codebase to clean this up.
-    #       I.e., the output of the parser should probably be
-    #       a class unto itself that exposes methods such as this one.
-    #
-    def _strip_line_numbers(self, script):
-        """Strip any line number keys from state_var_val."""
-        try:
-            script = dict(script)
-            for script_key, script_val in script.items():
-                if isinstance(script_val, dict):
-                    script[script_key] = self._strip_line_numbers(script_val)
-            del script['__line__']
-            return script
-        except:
-            return script
     
     def _gen_code_string(self, code_buffer):
         """Generate code string from code list buffer."""
@@ -425,7 +408,7 @@ class Generator():
             #
             # TODO: Add exception handling for cases where certain template vars are necessary.
             #
-            base_template_vars.update({ x : self._strip_line_numbers(script[x]) for x in script if x in self._base_vars })
+            base_template_vars.update({ x : self._parser.strip_line_numbers(script[x]) for x in script if x in self._base_vars })
 
             # Generate code strings from the code buffers and add them to base_template_vars
             for script_var_name, script_var_val in script_vars.items():

@@ -2,6 +2,9 @@
 
 {% include "State.tpl" %}
 
+{% block base_header %}
+{% endblock base_header %}
+
 {% block imports %}
 {% if 'actionlib_import' not in defined_headers %}
 from actionlib import *
@@ -9,8 +12,17 @@ from actionlib import *
 {% endif %}
 {% endblock imports %}
 
+{% block defs %}
+{% endblock defs %}
+
+{% block class_defs %}
+{% endblock class_defs %}
+
 {% block header %}
 {% endblock header %}
+
+{% block main_def %}
+{% endblock main_def %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
@@ -25,3 +37,18 @@ smach.{{ parent_type }}.add('{{ name }}',
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
 {{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}
+
+{% block footer %}
+{% endblock footer %}
+
+{% block execute %}
+{% endblock execute %}
+
+{% block spin %}
+{% endblock spin %}
+
+{% block base_footer %}
+{% endblock base_footer %}
+
+{% block main %}
+{% endblock main %}
