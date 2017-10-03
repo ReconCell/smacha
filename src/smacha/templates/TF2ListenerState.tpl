@@ -41,7 +41,7 @@ class TF2ListenerState(smach.State):
         rospy.loginfo('Executing TFListenerState for target_frame ' + self._target_frame + ' and source_frame ' + self._source_frame)
         while not (self.tf2_buffer.can_transform(self._target_frame, self._source_frame, self._time)):
             pass
-        setattr(userdata, self._output_key, self.tf_listener.lookupTransform(self._target_frame, self._source_frame, self._time))
+        setattr(userdata, self._output_key, self.tf2_buffer.lookup_transform(self._target_frame, self._source_frame, self._time))
         return {% if successful_outcome is defined %}'{{ successful_outcome }}{% else %}'succeeded'{% endif %}
 {% do defined_headers.append('class_TF2ListenerState') %}
 {% endif %}
@@ -54,7 +54,7 @@ class TF2ListenerState(smach.State):
 {% endblock main_def %}
 
 {% block body %}
-smach.StateMachine.add('READ_HEXAPOD_CURRENT_POSE', TF2ListenerState('{{ target_frame }}', '{{ source_frame }}', '{{ output_key }}'){% if transitions is defined %},
+smach.StateMachine.add('{{ name }}', TF2ListenerState('{{ target_frame }}', '{{ source_frame }}', '{{ output_key }}'){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %},
 {{ 'remapping=' | indent(23, true) }}{'{{ output_key }}':'{{ output_key }}'})
 {% endblock body %}
