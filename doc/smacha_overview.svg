@@ -403,14 +403,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="435.2195"
-     inkscape:cy="151.83294"
+     inkscape:cx="433.86488"
+     inkscape:cy="16.403575"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1600"
-     inkscape:window-height="876"
-     inkscape:window-x="0"
+     inkscape:window-width="1135"
+     inkscape:window-height="1896"
+     inkscape:window-x="65"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
      inkscape:snap-nodes="true"
@@ -431,7 +431,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -489,14 +489,14 @@
     <text
        xml:space="preserve"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.56540108px;line-height:125%;font-family:'Myriad Pro';-inkscape-font-specification:'Sans Italic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="402.08063"
-       y="755.90479"
+       x="409.1579"
+       y="755.37775"
        id="text4171"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4173"
-         x="402.08063"
-         y="755.90479"
+         x="409.1579"
+         y="755.37775"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5px;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro'">Parser</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.87540758;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow2Mstart);marker-end:url(#Arrow2Mend-3)"
@@ -516,14 +516,14 @@
     <text
        xml:space="preserve"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.56540108px;line-height:125%;font-family:'Myriad Pro';-inkscape-font-specification:'Sans Italic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="382.47552"
-       y="613.71521"
+       x="391.36935"
+       y="613.26788"
        id="text4171-6"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4173-7"
-         x="382.47552"
-         y="613.71521"
+         x="391.36935"
+         y="613.26788"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5px;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro'">Templater</tspan></text>
     <rect
        style="opacity:1;fill:#79bd9a;fill-opacity:1;stroke:#000000;stroke-width:0.65326214;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
@@ -537,25 +537,25 @@
     <text
        xml:space="preserve"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.56540108px;line-height:125%;font-family:'Myriad Pro';-inkscape-font-specification:'Sans Italic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="591.11707"
-       y="685.8772"
+       x="601.31403"
+       y="685.22443"
        id="text4171-6-6"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4173-7-2"
-         x="591.11707"
-         y="685.8772"
+         x="601.31403"
+         y="685.22443"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5px;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro'">Generator</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.56540108px;line-height:125%;font-family:'Myriad Pro';-inkscape-font-specification:'Sans Italic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="455.65161"
+       x="472.99518"
        y="547.76978"
        id="text4171-6-9"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4173-7-1"
-         x="455.65161"
+         x="472.99518"
          y="547.76978"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:25px;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro'">SMACHA API</tspan></text>
     <rect
