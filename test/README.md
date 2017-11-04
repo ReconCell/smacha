@@ -13,3 +13,7 @@ The code has been superficially refactored in places to make it easier to run di
 * Class definition ordering, as well as the ordering of other definitions, may have been swapped to suit the recursion of the code generator, etc.
 * `service_test.py`: This new test script has been added based on the [SMACH ServiceState tutorial](http://wiki.ros.org/smach/Tutorials/ServiceState).
 * `GripperSrv.srv`: This new gripper service definition file has been added based on the [SMACH ServiceState tutorial](http://wiki.ros.org/smach/Tutorials/ServiceState). The original version of this file was not available online at the time of writing, so this is a "best guess" estimate of what it might have looked like in its original form based on the tutorial.
+
+## smacha_test_examples
+
+So far, there are four tests present here that test parameter handling in SMACHA scripts.
