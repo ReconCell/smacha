@@ -103,6 +103,15 @@ class TestGenerator(unittest.TestCase):
                                             [base_path + '/smacha_templates/smacha_test_examples'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_nesting_params(self):
+        """Test nesting_params.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_test_examples/nesting_params.py') as original_file:
+            generated_code = self._generate(base_path + '/smacha_scripts/smacha_test_examples/nesting_params.yml',
+                                            [base_path + '/smacha_templates/smacha_test_examples'])
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
 
 if __name__=="__main__":

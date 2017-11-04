@@ -1,4 +1,4 @@
---- # SMACHA Parameter Passing Test
+--- # SMACHA Hard-Coded Parameter Passing Test
 name: sm_top
 template: Base
 manifest: smacha

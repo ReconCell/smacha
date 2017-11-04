@@ -10,6 +10,8 @@ class Generator():
     def __init__(self, parser, templater, verbose=False,
                     base_vars =
                         ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
+                    persistent_vars =
+                        ['params'],
                     buffer_names =
                         ['base_header', 'imports', 'defs', 'class_defs', 'main_def',
                          'header', 'body', 'footer', 'execute', 'base_footer', 'main'],
@@ -34,6 +36,9 @@ class Generator():
 
         # Initialise a list of names of expected base template variables
         self._base_vars = base_vars
+        
+        # Initialise a list of names of variables that should persist from parent to child states
+        self._persistent_vars = persistent_vars
 
         # Initialise a list of names of code buffers to be processed
         self._buffer_names = buffer_names
@@ -85,6 +90,14 @@ class Generator():
                 for state_name, state_vars in script.items():
                     if state_name != '__line__':
                       break
+                        
+                # Add persistent state_vars from parents passed via script_vars to state_vars
+                for persistent_var in self._persistent_vars:
+                    if persistent_var in script_vars:
+                        if persistent_var in state_vars:
+                            state_vars[persistent_var].update(self._parser.strip_line_numbers(script_vars[persistent_var]))
+                        else:
+                            state_vars[persistent_var] = self._parser.strip_line_numbers(script_vars[persistent_var])
 
                 # Try to convert any state_vars lookups or string constructs that might be present.
                 for state_var, state_var_val in state_vars.items():
@@ -142,6 +155,10 @@ class Generator():
                         container_script_vars['parent_template'] = state_vars['template']
                         container_script_vars['parent_type'] = state_vars['template']
                         
+                        # Add persistent state_vars to container_script_vars.
+                        # E.g. parameters that need to be passed between parent and child states.
+                        container_script_vars.update({x: self._parser.strip_line_numbers(state_vars[x]) for x in state_vars if x in self._persistent_vars})
+
                         # Recursively process nested child states
                         container_script_vars = self._process_script(state_vars['states'], container_script_vars)
 
@@ -305,6 +322,7 @@ class Generator():
                         # Add appropriate script_vars to template_vars so that the current leaf state template
                         # has access to variables defined in base templates
                         template_vars.update({x: script_vars[x] for x in script_vars if x not in self._buffer_names})
+                        
                         
                         # Call the templater object to render all blocks in the current leaf state template
                         state_code = self._templater.render_all_blocks(state_vars['template'], template_vars)
