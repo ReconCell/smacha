@@ -89,7 +89,7 @@ class TestGenerator(unittest.TestCase):
     def test_hard_coded_params(self):
         """Test hard_coded_params.yml"""
         base_path = os.path.dirname(os.path.abspath(__file__))
-        with open(base_path + '/smacha_test_examples/params_test.py') as original_file:
+        with open(base_path + '/smacha_test_examples/params.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/smacha_test_examples/hard_coded_params.yml',
                                             [base_path + '/smacha_templates/smacha_test_examples'])
             original_code = original_file.read()
@@ -98,7 +98,7 @@ class TestGenerator(unittest.TestCase):
     def test_assigned_params(self):
         """Test assigned_params.yml"""
         base_path = os.path.dirname(os.path.abspath(__file__))
-        with open(base_path + '/smacha_test_examples/params_test.py') as original_file:
+        with open(base_path + '/smacha_test_examples/params.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/smacha_test_examples/assigned_params.yml',
                                             [base_path + '/smacha_templates/smacha_test_examples'])
             original_code = original_file.read()
