@@ -5,6 +5,8 @@ manifest: smacha
 node_name: smacha_params_test
 outcomes: [final_outcome]
 states:
+  # These states show examples of hard-coding of parameter variables that are
+  # later used within templates.
   - FOO_0:
       template: ParamFoo
       name_param: FOO_0

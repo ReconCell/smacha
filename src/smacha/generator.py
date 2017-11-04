@@ -292,6 +292,10 @@ class Generator():
                             if state_var not in ['__line__', 'states', 'template', 'script', 'input_keys', 'output_keys', 'outcomes']:
                                 if state_var in sub_script[state_name].keys() or state_var == 'remapping':
                                     sub_script[state_name][state_var] = state_var_val
+                        
+                        # Add persistent state_vars to script_vars.
+                        # E.g. parameters that need to be passed between parent and child states.
+                        script_vars.update({x: self._parser.strip_line_numbers(state_vars[x]) for x in state_vars if x in self._persistent_vars})
 
                         # Continue processing with the included sub-script now substituted in
                         # for the current state with potentially re-defined state variables
