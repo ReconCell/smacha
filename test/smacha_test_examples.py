@@ -19,10 +19,10 @@ class TestGenerator(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestGenerator, self).__init__(*args, **kwargs)
     
-    def _generate(self, smacha_script_filename, template_dirs):
+    def _generate(self, smacha_script_filename, script_dirs, template_dirs):
         """Generate smach code using smacha yaml script file and templates."""
         # Load parser
-        parser = smacha.Parser()
+        parser = smacha.Parser(script_dirs = script_dirs)
         
         # Load and parse smacha yaml script
         with open(smacha_script_filename) as smacha_script_file:
@@ -91,6 +91,7 @@ class TestGenerator(unittest.TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(base_path + '/smacha_test_examples/params.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/smacha_test_examples/hard_coded_params.yml',
+                                            [base_path + '/smacha_scripts/smacha_test_examples'],
                                             [base_path + '/smacha_templates/smacha_test_examples'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
@@ -100,6 +101,7 @@ class TestGenerator(unittest.TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(base_path + '/smacha_test_examples/params.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/smacha_test_examples/assigned_params.yml',
+                                            [base_path + '/smacha_scripts/smacha_test_examples'],
                                             [base_path + '/smacha_templates/smacha_test_examples'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
@@ -109,6 +111,17 @@ class TestGenerator(unittest.TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(base_path + '/smacha_test_examples/nesting_params.py') as original_file:
             generated_code = self._generate(base_path + '/smacha_scripts/smacha_test_examples/nesting_params.yml',
+                                            [base_path + '/smacha_scripts/smacha_test_examples'],
+                                            [base_path + '/smacha_templates/smacha_test_examples'])
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_nesting_params_with_sub_script(self):
+        """Test nesting_params_with_sub_script.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_test_examples/nesting_params.py') as original_file:
+            generated_code = self._generate(base_path + '/smacha_scripts/smacha_test_examples/nesting_params_with_sub_script.yml',
+                                            [base_path + '/smacha_scripts/smacha_test_examples'],
                                             [base_path + '/smacha_templates/smacha_test_examples'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
