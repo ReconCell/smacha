@@ -108,7 +108,19 @@ class Generator():
                             try:
                                 state_vars[state_var] = self._construct_string(state_vars, state_var_val)
                             except:
-                                raise
+                                continue
+                    elif isinstance(state_var_val, dict):
+                        for state_var_val_item, state_var_val_item_val in state_var_val.items():
+                            if isinstance(state_var_val_item_val, list):
+                                try:
+                                    state_vars[state_var][state_var_val_item] = self._get_script_var(state_vars, state_var_val_item_val)
+                                except:
+                                    try:
+                                        state_vars[state_var][state_var_val_item] = self._construct_string(state_vars, state_var_val_item_val)
+                                    except:
+                                        continue
+                            else:
+                                continue
                     else:
                         continue
                 
@@ -425,7 +437,11 @@ class Generator():
         for string_part in string_construct:
             if isinstance(string_part, list):
                 try:
+                    # print('string_construct: {}'.format(string_construct))
+                    # print('string_part: {}'.format(string_part))
+                    # print('script_vars: {}'.format(script_vars))
                     output_string = output_string + str(self._get_script_var(script_vars, string_part))
+                    # print('output_string: {}'.format(output_string))
                     contains_lookup = True
                 except:
                     raise ParsingError(error='Could not parse script_vars lookup in string construct!')
