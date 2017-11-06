@@ -7,6 +7,7 @@
 
 {% block imports %}
 {% if 'import_tf2_ros' not in defined_headers %}
+import tf2_ros
 {% do defined_headers.append('import_tf2_ros') %}
 {% endif %}
 {% endblock imports %}
