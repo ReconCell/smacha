@@ -1,0 +1,74 @@
+#! /usr/bin/env python
+
+import sys
+import argparse
+
+import smacha
+
+if __name__ == '__main__':
+    # Parse arguments
+    arg_parser = argparse.ArgumentParser(description='SMACHA: Meta-scripting, templating and code generation ' +
+                                                     'for rapid SMACH state machine assembly.')
+    
+    arg_parser.add_argument('script_file',
+                            action='store',
+                            help='SMACHA script (yaml file).')
+    
+    arg_parser.add_argument('-t', '--templates',
+                            nargs = '*',
+                            dest='template_dirs',
+                            action='store',
+                            default=[],
+                            help='Custom SMACHA template directories (directories containing .tpl template files).')
+    
+    arg_parser.add_argument('-s', '--scripts',
+                            nargs = '*',
+                            dest='script_dirs',
+                            action='store',
+                            default=[],
+                            help='SMACHA script directories (directories containing yaml files).')
+    
+    arg_parser.add_argument('-o', '--output',
+                            dest='output_file',
+                            action='store',
+                            default='./smacha_output.py',
+                            help='Generated SMACH output (python file).')
+    
+    arg_parser.add_argument('-c', '--comments',
+                            action='store_true',
+                            default=False,
+                            help='Include template header and footer comments in generated code.')
+    
+    arg_parser.add_argument('-i', '--introspection-server',
+                            action='store_true',
+                            default=False,
+                            help='Include an introspection server (for use with smach_viewer) in generated code.')
+    
+    arg_parser.add_argument('-v', '--verbose',
+                            action='store_true',
+                            default=False,
+                            help='Print verbose output to terminal.')
+    
+    args = arg_parser.parse_args()
+    
+    # Load parser
+    parser = smacha.Parser(script_dirs = args.script_dirs)
+    
+    # Load and parse SMACHA script
+    with open(args.script_file) as smacha_file:
+        smacha_script = parser.parse(smacha_file)
+
+    # Load template processor
+    templater = smacha.Templater(args.template_dirs,
+                                 include_comments=args.comments,
+                                 include_introspection_server=args.introspection_server)
+    
+    # Load code generator
+    generator = smacha.Generator(parser, templater, verbose=args.verbose)
+    
+    # Generate the SMACH code
+    smach_code = generator.run(smacha_script)
+    
+    # Write the final output to a SMACH python file
+    with open(args.output_file, 'w') as smach_file:
+        smach_file.write(smach_code)

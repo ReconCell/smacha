@@ -77,7 +77,7 @@ class Parser():
         mapping['__line__'] = node.__line__
         return mapping
     
-    def parse(self, script):
+    def parse(self, script, include_line_numbers=True):
         """Parse YAML script."""
         try:
             script_buffer, _ = self.select_script([script, script + '.yml'])
@@ -88,8 +88,9 @@ class Parser():
             except Exception:
                 raise ScriptNotFoundError(script)
 
-        self._loader.compose_node = self._compose_node
-        self._loader.construct_mapping = self._construct_mapping
+        if include_line_numbers:
+            self._loader.compose_node = self._compose_node
+            self._loader.construct_mapping = self._construct_mapping
         
         parsed_script = self._loader.get_single_data()
         
