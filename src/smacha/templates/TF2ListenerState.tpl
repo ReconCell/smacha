@@ -21,7 +21,7 @@ class TF2ListenerState(smach.State):
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=[{% for outcome, transition in transitions.items() %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}],
-                             input_keys=[],
+                             input_keys=['target', 'source'],
                              output_keys=['output'])
 
         self._tf2_buffer = tf2_ros.Buffer()
