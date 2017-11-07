@@ -5,9 +5,7 @@ manifest: smacha
 node_name: smach_example_state_machine
 outcomes: [outcome6]
 states:
-  - BAS:
-      template: Bas
-      transitions: {outcome3: CON}
+  - BAS: {template: Bas, transitions: {outcome3: CON}}
   - CON:
       template: Concurrence
       outcomes: [outcome4, outcome5]
@@ -15,7 +13,5 @@ states:
       outcome_map: {outcome5: {FOO: outcome2, BAR: outcome1}}
       transitions: {outcome4: CON, outcome5: outcome6}
       states:
-        - FOO:
-            template: Foo
-        - BAR:
-            template: Bar
+        - FOO: {template: Foo}
+        - BAR: {template: Bar}

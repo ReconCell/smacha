@@ -7,13 +7,9 @@ outcomes: [final_outcome]
 states:
   # These states show examples of hard-coding of parameter variables that are
   # later used within templates.
-  - FOO_0:
-      template: ParamFoo
-      name_param: FOO_0
-      outcome_param: outcome1
-      transitions: {outcome1: FOO_1, outcome2: final_outcome}
-  - FOO_1:
-      template: ParamFoo
-      name_param: FOO_1
-      outcome_param: outcome2
-      transitions: {outcome1: FOO_1, outcome2: final_outcome}
+  - FOO_0: {template: ParamFoo,
+            name_param: FOO_0, outcome_param: outcome1,
+            transitions: {outcome1: FOO_1, outcome2: final_outcome}}
+  - FOO_1: {template: ParamFoo,
+            name_param: FOO_1, outcome_param: outcome2,
+            transitions: {outcome1: FOO_1, outcome2: final_outcome}}
