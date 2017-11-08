@@ -94,12 +94,12 @@ class Generator():
         # Inspect script for state dict
         elif isinstance(script, dict):
             # Check if the state script dict is well-formed
-            if len(script.items()) > 1:
+            if len(list(script.items())) > 1:
                 raise ParsingError(error='Badly formed state script!', line_number=script.lc.line)
             
             else:
                 # Find the state name and variables in the state script
-                state_name, state_vars = script.items()[0]
+                state_name, state_vars = list(script.items())[0]
                         
                 # Add persistent state_vars from parents passed via script_vars to state_vars
                 for persistent_var in self._container_persistent_vars:
@@ -293,7 +293,7 @@ class Generator():
                             pass
 
                         # Find and replace the state name in the state sub-script
-                        sub_script_state_name, sub_script_state_vars = sub_script.items()[0]
+                        sub_script_state_name, sub_script_state_vars = list(sub_script.items())[0]
                         sub_script[state_name] = sub_script.pop(sub_script_state_name)
 
                         # Find and replace sub-script variables with current state variables
