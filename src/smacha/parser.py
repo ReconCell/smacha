@@ -1,7 +1,5 @@
 import os
-import yaml
-from yaml.composer import Composer
-from yaml.constructor import Constructor
+from ruamel import yaml
 from smacha.exceptions import ScriptNotFoundError
 
 __all__ = ['Parser']
@@ -10,7 +8,8 @@ class Parser():
     """YAML script parser."""
 
     def __init__(self, script_dirs=[]):
-        self._loader = None
+        self._loader = yaml.RoundTripLoader
+        self._dumper = yaml.RoundTripDumper
         self._script_dirs = script_dirs
         pass
 
@@ -59,56 +58,21 @@ class Parser():
 
         raise ScriptNotFoundError(names)
     
-    
-    # Credit to puzzlet@stackoverflow for the following two functions that
-    # allow for line numbers to be added to the parsed yaml.
-    #
-    # http://stackoverflow.com/questions/13319067/parsing-yaml-return-with-line-number
-    #
-    def _compose_node(self, parent, index):
-        # the line number where the previous token has ended (plus empty lines)
-        line = self._loader.line
-        node = Composer.compose_node(self._loader, parent, index)
-        node.__line__ = line + 1
-        return node
-    
-    def _construct_mapping(self, node, deep=False):
-        mapping = Constructor.construct_mapping(self._loader, node, deep=deep)
-        mapping['__line__'] = node.__line__
-        return mapping
-    
     def parse(self, script, include_line_numbers=True):
         """Parse YAML script."""
         try:
             script_buffer, _ = self.select_script([script, script + '.yml'])
-            self._loader = yaml.Loader(script_buffer)
+            parsed_script = yaml.load(script_buffer, Loader=self._loader)
         except Exception:
             try:
-                self._loader = yaml.Loader(script)
+                parsed_script = yaml.load(script, Loader=self._loader)
             except Exception:
                 raise ScriptNotFoundError(script)
 
-        if include_line_numbers:
-            self._loader.compose_node = self._compose_node
-            self._loader.construct_mapping = self._construct_mapping
-        
-        parsed_script = self._loader.get_single_data()
-        
         return parsed_script
 
     def dump(self, script_file, script):
         """Dump YAML script to file."""
         with open(script_file, 'w') as script_file_handle:
-            yaml.dump(script, script_file_handle, default_flow_style=True, default_style='')
-
-    def strip_line_numbers(self, script):
-        """Strip any line number keys from script."""
-        try:
-            script = dict(script)
-            for script_key, script_val in script.items():
-                if isinstance(script_val, dict):
-                    script[script_key] = self.strip_line_numbers(script_val)
-            del script['__line__']
-            return script
-        except:
-            return script
+            yaml.dump(script, script_file_handle,
+                      Dumper = self._dumper, default_flow_style=False, default_style='')
