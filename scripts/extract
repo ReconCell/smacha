@@ -49,9 +49,7 @@ if __name__ == '__main__':
     # Find the container state
     for state in script['states']:
         # Find the state name and variables in the current state
-        for state_name, state_vars in state.items():
-            if state_name != '__line__':
-                break
+        state_name, state_vars = state.items()[0]
 
         # Check if it's the state we're looking for
         if state_name == args.state:
