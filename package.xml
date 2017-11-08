@@ -46,7 +46,6 @@
   <build_depend>geometry_msgs</build_depend>
   <run_depend>rospy</run_depend>
   <run_depend>python-argparse</run_depend>
-  <run_depend>python-yaml</run_depend>
   <run_depend>python-ruamel.yaml</run_depend>
   <run_depend>python-jinja2</run_depend>
   <run_depend>actionlib</run_depend>
