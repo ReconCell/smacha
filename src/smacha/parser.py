@@ -96,6 +96,11 @@ class Parser():
         
         return parsed_script
 
+    def dump(self, script_file, script):
+        """Dump YAML script to file."""
+        with open(script_file, 'w') as script_file_handle:
+            yaml.dump(script, script_file_handle, default_flow_style=True, default_style='')
+
     def strip_line_numbers(self, script):
         """Strip any line number keys from script."""
         try:

@@ -7,19 +7,16 @@ import smacha
 
 if __name__ == '__main__':
     # Parse arguments
-    arg_parser = argparse.ArgumentParser(description='SMACHA: Meta-scripting, templating and code generation ' +
-                                                     'for rapid SMACH state machine assembly.')
+    arg_parser = argparse.ArgumentParser(description='SMACHA Extract: Extract a container state from a script and ' +
+                                                     'save it as a sub-script.')
     
     arg_parser.add_argument('script_file',
                             action='store',
                             help='SMACHA script (yaml file).')
     
-    arg_parser.add_argument('-t', '--templates',
-                            nargs = '*',
-                            dest='template_dirs',
+    arg_parser.add_argument('state',
                             action='store',
-                            default=[],
-                            help='Custom SMACHA template directories (directories containing .tpl template files).')
+                            help='Name of container state to be extracted.')
     
     arg_parser.add_argument('-s', '--scripts',
                             nargs = '*',
@@ -28,26 +25,18 @@ if __name__ == '__main__':
                             default=[],
                             help='SMACHA script directories (directories containing yaml files).')
     
-    arg_parser.add_argument('-o', '--output',
-                            dest='output_file',
+    arg_parser.add_argument('-sub', '--sub-script-output',
+                            dest='sub_script_output_file',
                             action='store',
-                            default='./smacha_output.py',
-                            help='Generated SMACH output (python file).')
+                            default='./sub_script_output.yml',
+                            help='Generated SMACHA sub-script output (YAML file).')
     
-    arg_parser.add_argument('-c', '--comments',
-                            action='store_true',
-                            default=False,
-                            help='Include template header and footer comments in generated code.')
+    arg_parser.add_argument('-sup', '--super-script-output',
+                            dest='super_script_output_file',
+                            action='store',
+                            default='./super_script_output.yml',
+                            help='Generated SMACHA super-script output (YAML file).')
     
-    arg_parser.add_argument('-i', '--introspection-server',
-                            action='store_true',
-                            default=False,
-                            help='Include an introspection server (for use with smach_viewer) in generated code.')
-    
-    arg_parser.add_argument('-v', '--verbose',
-                            action='store_true',
-                            default=False,
-                            help='Print verbose output to terminal.')
     
     args = arg_parser.parse_args()
     
@@ -55,20 +44,18 @@ if __name__ == '__main__':
     parser = smacha.Parser(script_dirs = args.script_dirs)
     
     # Load and parse SMACHA script
-    with open(args.script_file) as smacha_file:
-        smacha_script = parser.parse(smacha_file)
+    script = parser.parse(args.script_file, include_line_numbers=False)
 
-    # Load template processor
-    templater = smacha.Templater(args.template_dirs,
-                                 include_comments=args.comments,
-                                 include_introspection_server=args.introspection_server)
-    
-    # Load code generator
-    generator = smacha.Generator(parser, templater, verbose=args.verbose)
-    
-    # Generate the SMACH code
-    smach_code = generator.run(smacha_script)
-    
-    # Write the final output to a SMACH python file
-    with open(args.output_file, 'w') as smach_file:
-        smach_file.write(smach_code)
+    # Find the container state
+    for state in script['states']:
+        # Find the state name and variables in the current state
+        for state_name, state_vars in state.items():
+            if state_name != '__line__':
+                break
+
+        # Check if it's the state we're looking for
+        if state_name == args.state:
+            break
+
+    # Write the sub-script to a YAML file
+    parser.dump(args.sub_script_output_file, [state])
