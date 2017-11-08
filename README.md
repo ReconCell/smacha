@@ -286,10 +286,15 @@ sudo sh -c 'echo "yaml https://github.com/ReconCell/rosdistro/raw/master/rosdep/
 rosdep update
 ```
 
-### Clone 
+### Clone, Update Dependencies and Build
 
 Simply clone into the `src` directory of your catkin workspace and run `catkin_make` or `catkin build` from the
-root of the workspace.
+root of the workspace.  It may be necessary to update dependencies using `rosdep` as follows:
+
+```
+cd ~/catkin_ws
+rosdep install --from-paths src --ignore-src -r -y
+```
 
 ## Usage
 In the simplest case, using default core templates, SMACHA can be invoked on a `my_script.yml`
