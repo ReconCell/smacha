@@ -177,6 +177,7 @@ include_directories(
 # )
 install(PROGRAMS
   scripts/smacha
+  scripts/extract
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
