@@ -5,20 +5,12 @@ manifest: smacha
 node_name: smach_example_actionlib
 outcomes: [succeeded, aborted, preempted]
 states:
-  - GOAL_DEFAULT:
-      template: SimpleActionState
-      action_server_namespace: test_action
-      action: TestAction
-      transitions: {succeeded: GOAL_STATIC}
-  - GOAL_STATIC:
-      template: TestActionGoalStatic
-      action_server_namespace: test_action
-      action: TestAction
-      goal: TestGoal(goal=1)
-      transitions: {aborted: GOAL_CB}
-  - GOAL_CB:
-      template: TestActionGoalCB
-      action_server_namespace: test_action
-      action: TestAction
-      goal_cb: goal_callback
-      transitions: {aborted: succeeded}
+  - GOAL_DEFAULT: {template: SimpleActionState,
+                   action_server_namespace: test_action, action: TestAction,
+                   transitions: {succeeded: GOAL_STATIC}}
+  - GOAL_STATIC: {template: TestActionGoalStatic,
+                  action_server_namespace: test_action, action: TestAction, goal: TestGoal(goal=1),
+                  transitions: {aborted: GOAL_CB}}
+  - GOAL_CB: {template: TestActionGoalCB,
+              action_server_namespace: test_action, action: TestAction, goal_cb: goal_callback,
+              transitions: {aborted: succeeded}}

@@ -6,15 +6,9 @@
     states:
       # In these states, the [params, name_0] and [params, name_1] parameter lookups
       # are populated by parameters defined in the super-script ('nesting_params_with_sub_script.yml').
-      - FOO_0:
-          template: ParamFoo
-          params: {outcome: outcome1}
-          name_param: [params, name_0]
-          outcome_param: [params, outcome]
-          transitions: {outcome1: FOO_1, outcome2: outcome3}
-      - FOO_1:
-          template: ParamFoo
-          params: {outcome: outcome2}
-          name_param: [params, name_1]
-          outcome_param: [params, outcome]
-          transitions: {outcome1: FOO_1, outcome2: outcome3}
+      - FOO_0: {template: ParamFoo, params: {outcome: outcome1},
+                name_param: [params, name_0], outcome_param: [params, outcome],
+                transitions: {outcome1: FOO_1, outcome2: outcome3}}
+      - FOO_1: {template: ParamFoo, params: {outcome: outcome2},
+                name_param: [params, name_1], outcome_param: [params, outcome],
+                transitions: {outcome1: FOO_1, outcome2: outcome3}}

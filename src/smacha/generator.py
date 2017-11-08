@@ -10,8 +10,12 @@ class Generator():
     def __init__(self, parser, templater, verbose=False,
                     base_vars =
                         ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
-                    persistent_vars =
+                    container_persistent_vars =
                         ['params'],
+                    sub_script_non_persistent_vars =
+                        ['states', 'template', 'script', 'input_keys', 'output_keys', 'outcomes'],
+                    sub_script_persistent_vars =
+                        ['userdata', 'remapping', 'transitions'],
                     buffer_names =
                         ['base_header', 'imports', 'defs', 'class_defs', 'main_def',
                          'header', 'body', 'footer', 'execute', 'base_footer', 'main'],
@@ -38,7 +42,15 @@ class Generator():
         self._base_vars = base_vars
         
         # Initialise a list of names of variables that should persist from parent to child states
-        self._persistent_vars = persistent_vars
+        self._container_persistent_vars = container_persistent_vars
+        
+        # Initialise a list of names of variables that should NOT persist from sub-script call
+        # to sub-script definition.
+        self._sub_script_non_persistent_vars = sub_script_non_persistent_vars
+        
+        # Initialise a list of names of variables that should persist from sub-script call
+        # to sub-script definition.
+        self._sub_script_persistent_vars = sub_script_persistent_vars
 
         # Initialise a list of names of code buffers to be processed
         self._buffer_names = buffer_names
@@ -82,22 +94,20 @@ class Generator():
         # Inspect script for state dict
         elif isinstance(script, dict):
             # Check if the state script dict is well-formed
-            if len(script.items()) > 2:
-                raise ParsingError(error='Badly formed state script!', line_number=script['__line__'])
+            if len(list(script.items())) > 1:
+                raise ParsingError(error='Badly formed state script!', line_number=script.lc.line)
             
             else:
                 # Find the state name and variables in the state script
-                for state_name, state_vars in script.items():
-                    if state_name != '__line__':
-                      break
+                state_name, state_vars = list(script.items())[0]
                         
                 # Add persistent state_vars from parents passed via script_vars to state_vars
-                for persistent_var in self._persistent_vars:
+                for persistent_var in self._container_persistent_vars:
                     if persistent_var in script_vars:
                         if persistent_var in state_vars:
-                            state_vars[persistent_var].update(self._parser.strip_line_numbers(script_vars[persistent_var]))
+                            state_vars[persistent_var].update(script_vars[persistent_var])
                         else:
-                            state_vars[persistent_var] = self._parser.strip_line_numbers(script_vars[persistent_var])
+                            state_vars[persistent_var] = script_vars[persistent_var]
 
                 # Try to convert any state_vars lookups or string constructs that might be present.
                 for state_var, state_var_val in state_vars.items():
@@ -108,7 +118,23 @@ class Generator():
                             try:
                                 state_vars[state_var] = self._construct_string(state_vars, state_var_val)
                             except:
-                                raise
+                                # If no state_vars lookups or string constructs can be parsed from state_var,
+                                # leave it as it is and continue.
+                                continue
+                    elif isinstance(state_var_val, dict):
+                        for state_var_val_item, state_var_val_item_val in state_var_val.items():
+                            if isinstance(state_var_val_item_val, list):
+                                try:
+                                    state_vars[state_var][state_var_val_item] = self._get_script_var(state_vars, state_var_val_item_val)
+                                except:
+                                    try:
+                                        state_vars[state_var][state_var_val_item] = self._construct_string(state_vars, state_var_val_item_val)
+                                    except:
+                                        # If no state_vars lookups or string constructs can be parsed from
+                                        # the state_var dict item, leave it as it is and continue.
+                                        continue
+                            else:
+                                continue
                     else:
                         continue
                 
@@ -126,8 +152,8 @@ class Generator():
                         
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
-                            if state_var != 'states' and state_var != 'template' and state_var != '__line__':
-                                template_vars[state_var] = self._parser.strip_line_numbers(state_var_val)
+                            if state_var != 'states' and state_var != 'template':
+                                template_vars[state_var] = state_var_val
                         
                         # Initialise dict of container script vars
                         container_script_vars = dict()
@@ -157,7 +183,7 @@ class Generator():
                         
                         # Add persistent state_vars to container_script_vars.
                         # E.g. parameters that need to be passed between parent and child states.
-                        container_script_vars.update({x: self._parser.strip_line_numbers(state_vars[x]) for x in state_vars if x in self._persistent_vars})
+                        container_script_vars.update({x: state_vars[x] for x in state_vars if x in self._container_persistent_vars})
 
                         # Recursively process nested child states
                         container_script_vars = self._process_script(state_vars['states'], container_script_vars)
@@ -245,10 +271,7 @@ class Generator():
                 #
                 # NOTE: The code for the below case was written in haste while approaching
                 # a deadline and much could, and probably should, be improved with respect
-                # to error-handling and input validation.  For instance, the YAML line
-                # numbering scheme is probably now broken with this addition.
-                # TODO: Consider upgrading the yaml parser to ruamel in light of this.
-                #
+                # to error-handling and input validation.
                 elif 'script' in state_vars:
                     # Process included sub-script
                     try:
@@ -270,9 +293,7 @@ class Generator():
                             pass
 
                         # Find and replace the state name in the state sub-script
-                        for sub_script_state_name, sub_script_state_vars in sub_script.items():
-                            if sub_script_state_name != '__line__':
-                              break
+                        sub_script_state_name, sub_script_state_vars = list(sub_script.items())[0]
                         sub_script[state_name] = sub_script.pop(sub_script_state_name)
 
                         # Find and replace sub-script variables with current state variables
@@ -289,13 +310,16 @@ class Generator():
                         # sub-script, since certain containers (e.g. Concurrence) do not define
                         # transitions.
                         for state_var, state_var_val in state_vars.items():
-                            if state_var not in ['__line__', 'states', 'template', 'script', 'input_keys', 'output_keys', 'outcomes']:
-                                if state_var in sub_script[state_name].keys() or state_var == 'remapping':
-                                    sub_script[state_name][state_var] = state_var_val
+                            if state_var not in self._sub_script_non_persistent_vars:
+                                if state_var in sub_script[state_name].keys() or state_var in self._sub_script_persistent_vars:
+                                    if state_var in sub_script[state_name].keys():
+                                        sub_script[state_name][state_var].update(state_var_val)
+                                    else:
+                                        sub_script[state_name][state_var] = state_var_val
                         
                         # Add persistent state_vars to script_vars.
                         # E.g. parameters that need to be passed between parent and child states.
-                        script_vars.update({x: self._parser.strip_line_numbers(state_vars[x]) for x in state_vars if x in self._persistent_vars})
+                        script_vars.update({x: state_vars[x] for x in state_vars if x in self._container_persistent_vars})
 
                         # Continue processing with the included sub-script now substituted in
                         # for the current state with potentially re-defined state variables
@@ -320,8 +344,8 @@ class Generator():
                         
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
-                            if state_var != 'template' and state_var != '__line__':
-                                template_vars[state_var] = self._parser.strip_line_numbers(state_var_val)
+                            if state_var != 'template':
+                                template_vars[state_var] = state_var_val
                         
                         # Add appropriate script_vars to template_vars so that the current leaf state template
                         # has access to variables defined in base templates
@@ -425,7 +449,11 @@ class Generator():
         for string_part in string_construct:
             if isinstance(string_part, list):
                 try:
+                    # print('string_construct: {}'.format(string_construct))
+                    # print('string_part: {}'.format(string_part))
+                    # print('script_vars: {}'.format(script_vars))
                     output_string = output_string + str(self._get_script_var(script_vars, string_part))
+                    # print('output_string: {}'.format(output_string))
                     contains_lookup = True
                 except:
                     raise ParsingError(error='Could not parse script_vars lookup in string construct!')
@@ -517,7 +545,7 @@ class Generator():
             #
             # TODO: Add exception handling for cases where certain template vars are necessary.
             #
-            base_template_vars.update({ x : self._parser.strip_line_numbers(script[x]) for x in script if x in self._base_vars })
+            base_template_vars.update({ x : script[x] for x in script if x in self._base_vars })
 
             # Generate code strings from the code buffers and add them to base_template_vars
             for script_var_name, script_var_val in script_vars.items():

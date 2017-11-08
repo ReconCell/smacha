@@ -7,7 +7,7 @@ test_python2:
     - pip install virtualenv
     - virtualenv --system-site-packages --python=/usr/bin/python2 venv2
     - venv2/bin/pip install nose
-    - venv2/bin/pip install pyyaml
+    - venv2/bin/pip install ruamel.yaml
     - venv2/bin/pip install jinja2
     - venv2/bin/nosetests test/executive_smach_tutorials_test.py
     - venv2/bin/nosetests test/smacha_test_examples.py
@@ -24,7 +24,7 @@ test_python3:
     - pip install virtualenv
     - virtualenv --system-site-packages --python=/usr/bin/python3 venv3
     - venv3/bin/pip install nose
-    - venv3/bin/pip install pyyaml
+    - venv3/bin/pip install ruamel.yaml
     - venv3/bin/pip install jinja2
     - venv3/bin/nosetests test/executive_smach_tutorials_test.py
     - venv3/bin/nosetests test/smacha_test_examples.py

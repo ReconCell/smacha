@@ -5,17 +5,11 @@ manifest: smacha
 node_name: smach_example_state_machine
 outcomes: [outcome5]
 states:
-  - BAS:
-      template: Bas
-      transitions: {outcome3: SUB}
+  - BAS: {template: Bas, transitions: {outcome3: SUB}}
   - SUB:
       template: StateMachine
       outcomes: [outcome4]
       transitions: {outcome4: outcome5}
       states:
-        - FOO:
-            template: Foo
-            transitions: {outcome1: BAR, outcome2: outcome4}
-        - BAR:
-            template: Bar
-            transitions: {outcome1: FOO}
+        - FOO: {template: Foo, transitions: {outcome1: BAR, outcome2: outcome4}}
+        - BAR: {template: Bar, transitions: {outcome1: FOO}}
