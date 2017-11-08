@@ -7,8 +7,8 @@ import smacha
 
 if __name__ == '__main__':
     # Parse arguments
-    arg_parser = argparse.ArgumentParser(description='SMACHA: Meta-scripting, templating and code generation ' +
-                                                     'for rapid SMACH state machine assembly.')
+    arg_parser = argparse.ArgumentParser(description='SMACHA Generate: Generate SMACH Python code using ' +
+                                                     'scripts and templates.')
     
     arg_parser.add_argument('script_file',
                             action='store',
@@ -55,8 +55,7 @@ if __name__ == '__main__':
     parser = smacha.Parser(script_dirs = args.script_dirs)
     
     # Load and parse SMACHA script
-    with open(args.script_file) as smacha_file:
-        smacha_script = parser.parse(smacha_file)
+    script = parser.parse(args.script_file)
 
     # Load template processor
     templater = smacha.Templater(args.template_dirs,
@@ -67,7 +66,7 @@ if __name__ == '__main__':
     generator = smacha.Generator(parser, templater, verbose=args.verbose)
     
     # Generate the SMACH code
-    smach_code = generator.run(smacha_script)
+    smach_code = generator.run(script)
     
     # Write the final output to a SMACH python file
     with open(args.output_file, 'w') as smach_file:

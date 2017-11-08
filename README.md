@@ -286,23 +286,28 @@ sudo sh -c 'echo "yaml https://github.com/ReconCell/rosdistro/raw/master/rosdep/
 rosdep update
 ```
 
-### Clone 
+### Clone, Update Dependencies and Build
 
 Simply clone into the `src` directory of your catkin workspace and run `catkin_make` or `catkin build` from the
-root of the workspace.
+root of the workspace.  It may be necessary to update dependencies using `rosdep` as follows:
+
+```
+cd ~/catkin_ws
+rosdep install --from-paths src --ignore-src -r -y
+```
 
 ## Usage
 In the simplest case, using default core templates, SMACHA can be invoked on a `my_script.yml`
 SMACHA script file as follows:
 ```
-rosrun smacha smacha my_script.yml
+rosrun smacha generate my_script.yml
 ```
 where the generated code will be output to a file called `smacha_output.py`
 
 Example usage for the "Nesting State Machines" tutorial:
 ```
 roscd smacha/test
-rosrun smacha smacha smachaml/executive_smach_tutorials/state_machine_nesting2.yml -t templates/executive_smach_tutorials -o state_machine_nesting2.py -v
+rosrun smacha generate smacha_scripts/executive_smach_tutorials/state_machine_nesting2.yml -t smacha_templates/executive_smach_tutorials -o state_machine_nesting2.py -v
 ```
 Here, the `-t` argument specifies custom template directories for this particular tutorial,
 which may contain templates that override the core templates.
@@ -311,7 +316,7 @@ The `-o` argument specifies a custom name for the generated output file.
 
 The `-v` argument tells SMACHA to print verbose processing output to the terminal.
 
-Further arguments and options may be explored by running `rosrun smacha smacha -h` or `rosrun smacha smacha --help`.
+Further arguments and options may be explored by running `rosrun smacha generate -h` or `rosrun smacha generate --help`.
 
 ## Testing
 Tests may be performed by running:
