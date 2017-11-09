@@ -1,0 +1,143 @@
+#! /usr/bin/env python
+
+import os
+import sys
+import argparse
+
+import smacha
+from smacha.exceptions import ParsingError
+
+if __name__ == '__main__':
+    # Parse arguments
+    arg_parser = argparse.ArgumentParser(description='SMACHA Contain: Pack a series of states in a script into a' +
+                                                     'container state and save the resulting script.')
+    
+    arg_parser.add_argument('script_file',
+                            action='store',
+                            help='SMACHA script (yaml file).')
+    
+    arg_parser.add_argument('container_name',
+                            action='store',
+                            help='Name of container.')
+    
+    arg_parser.add_argument('container_type',
+                            action='store',
+                            help='Type of container (e.g. StateMachine or Concurrence).')
+    
+    arg_parser.add_argument('states',
+                            nargs = '*',
+                            action='store',
+                            help='A list of names of states to be contained.')
+    
+    arg_parser.add_argument('-s', '--scripts',
+                            nargs = '*',
+                            dest='script_dirs',
+                            action='store',
+                            default=[],
+                            help='SMACHA script directories (directories containing yaml files).')
+    
+    arg_parser.add_argument('-o', '--output',
+                            dest='output_file',
+                            action='store',
+                            default='./smacha_contain_output.py.',
+                            help='Generated SMACH output (python file).')
+    
+    
+    args = arg_parser.parse_args()
+    
+    # Load parser
+    parser = smacha.Parser(script_dirs = args.script_dirs)
+    
+    # Load and parse SMACHA script
+    script = parser.parse(args.script_file)
+
+    # Find the list of states to be contained
+    states_buffer = list()
+    i_state = 0
+    i_script_container_state = 0
+    for i_script_state, script_state in enumerate(script['states']):
+        # Ensure we haven't run off a cliff
+        if i_state >= len(args.states):
+            break
+
+        # Find the state name and variables in the current state
+        script_state_name, script_state_vars = list(script_state.items())[0]
+
+        # Record a script state buffer and the script state index of
+        # the new container state.
+        if script_state_name == args.states[i_state] and states_buffer:
+            states_buffer.append(script_state)
+            i_state = i_state + 1
+        elif script_state_name != args.states[i_state] and states_buffer:
+            raise ParsingError('State list does not match script state sequence!')
+        elif script_state_name == args.states[i_state] and not states_buffer:
+            states_buffer.append(script_state)
+            i_script_container_state = i_script_state
+            i_state = i_state + 1
+        else:
+            continue
+
+    # Make note of persistent/non-persistent container and sub-script variables
+    # container_persistent_vars = ['params']
+    # sub_script_non_persistent_vars = ['states', 'template', 'script', 'input_keys', 'output_keys', 'outcomes']
+    # sub_script_persistent_vars = ['userdata', 'remapping', 'transitions']
+
+    # Construct skeleton of container state entry 
+    container_state_name = args.container_name
+    container_state_vars = dict()
+    container_state_vars['template'] = args.container_type
+    
+    # Generate new container state outcomes as appropriate and remap transitions
+    container_state_vars['outcomes'] = set()
+    container_state_vars['transitions'] = dict()
+    outcome_map = dict()
+    for state in states_buffer:
+        for outcome, transition in list(state.items())[0][1]['transitions'].items():
+            if transition not in args.states:
+                # Add the transition to the outcome_map and container state outcomes if necessary
+                if transition not in outcome_map.keys():
+                    new_container_outcome = container_state_name.lower() + '_outcome_' + str(len(outcome_map.keys()) + 1)
+                    outcome_map[transition] = new_container_outcome
+                    container_state_vars['outcomes'].update([new_container_outcome])
+                    # Update the container transition
+                    container_state_vars['transitions'][new_container_outcome] = transition
+                # Update the state transition
+                list(state.items())[0][1]['transitions'][outcome] = outcome_map[transition]
+    container_state_vars['outcomes'] = list(container_state_vars['outcomes'])
+
+    # Generate container params
+    container_state_vars['params'] = dict()
+    for state in states_buffer:
+        if 'params' in list(state.items())[0][1]:
+            for param, param_val in list(state.items())[0][1]['params'].items():
+                # If it doesn't yet exist in the container state, add it
+                if param not in container_state_vars['params'].keys():
+                    container_state_vars['params'][param] = param_val
+                # If it does exist, but the param value is different, generate a new param key
+                elif container_state_vars['params'][param] != param_val:
+                    # Generate a new param
+                    i_new_key = 1
+                    while param + '_' + str(i_new_key) in container_state_vars['params'][param]:
+                        i_new_key = i_new_key + 1
+                    container_state_vars['params'][param + '_' + str(i_new_key)] = param_val
+                # If it exists, and the param value is the same, skip it
+                else:
+                    continue
+            # Delete params from the state
+            list(state.items())[0][1].pop('params', 0)
+
+
+    # Add states_buffer to container
+    container_state_vars['states'] = states_buffer
+
+    # Construct container state
+    container_state = dict()
+    container_state[container_state_name] = container_state_vars
+
+    # Remove old states from script and add container
+    del script['states'][i_script_container_state+1:i_script_container_state+len(states_buffer)]
+    script['states'][i_script_container_state] = container_state
+    
+    # Write the updated script to a YAML file
+    parser.dump(args.output_file, script)
+

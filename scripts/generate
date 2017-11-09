@@ -31,7 +31,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('-o', '--output',
                             dest='output_file',
                             action='store',
-                            default='./smacha_output.py',
+                            default='./smacha_generate_output.py',
                             help='Generated SMACH output (python file).')
     
     arg_parser.add_argument('-c', '--comments',

@@ -58,7 +58,7 @@ class Parser():
 
         raise ScriptNotFoundError(names)
     
-    def parse(self, script, include_line_numbers=True):
+    def parse(self, script):
         """Parse YAML script."""
         try:
             script_buffer, _ = self.select_script([script, script + '.yml'])
