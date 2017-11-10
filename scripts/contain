@@ -78,7 +78,7 @@ if __name__ == '__main__':
             continue
 
     # Make note of persistent/non-persistent container and sub-script variables
-    # container_persistent_vars = ['params']
+    container_persistent_vars = ['params']
     # sub_script_non_persistent_vars = ['states', 'template', 'script', 'input_keys', 'output_keys', 'outcomes']
     # sub_script_persistent_vars = ['userdata', 'remapping', 'transitions']
 
@@ -105,27 +105,30 @@ if __name__ == '__main__':
                 list(state.items())[0][1]['transitions'][outcome] = outcome_map[transition]
     container_state_vars['outcomes'] = list(container_state_vars['outcomes'])
 
-    # Generate container params
-    container_state_vars['params'] = dict()
-    for state in states_buffer:
-        if 'params' in list(state.items())[0][1]:
-            for param, param_val in list(state.items())[0][1]['params'].items():
-                # If it doesn't yet exist in the container state, add it
-                if param not in container_state_vars['params'].keys():
-                    container_state_vars['params'][param] = param_val
-                # If it does exist, but the param value is different, generate a new param key
-                elif container_state_vars['params'][param] != param_val:
-                    # Generate a new param
-                    i_new_key = 1
-                    while param + '_' + str(i_new_key) in container_state_vars['params'][param]:
-                        i_new_key = i_new_key + 1
-                    container_state_vars['params'][param + '_' + str(i_new_key)] = param_val
-                # If it exists, and the param value is the same, skip it
-                else:
-                    continue
-            # Delete params from the state
-            list(state.items())[0][1].pop('params', 0)
+    # Handle container persistent variables
+    for persistent_var in container_persistent_vars:
+        container_state_vars[persistent_var] = dict()
+        for state in states_buffer:
+            if persistent_var in list(state.items())[0][1]:
+                # We assume persistent_var is a dict of vars
+                for var, val in list(state.items())[0][1][persistent_var].items():
+                    # If it doesn't yet exist in the container state, add it
+                    if var not in container_state_vars[persistent_var].keys():
+                        container_state_vars[persistent_var][var] = val
+                    # If it does exist, but the var value is different, generate a new var key
+                    elif container_state_vars[persistent_var][var] != val:
+                        # Generate a new var
+                        i_new_key = 1
+                        while var + '_' + str(i_new_key) in container_state_vars[persistent_var][var]:
+                            i_new_key = i_new_key + 1
+                        container_state_vars[persistent_var][var + '_' + str(i_new_key)] = val
+                    # If it exists, and the var value is the same, skip it
+                    else:
+                        continue
+                # Delete persistent variable from the state
+                list(state.items())[0][1].pop(persistent_var, 0)
 
+    # 
 
     # Add states_buffer to container
     container_state_vars['states'] = states_buffer

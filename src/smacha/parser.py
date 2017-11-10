@@ -76,3 +76,35 @@ class Parser():
         with open(script_file, 'w') as script_file_handle:
             yaml.dump(script, script_file_handle,
                       Dumper = self._dumper, default_flow_style=False, default_style='')
+
+    def contains_lookups(self, script_var, lookup_vars):
+        """
+        Check if a script variable contains variable lookups.
+
+        INPUTS:
+            script_var: An arbitrarily typed script variable.  E.g. it could be a string like 'robot' or
+                        a dict like {'foo': 'bar'} or a list containing script variable lookups like
+                        [['params', 'robot'], '/base'].
+            lookup_vars: A list of names of possible lookup variables, e.g. ['params'].
+
+        RETURNS:
+            True: If script_var contains lookups.
+            False: Otherwise.
+        """
+        try:
+            if isinstance(script_var, list):
+                try:
+                    if (len(script_var) == 2 and isinstance(script_var[0], str) and isinstance(script_var[1], str) and
+                        script_var[0] in lookup_vars):
+                            return True
+                    else:
+                        raise Exception
+                except:
+                    for script_var_var in script_var:
+                        if contains_lookups(script_var_var, lookup_vars):
+                            return True
+                        else:
+                            continue
+                    return False
+        except:
+            return False
