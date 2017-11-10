@@ -45,13 +45,18 @@ if __name__ == '__main__':
     
     args = arg_parser.parse_args()
     
+    # Take note of persistent/non-persistent container and sub-script variables
+    container_persistent_vars = ['params']
+    
     # Load parser
     parser = smacha.Parser(script_dirs = args.script_dirs)
     
     # Load and parse SMACHA script
     script = parser.parse(args.script_file)
-
+    
+    #
     # Find the list of states to be contained
+    #
     states_buffer = list()
     i_state = 0
     i_script_container_state = 0
@@ -77,17 +82,16 @@ if __name__ == '__main__':
         else:
             continue
 
-    # Make note of persistent/non-persistent container and sub-script variables
-    container_persistent_vars = ['params']
-    # sub_script_non_persistent_vars = ['states', 'template', 'script', 'input_keys', 'output_keys', 'outcomes']
-    # sub_script_persistent_vars = ['userdata', 'remapping', 'transitions']
-
+    #
     # Construct skeleton of container state entry 
+    #
     container_state_name = args.container_name
     container_state_vars = dict()
     container_state_vars['template'] = args.container_type
-    
+   
+    # 
     # Generate new container state outcomes as appropriate and remap transitions
+    #
     container_state_vars['outcomes'] = set()
     container_state_vars['transitions'] = dict()
     outcome_map = dict()
@@ -105,7 +109,9 @@ if __name__ == '__main__':
                 list(state.items())[0][1]['transitions'][outcome] = outcome_map[transition]
     container_state_vars['outcomes'] = list(container_state_vars['outcomes'])
 
+    #
     # Handle container persistent variables by moving them outside of the container as appropriate.
+    #
     for persistent_var in container_persistent_vars:
         # Create a dict for the persistent variable in container_state_vars if it doesn't exist yet.
         if persistent_var not in container_state_vars:
