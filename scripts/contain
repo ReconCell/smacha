@@ -110,12 +110,13 @@ if __name__ == '__main__':
     container_state_vars['outcomes'] = list(container_state_vars['outcomes'])
 
     #
-    # Adjust transitions of all states in script to point to container state as appropriate.
+    # Adjust transitions of all other states in script to point to container state as appropriate.
     #
     for state in script['states']:
-        for outcome, transition in list(state.items())[0][1]['transitions'].items():
-            if transition in args.states:
-                list(state.items())[0][1]['transitions'][outcome] = container_state_name
+        if state.items()[0][0] not in args.states:
+            for outcome, transition in list(state.items())[0][1]['transitions'].items():
+                if transition in args.states:
+                    list(state.items())[0][1]['transitions'][outcome] = container_state_name
 
     #
     # Handle container persistent variables by moving them outside of the container as appropriate.
