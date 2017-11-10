@@ -105,9 +105,12 @@ if __name__ == '__main__':
                 list(state.items())[0][1]['transitions'][outcome] = outcome_map[transition]
     container_state_vars['outcomes'] = list(container_state_vars['outcomes'])
 
-    # Handle container persistent variables
+    # Handle container persistent variables by moving them outside of the container as appropriate.
     for persistent_var in container_persistent_vars:
-        container_state_vars[persistent_var] = dict()
+        # Create a dict for the persistent variable in container_state_vars if it doesn't exist yet.
+        if persistent_var not in container_state_vars:
+            container_state_vars[persistent_var] = dict()
+
         for state in states_buffer:
             if persistent_var in list(state.items())[0][1]:
                 # We assume persistent_var is a dict of vars
@@ -128,7 +131,58 @@ if __name__ == '__main__':
                 # Delete persistent variable from the state
                 list(state.items())[0][1].pop(persistent_var, 0)
 
-    # 
+        # Delete the persistent variable from container_state_vars if it's still empty
+        if not container_state_vars[persistent_var]:
+            container_state_vars.pop(persistent_var, 0)
+
+    #
+    # Handle userdata and remapping by moving certain userdata entries outside of the container as appropriate.
+    #
+    container_state_vars['remapping'] = dict()
+
+    # Create a dict for userdata in script_vars if it doesn't exist yet.
+    if 'userdata' not in script:
+        script['userdata'] = dict()
+
+    for state in states_buffer:
+        if 'userdata' in list(state.items())[0][1]:
+            for var, val in list(state.items())[0][1]['userdata'].items():
+                # Userdata should only be lifted out of the container if it
+                # does not contain variable lookups.
+                if not parser.contains_lookups(val, container_persistent_vars):
+                    # If it doesn't yet exist in the script userdata, add it
+                    if var not in script['userdata'].keys():
+                        # Add it to script userdata
+                        script['userdata'][var] = val
+
+                        # Update the remapping
+                        container_state_vars['remapping'][var] = var
+
+                    # If it does exist, generate a new var key
+                    else:
+                        # Generate a new var
+                        i_new_key = 1
+                        while var + '_' + str(i_new_key) in script['userdata'][var]:
+                            i_new_key = i_new_key + 1
+                        script['userdata'][var + '_' + str(i_new_key)] = val
+
+                        # Update the remapping
+                        container_state_vars['remapping'][var] = var + '_' + str(i_new_key)
+
+                    # Delete the variable from the userdata in the state
+                    list(state.items())[0][1]['userdata'].pop(var, 0)
+
+            # If the state userdata is now empty, delete it
+            if not list(state.items())[0][1]['userdata']:
+                list(state.items())[0][1].pop('userdata', 0)
+    
+    # Delete the remapping variable from the container_state_vars if it's still empty
+    if not container_state_vars['remapping']:
+        container_state_vars.pop('remapping', 0)
+
+    # Delete the userdata variable from the script if it's still empty
+    if not script['userdata']:
+        script.pop('userdata', 0)
 
     # Add states_buffer to container
     container_state_vars['states'] = states_buffer

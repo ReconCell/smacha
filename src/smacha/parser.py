@@ -101,7 +101,7 @@ class Parser():
                         raise Exception
                 except:
                     for script_var_var in script_var:
-                        if contains_lookups(script_var_var, lookup_vars):
+                        if self.contains_lookups(script_var_var, lookup_vars):
                             return True
                         else:
                             continue
