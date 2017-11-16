@@ -198,6 +198,38 @@ if __name__ == '__main__':
     # Delete the userdata variable from the script if it's still empty
     if not script['userdata']:
         script.pop('userdata', 0)
+    
+    #
+    # Handle input_keys and output_keys by cross-checking between userdata and remappings
+    #
+    preceding_userdata = dict()
+    input_keys = set()
+    output_keys = set()
+
+    # Collate userdata from the parent script
+    if 'userdata' in script:
+        preceding_userdata.update(script['userdata'])
+
+    # Collate userdata from preceding states
+    for i_state in range(0,i_script_container_state):
+        preceding_userdata.update(script['states'][i_state].items()[0][1]['userdata'])
+
+    for state in states_buffer:
+        if 'remapping' in list(state.items())[0][1]:
+            for var, val in list(state.items())[0][1]['remapping'].items():
+                # If val appears in the current state's userdata, it is neither an input nor an output key
+                if 'userdata' in list(state.items())[0][1] and val in list(state.items())[0][1]['userdata'].keys():
+                    continue
+                # Otherwise, if val appears in the preceding userdata, we assume it must be an input key
+                elif val in preceding_userdata.keys():
+                    input_keys.add(val)
+                # Otherwise, we assume it's an output key
+                else:
+                    output_keys.add(val)
+
+    # Add input_keys and output_keys to container_state_vars
+    container_state_vars['input_keys'] = list(input_keys)
+    container_state_vars['output_keys'] = list(output_keys)
 
     # Add states_buffer to container
     container_state_vars['states'] = states_buffer
