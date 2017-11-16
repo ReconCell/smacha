@@ -12,8 +12,6 @@ class Generator():
                         ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
                     container_persistent_vars =
                         ['params'],
-                    sub_script_non_persistent_vars =
-                        ['states', 'template', 'script', 'input_keys', 'output_keys', 'outcomes'],
                     sub_script_persistent_vars =
                         ['userdata', 'remapping', 'transitions'],
                     buffer_names =
@@ -43,10 +41,6 @@ class Generator():
         
         # Initialise a list of names of variables that should persist from parent to child states
         self._container_persistent_vars = container_persistent_vars
-        
-        # Initialise a list of names of variables that should NOT persist from sub-script call
-        # to sub-script definition.
-        self._sub_script_non_persistent_vars = sub_script_non_persistent_vars
         
         # Initialise a list of names of variables that should persist from sub-script call
         # to sub-script definition.
@@ -113,10 +107,10 @@ class Generator():
                 for state_var, state_var_val in state_vars.items():
                     if isinstance(state_var_val, list):
                         try:
-                            state_vars[state_var] = self._get_script_var(state_vars, state_var_val)
+                            state_vars[state_var] = self._parser.get_script_var(state_vars, state_var_val)
                         except:
                             try:
-                                state_vars[state_var] = self._construct_string(state_vars, state_var_val)
+                                state_vars[state_var] = self._parser.construct_string(state_vars, state_var_val)
                             except:
                                 # If no state_vars lookups or string constructs can be parsed from state_var,
                                 # leave it as it is and continue.
@@ -125,10 +119,10 @@ class Generator():
                         for state_var_val_item, state_var_val_item_val in state_var_val.items():
                             if isinstance(state_var_val_item_val, list):
                                 try:
-                                    state_vars[state_var][state_var_val_item] = self._get_script_var(state_vars, state_var_val_item_val)
+                                    state_vars[state_var][state_var_val_item] = self._parser.get_script_var(state_vars, state_var_val_item_val)
                                 except:
                                     try:
-                                        state_vars[state_var][state_var_val_item] = self._construct_string(state_vars, state_var_val_item_val)
+                                        state_vars[state_var][state_var_val_item] = self._parser.construct_string(state_vars, state_var_val_item_val)
                                     except:
                                         # If no state_vars lookups or string constructs can be parsed from
                                         # the state_var dict item, leave it as it is and continue.
@@ -310,12 +304,11 @@ class Generator():
                         # sub-script, since certain containers (e.g. Concurrence) do not define
                         # transitions.
                         for state_var, state_var_val in state_vars.items():
-                            if state_var not in self._sub_script_non_persistent_vars:
-                                if state_var in sub_script[state_name].keys() or state_var in self._sub_script_persistent_vars:
-                                    if state_var in sub_script[state_name].keys():
-                                        sub_script[state_name][state_var].update(state_var_val)
-                                    else:
-                                        sub_script[state_name][state_var] = state_var_val
+                            if state_var in sub_script[state_name].keys() or state_var in self._sub_script_persistent_vars:
+                                if state_var in sub_script[state_name].keys():
+                                    sub_script[state_name][state_var].update(state_var_val)
+                                else:
+                                    sub_script[state_name][state_var] = state_var_val
                         
                         # Add persistent state_vars to script_vars.
                         # E.g. parameters that need to be passed between parent and child states.
@@ -392,84 +385,6 @@ class Generator():
         
         return script_vars
 
-    def _get_script_var(self, script_vars, query):
-        """
-        Retrieve a variable from script_vars as specified by query.
-    
-        Query should be either a 1 or 2-element list, e.g. ['params', 'robot'],
-        in which case a robot name would be retrieved from the 'params'
-        entry in 'script_vars'.
-        """
-        if not isinstance(query, list):
-            raise ValueError('script_vars query should be a list!')
-        elif len(query) == 1:
-            if not isinstance(query[0], str):
-                raise ValueError('script_vars query list should contain strings!')
-            elif query[0] not in script_vars:
-                raise ValueError('Query "{}" not found in script_vars!'.format(query[0]))
-            else:
-                return script_vars[query[0]]
-        elif len(query) == 2:
-            if not isinstance(query[0], str) or not isinstance(query[1], str):
-                raise ValueError('script_vars query list should contain strings!')
-            elif query[0] not in script_vars:
-                raise ValueError('Query "{}" not found in script_vars!'.format(query[0]))
-            elif query[1] not in script_vars[query[0]]:
-                raise ValueError('Query "{}" not found in script_vars["{}"]!'.format(query[1], query[0]))
-            else:
-                return script_vars[query[0]][query[1]]
-        else:
-            raise ValueError('script_vars query should be a list of length 1 or 2!')
-    
-    def _construct_string(self, script_vars, string_construct):
-        """
-        Construct a string given a list of script_vars lookups (specified as 1 or 2-element lists- see
-        _get_script_var() method) and/or strings.
-        
-        E.g. the string_construct ['/', ['params', 'robot'], '/joint_states']
-        would return an output string '/robot_1/joint_states' if script_vars['params']['robot'] == 'robot_1'
-        and '/robot_2/joint_states' if script_vars['params']['robot'] == 'robot_2'.
-        
-        INPUTS:
-            script_vars: A dictionary of script/state variables.
-            string_construct: A list of either script_vars lookups or strings describing how a string should
-                              be constructed, as demonstrated in the above example.
-        RETURNS:
-            output_string: The constructed string is returned, as long as the string_construct can be parsed
-                           successfully and as long as it contains at least one script_vars lookup.
-            string_construct: If the string_construct can be parsed, but does not contain a lookup,
-                              the original string_construct list is returned as-is. This is done
-                              to avoid confusion with a genuine list.
-        """
-        output_string = ''
-        contains_lookup = False
-        if not isinstance(string_construct, list):
-            raise ParsingError(error='String construct should be a list!')
-        
-        for string_part in string_construct:
-            if isinstance(string_part, list):
-                try:
-                    # print('string_construct: {}'.format(string_construct))
-                    # print('string_part: {}'.format(string_part))
-                    # print('script_vars: {}'.format(script_vars))
-                    output_string = output_string + str(self._get_script_var(script_vars, string_part))
-                    # print('output_string: {}'.format(output_string))
-                    contains_lookup = True
-                except:
-                    raise ParsingError(error='Could not parse script_vars lookup in string construct!')
-            elif isinstance(string_part, str):
-                output_string = output_string + string_part
-            else:
-                try:
-                    output_string = output_string + str(string_part)
-                except:
-                    raise ParsingError(error='Could not convert string construct part to string!')
-
-        if contains_lookup:    
-            return output_string
-        else:
-            return string_construct
-    
     def _gen_code_string(self, code_buffer):
         """Generate code string from code list buffer."""
         code_string = ''
