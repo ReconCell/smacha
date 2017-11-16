@@ -113,7 +113,7 @@ if __name__ == '__main__':
     # Adjust transitions of all other states in script to point to container state as appropriate.
     #
     for state in script['states']:
-        if state.items()[0][0] not in args.states:
+        if list(state.items())[0][0] not in args.states:
             for outcome, transition in list(state.items())[0][1]['transitions'].items():
                 if transition in args.states:
                     list(state.items())[0][1]['transitions'][outcome] = container_state_name
@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
     for state in states_buffer:
         if 'userdata' in list(state.items())[0][1]:
-            for var, val in list(state.items())[0][1]['userdata'].items():
+            for var, val in list(list(state.items())[0][1]['userdata'].items()):
                 # Userdata should only be lifted out of the container if it
                 # does not contain variable lookups.
                 if not parser.contains_lookups(val, container_persistent_vars):
