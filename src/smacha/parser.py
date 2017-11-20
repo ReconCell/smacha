@@ -154,7 +154,7 @@ class Parser():
         except:
             return False
     
-    def get_script_var(self, script_vars, query):
+    def lookup(self, script_vars, query):
         """
         Retrieve a variable from script_vars as specified by lookup query.
     
@@ -164,7 +164,7 @@ class Parser():
 
         INPUTS:
             script_vars: A dict of script variables.
-            query: A 1-element or 2-element list.
+            query: A 1-element or 2-element list of strings.
         
         RETURNS:
             script_vars[query[0]] if query is a 1-element list or
@@ -195,7 +195,7 @@ class Parser():
     def construct_string(self, script_vars, string_construct):
         """
         Construct a string given a list of script_vars lookups (specified as 1 or 2-element lists- see
-        get_script_var() method) and/or strings.
+        lookup() method) and/or strings.
         
         E.g. the string_construct ['/', ['params', 'robot'], '/joint_states']
         would return an output string '/robot_1/joint_states' if script_vars['params']['robot'] == 'robot_1'
@@ -220,7 +220,7 @@ class Parser():
         for string_part in string_construct:
             if isinstance(string_part, list):
                 try:
-                    output_string = output_string + str(self.get_script_var(script_vars, string_part))
+                    output_string = output_string + str(self.lookup(script_vars, string_part))
                     contains_lookup = True
                 except:
                     raise ParsingError(error='Could not parse script_vars lookup in string construct!')

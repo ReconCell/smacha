@@ -107,7 +107,7 @@ class Generator():
                 for state_var, state_var_val in state_vars.items():
                     if isinstance(state_var_val, list):
                         try:
-                            state_vars[state_var] = self._parser.get_script_var(state_vars, state_var_val)
+                            state_vars[state_var] = self._parser.lookup(state_vars, state_var_val)
                         except:
                             try:
                                 state_vars[state_var] = self._parser.construct_string(state_vars, state_var_val)
@@ -119,7 +119,7 @@ class Generator():
                         for state_var_val_item, state_var_val_item_val in state_var_val.items():
                             if isinstance(state_var_val_item_val, list):
                                 try:
-                                    state_vars[state_var][state_var_val_item] = self._parser.get_script_var(state_vars, state_var_val_item_val)
+                                    state_vars[state_var][state_var_val_item] = self._parser.lookup(state_vars, state_var_val_item_val)
                                 except:
                                     try:
                                         state_vars[state_var][state_var_val_item] = self._parser.construct_string(state_vars, state_var_val_item_val)
