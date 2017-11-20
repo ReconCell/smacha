@@ -108,7 +108,16 @@ class Parser():
         return parsed_script
 
     def dump(self, script_file, script):
-        """Dump YAML script to file."""
+        """
+        Dump YAML script to file.
+
+        INPUTS:
+            script_file: Script filename (str).
+            script: Script (dict).
+
+        RETURNS:
+            N/A.
+        """
         with open(script_file, 'w') as script_file_handle:
             yaml.dump(script, script_file_handle,
                       Dumper = self._dumper, default_flow_style=False, default_style='')
@@ -147,17 +156,25 @@ class Parser():
     
     def get_script_var(self, script_vars, query):
         """
-        Retrieve a variable from script_vars as specified by query.
+        Retrieve a variable from script_vars as specified by lookup query.
     
         Query should be either a 1 or 2-element list, e.g. ['params', 'robot'],
         in which case a robot name would be retrieved from the 'params'
         entry in 'script_vars'.
+
+        INPUTS:
+            script_vars: A dict of script variables.
+            query: A 1-element or 2-element list.
+        
+        RETURNS:
+            script_vars[query[0]] if query is a 1-element list or
+            script_vars[query[0]][query[1]] if querty is a 2-element list.
         """
         if not isinstance(query, list):
-            raise ValueError('script_vars query should be a list!')
+            raise ValueError('Query should be a list!')
         elif len(query) == 1:
             if not isinstance(query[0], str):
-                raise ValueError('script_vars query list should contain strings!')
+                raise ValueError('Query list should contain strings!')
             elif query[0] not in script_vars:
                 raise ValueError('Query "{}" not found in script_vars!'.format(query[0]))
             else:
