@@ -5,17 +5,42 @@ from smacha.exceptions import ScriptNotFoundError
 __all__ = ['Parser']
 
 class Parser():
-    """YAML script parser."""
+    """
+    Main SMACHA YAML script parser class.
+
+    The parser uses ruamel.yaml as its main engine for reading, parsing and
+    writing YAML files, while also providing methods for interpreting
+    SMACHA-specific script constructs.
+    """
 
     def __init__(self, script_dirs=[]):
+        """
+        Constructor.
+
+        Specifies roundtrip processing for ruamel.yaml by default so that
+        comments and script structure can be retained.
+
+        INPUTS:
+            script_dirs: A list of directories in which to search for SMACHA scripts.
+        """
         self._loader = yaml.RoundTripLoader
         self._dumper = yaml.RoundTripDumper
         self._script_dirs = script_dirs
         pass
 
-    def load_script(self, script):
-        """Search for the specified YAML script file and load it."""
+    def load(self, script):
+        """
+        Search for the specified YAML script file and load it.
+
+        INPUTS:
+            script: Either a file name (str) or a file handle to a SMACHA YAML script.
+
+        RETURNS:
+            contents: The file contents (str).
+            filename: The file name (str).
+        """
         def read_contents(filename):
+            """Helper function for reading file content."""
             try:
                 f = open(filename, 'rb')
             except IOError as e:
@@ -30,8 +55,23 @@ class Parser():
                 f.close()
             
             return contents
+    
+        def select_script(names):
+            """Helper function that loads the first loadable file in a list."""
+            if not names:
+                raise ScriptNotFoundError(names)
 
-        if os.path.isfile(script):
+            for name in names:
+                try:
+                    return self.load(name)
+                except ScriptNotFoundError:
+                    pass
+            raise ScriptNotFoundError(names)
+
+        if isinstance(script, list):
+            return select_script(script)
+
+        elif os.path.isfile(script):
             filename = script
             contents = read_contents(filename)
             return contents, filename
@@ -46,22 +86,18 @@ class Parser():
 
         raise ScriptNotFoundError(script)
 
-    def select_script(self, names):
-        if not names:
-            raise ScriptNotFoundError(names)
-
-        for name in names:
-            try:
-                return self.load_script(name)
-            except ScriptNotFoundError:
-                pass
-
-        raise ScriptNotFoundError(names)
-    
     def parse(self, script):
-        """Parse YAML script."""
+        """
+        Parse YAML script.
+
+        INPUTS:
+            script: Either a file name (str) or script string (bytes)
+
+        RETURNS:
+            parsed_script: The parsed YAML script (ruamel.yaml.comments.CommentedMap).
+        """
         try:
-            script_buffer, _ = self.select_script([script, script + '.yml'])
+            script_buffer, _ = self.load([script, script + '.yml'])
             parsed_script = yaml.load(script_buffer, Loader=self._loader)
         except Exception:
             try:
@@ -167,11 +203,7 @@ class Parser():
         for string_part in string_construct:
             if isinstance(string_part, list):
                 try:
-                    # print('string_construct: {}'.format(string_construct))
-                    # print('string_part: {}'.format(string_part))
-                    # print('script_vars: {}'.format(script_vars))
                     output_string = output_string + str(self.get_script_var(script_vars, string_part))
-                    # print('output_string: {}'.format(output_string))
                     contains_lookup = True
                 except:
                     raise ParsingError(error='Could not parse script_vars lookup in string construct!')
