@@ -97,7 +97,7 @@ class Parser():
             script: Either a file name (str) or script string (bytes)
 
         RETURNS:
-            parsed_script: The parsed YAML script (ruamel.yaml.comments.CommentedMap).
+            parsed_script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap).
         """
         try:
             script_buffer, _ = self.load([script, script + '.yml'])
@@ -166,7 +166,7 @@ class Parser():
         entry in 'script_vars'.
 
         INPUTS:
-            script_vars: A dict of script variables.
+            script_vars: Script variables (dict).
             query: A 1-element or 2-element list of strings.
         
         RETURNS:

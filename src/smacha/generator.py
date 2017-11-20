@@ -6,7 +6,12 @@ from smacha.exceptions import ParsingError
 __all__ = ['Generator']
 
 class Generator():
-    """SMACH code generator."""
+    """
+    Main SMACHA code generator class.
+
+    This class recursively processes the state machines described in SMACHA YAML scripts while
+    generating executable code by rendering from templates that they reference.
+    """
     def __init__(self, parser, templater, verbose=False,
                     base_vars =
                         ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
@@ -27,6 +32,32 @@ class Generator():
                         ['append', 'append', 'append', 'append', 'append',
                          'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
                     local_var_lists = ['local_vars']):
+        """
+        Constructor.
+
+        INPUTS:
+            parser: SMACHA script parser object (smacha.parser).
+            templater: SMACHA templater object (smacha.templater).
+            verbose: A flag to enable verbose output to terminal (bool).
+            base_vars: Names of expected base template variables (list).
+            container_persistent_vars: Names of variables that should persist from
+                                       parent to child states (list).
+            sub_script_persistent_vars: Names of variables that should persist from
+                                        sub-script call to sub-script definition.
+            buffer_names: Names of code buffers (with respective template blocks) to be processed
+                          (n-dim list of strings).
+            buffer_types: Types of code buffers to be processed
+                          (n-dim list of strings ('list' or 'dict')).
+            container_insertion_order: Container buffer insertion order rules
+                                       (n-dim list of strings ('append' or 'prepend')).
+            buffer_insertion_order: Buffer insertion order rules
+                                    (n-dim list of strings ('append' or 'prepend')).
+            local_var_lists: Local variable list names that are intended to contain variable names in templates
+                             that should be non-persistent between states (i.e. local).
+                    
+        RETURNS:
+            N/A.
+        """
         # Flag to enable verbose output to terminal 
         self._verbose = verbose
 
@@ -77,7 +108,17 @@ class Generator():
         self._local_var_lists = local_var_lists 
     
     def _process_script(self, script, script_vars):
-        """Recursively process parsed yaml SMACHA script."""
+        """
+        Recursively process parsed SMACHA YAML script while updating script variables via
+        template rendering.
+
+        INPUTS:
+            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
+            script_vars: Script variables (dict).
+
+        RETURNS:
+            script_vars: Updated script variables (dict). 
+        """
         # Inspect script for list of states
         if isinstance(script, list):
             # Iterate through list of states
@@ -386,14 +427,30 @@ class Generator():
         return script_vars
 
     def _gen_code_string(self, code_buffer):
-        """Generate code string from code list buffer."""
+        """
+        Generate code string from code list buffer.
+        
+        INPUTS:
+            code_buffer: A list buffer of code strings (list of str's).
+
+        RETURNS:
+            code_string: A concatenation of the strings in the list buffer (str).
+        """
         code_string = ''
         for code_snippet in code_buffer:
             code_string = code_string + code_snippet + '\n'
         return code_string
     
     def run(self, script):
-        """Generate SMACH code from a parsed SMACHA yaml script."""
+        """
+        Generate SMACH code from a parsed SMACHA yaml script.
+        
+        INPUTS:
+            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
+
+        RETURNS:
+            base_code: The generated code (str).
+        """
         
         # TODO: Clean up this logic
         if not isinstance(script, dict):
