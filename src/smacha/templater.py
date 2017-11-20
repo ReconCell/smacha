@@ -10,12 +10,14 @@ import inspect
 __all__ = ['Templater']
 
 
-# Credit to Alexander Todorov for this class that allows specified blocks
-# to be either skipped or rendered in a given template.
-#
-# http://atodorov.org/blog/2014/02/21/skip-or-render-specific-blocks-from-jinja2-templates/
-# 
 class SkipBlockExtension(Extension):
+    """
+    This Jinja2 extension class allows specified blocks to be either skipped or rendered
+    in a given template.
+    
+    Credit to Alexander Todorov:
+    http://atodorov.org/blog/2014/02/21/skip-or-render-specific-blocks-from-jinja2-templates/
+    """
     def __init__(self, environment):
         super(SkipBlockExtension, self).__init__(environment)
         environment.extend(skip_blocks=[])
@@ -60,6 +62,13 @@ def not_string(value):
     To force a string, the expression may be wrapped in backslash-escaped single quotes
     (e.g. \'expression\') in the SMACHA YAML script and the above behaviour will
     be overridden, i.e. this function will return false.
+
+    INPUTS:
+        value: A string.
+
+    RETURNS:
+        True: If value is not a string.
+        False: If value is a string.
     """
     def is_number(s):
         try:
@@ -90,8 +99,30 @@ def not_string(value):
 
 
 class Templater():
-    """Jinja template processor."""
+    """
+    Main SMACHA template processor.
+
+    The templater uses Jinja2 as its main engine for processing templates,
+    but it also provides some additional features and functionality.
+    """
+
     def __init__(self, template_dirs=[], include_comments=False, include_introspection_server=False):
+        """
+        Constructor.
+
+        Specifies roundtrip processing for ruamel.yaml by default so that
+        comments and script structure can be retained.
+
+        INPUTS:
+            template_dirs: A list of directories in which to search for SMACHA templates.
+            include_comments: A flag (bool) that specifies whether blocks marked as either 
+                              'upper_comments' or 'lower_comments' should be included
+                              in rendered templates.
+            include_introspection_server: A flag (bool) that specifies whether code for including an
+                                          introspection server should be included in rendered templates.
+        RETURNS:
+            N/A.
+        """
         # Flag to enable rendering of header and footer comments in templates
         self._include_comments = include_comments
 
@@ -128,7 +159,16 @@ class Templater():
         pass
 
     def render(self, template_name, template_vars):
-        """Render code template."""
+        """
+        Render code template.
+
+        INPUTS:
+            template_name: The name of the template to be rendered (str).
+            template_vars: The template variables (dict).
+
+        RETURNS:
+            code: The rendered template code (str).
+        """
         # Read the state template file into a template object using the environment object
         template = self._template_env.select_template([template_name, template_name + '.tpl'])
         
@@ -144,8 +184,15 @@ class Templater():
         This function searches for all templates with file names beginning
         with state_name and possibly proceeded by an underscore followed by a stub name,
         e.g. MyState.jinja, MyState_header.jinja, MyState_footer.jinja,
-        render them all, and return the rendered code in a dict with 'body' + stub names
+        renders them all, and returns the rendered code in a dict with 'body' + stub names
         as keys, e.g. {'body': <body>, 'header': <header>, 'footer': <footer>}.
+
+        INPUTS:
+            state_name: The name of the state to be rendered (str).
+            template_vars: The template variables (dict).
+
+        RETURNS:
+            template_code: The rendered template code (str).
         """
         # Compile regular expression to match all templates for the given state_name
         regex = re.compile(state_name + '_(.+)\.tpl')
@@ -166,7 +213,17 @@ class Templater():
         return template_code
     
     def render_block(self, template_name, template_vars, target_block):
-        """Render specific block from code template."""
+        """
+        Render specific block from code template.
+
+        INPUTS:
+            template_name: The name of the template (str).
+            template_vars: The template variables (dict).
+            target_block: The name of the block to be rendered (str).
+
+        RETURNS:
+            block_code: The rendered template block code (str).
+        """
         # Read the state template file into a template object using the environment object
         template = self._template_env.select_template([template_name, template_name + '.tpl'])
 
@@ -215,7 +272,16 @@ class Templater():
             return block_code + '\n'
 
     def render_all_blocks(self, template_name, template_vars):
-        """Render all blocks from code template."""
+        """
+        Render all blocks from code template.
+        
+        INPUTS:
+            template_name: The name of the template (str).
+            template_vars: The template variables (dict).
+
+        RETURNS:
+            template_block_code: The rendered code for each template block (dict).
+        """
         # Read the state template file into a template object using the environment object
         template = self._template_env.select_template([template_name, template_name + '.tpl'])
 
@@ -225,7 +291,16 @@ class Templater():
         return template_block_code
 
     def get_template_vars(self, template_name, context = None):
-        """Get all variables defined in a template."""
+        """
+        Get all variables defined in a template.
+        
+        INPUTS:
+            template_name: The name of the template (str).
+            context: The (optional) template context (dict).
+
+        RETURNS:
+            template_vars: The variables defined in the template (dict).
+        """
         # Read the state template file into a template object using the environment object
         template = self._template_env.select_template([template_name, template_name + '.tpl'])
 

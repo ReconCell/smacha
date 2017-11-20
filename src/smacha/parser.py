@@ -22,6 +22,9 @@ class Parser():
 
         INPUTS:
             script_dirs: A list of directories in which to search for SMACHA scripts.
+
+        RETURNS:
+            N/A.
         """
         self._loader = yaml.RoundTripLoader
         self._dumper = yaml.RoundTripDumper
