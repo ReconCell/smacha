@@ -1,0 +1,36 @@
+    # SMACHA state sequence example
+name: sm_top
+template: Base
+manifest: smacha
+node_name: smacha_params_test
+outcomes: [final_outcome]
+states:
+- SUB:
+    outcomes:
+    - sub_outcome_2
+    - sub_outcome_1
+    states:
+    - FOO_0:
+        template: ParamFoo
+        name_param: [params, name]
+        outcome_param: [params, outcome]
+        transitions: {outcome1: FOO_1, outcome2: sub_outcome_1}
+    - FOO_1:
+        template: ParamFoo
+        name_param: [params, name]
+        outcome_param: [params, outcome]
+        transitions: {outcome1: sub_outcome_2, outcome2: sub_outcome_1}
+    params:
+      outcome: outcome1
+      name_1: FOO_1
+      name: FOO_0
+    template: StateMachine
+    transitions:
+      sub_outcome_2: FOO_2
+      sub_outcome_1: final_outcome
+- FOO_2:
+    template: ParamFoo
+    params: {name: FOO_2, outcome: outcome1}
+    name_param: [params, name]
+    outcome_param: [params, outcome]
+    transitions: {outcome1: FOO_2, outcome2: final_outcome}

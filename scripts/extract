@@ -92,4 +92,4 @@ if __name__ == '__main__':
     parser.dump(args.super_script_output_file, script)
 
     # Write the sub-script to a YAML file
-    parser.dump(args.sub_script_output_file, [sub_script_state])
+    parser.dump([sub_script_state], output_file=args.sub_script_output_file)

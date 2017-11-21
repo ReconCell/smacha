@@ -124,20 +124,27 @@ class Parser():
 
         return parsed_script
 
-    def dump(self, script_file, script):
+    def dump(self, script, output_file=None):
         """
-        Dump YAML script to file.
+        Dump YAML script to string and (optionally) write to file.
 
         INPUTS:
-            script_file: Script filename (str).
-            script: Script (dict).
+            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap).
+            output_file: Script filename (str).
 
         RETURNS:
-            N/A.
+            script_string: The rendered script (str).
         """
-        with open(script_file, 'w') as script_file_handle:
-            yaml.dump(script, script_file_handle,
-                      Dumper = self._dumper, default_flow_style=False, default_style='')
+        if output_file:
+            with open(output_file, 'w') as output_file_handle:
+                script_string = yaml.dump(script, output_file_handle,
+                                          Dumper = self._dumper, default_flow_style=False, default_style='')
+        else:
+            script_string = yaml.dump(script, None,
+                                      Dumper = self._dumper, default_flow_style=False, default_style='')
+
+        return script_string
+
 
     def contains_lookups(self, script_var, lookup_vars):
         """
@@ -444,8 +451,10 @@ class Parser():
                         output_keys.add(val)
 
         # Add input_keys and output_keys to container_state_vars
-        container_state_vars['input_keys'] = list(input_keys)
-        container_state_vars['output_keys'] = list(output_keys)
+        if input_keys:
+            container_state_vars['input_keys'] = list(input_keys)
+        if output_keys:
+            container_state_vars['output_keys'] = list(output_keys)
 
         # Add states_buffer to container
         container_state_vars['states'] = states_buffer
