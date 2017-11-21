@@ -1,0 +1,62 @@
+#! /usr/bin/env python
+
+import os
+import sys
+import argparse
+
+import smacha
+from smacha.exceptions import ParsingError
+
+if __name__ == '__main__':
+    # Parse arguments
+    arg_parser = argparse.ArgumentParser(description='SMACHA Contain: Pack a series of states in a script into a' +
+                                                     'container state and save the resulting script.')
+    
+    arg_parser.add_argument('script_file',
+                            action='store',
+                            help='SMACHA script (yaml file).')
+    
+    arg_parser.add_argument('container_name',
+                            action='store',
+                            help='Name of container.')
+    
+    arg_parser.add_argument('container_type',
+                            action='store',
+                            help='Type of container (e.g. StateMachine or Concurrence).')
+    
+    arg_parser.add_argument('states',
+                            nargs = '*',
+                            action='store',
+                            help='A list of names of states to be contained.')
+    
+    arg_parser.add_argument('-s', '--scripts',
+                            nargs = '*',
+                            dest='script_dirs',
+                            action='store',
+                            default=[],
+                            help='SMACHA script directories (directories containing yaml files).')
+    
+    arg_parser.add_argument('-o', '--output',
+                            dest='output_file',
+                            action='store',
+                            default='./smacha_contain_output.py.',
+                            help='Generated SMACH output (python file).')
+    
+    
+    args = arg_parser.parse_args()
+    
+    # Take note of persistent/non-persistent container and sub-script variables
+    container_persistent_vars = ['params']
+    
+    # Load parser
+    parser = smacha.Parser(script_dirs = args.script_dirs)
+    
+    # Load and parse SMACHA script
+    script_str, _ = parser.load(args.script_file)
+    script = parser.parse(script_str)
+
+    # Use the contain method in the parser to do script conversion
+    contained_script = parser.contain(script, args.container_name, args.container_type, args.states)
+    
+    # Write the updated script to a YAML file
+    parser.dump(contained_script, output_file=args.output_file)

@@ -31,7 +31,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('-o', '--output',
                             dest='output_file',
                             action='store',
-                            default='./smacha_output.py',
+                            default='./smacha_generate_output.py',
                             help='Generated SMACH output (python file).')
     
     arg_parser.add_argument('-c', '--comments',
@@ -55,7 +55,8 @@ if __name__ == '__main__':
     parser = smacha.Parser(script_dirs = args.script_dirs)
     
     # Load and parse SMACHA script
-    script = parser.parse(args.script_file)
+    script_str, _ = parser.load(args.script_file)
+    script = parser.parse(script_str)
 
     # Load template processor
     templater = smacha.Templater(args.template_dirs,

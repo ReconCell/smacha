@@ -6,14 +6,17 @@ from smacha.exceptions import ParsingError
 __all__ = ['Generator']
 
 class Generator():
-    """SMACH code generator."""
+    """
+    Main SMACHA code generator class.
+
+    This class recursively processes the state machines described in SMACHA YAML scripts while
+    generating executable code by rendering from templates that they reference.
+    """
     def __init__(self, parser, templater, verbose=False,
                     base_vars =
                         ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
                     container_persistent_vars =
                         ['params'],
-                    sub_script_non_persistent_vars =
-                        ['states', 'template', 'script', 'input_keys', 'output_keys', 'outcomes'],
                     sub_script_persistent_vars =
                         ['userdata', 'remapping', 'transitions'],
                     buffer_names =
@@ -29,6 +32,32 @@ class Generator():
                         ['append', 'append', 'append', 'append', 'append',
                          'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
                     local_var_lists = ['local_vars']):
+        """
+        Constructor.
+
+        INPUTS:
+            parser: SMACHA script parser object (smacha.parser).
+            templater: SMACHA templater object (smacha.templater).
+            verbose: A flag to enable verbose output to terminal (bool).
+            base_vars: Names of expected base template variables (list).
+            container_persistent_vars: Names of variables that should persist from
+                                       parent to child states (list).
+            sub_script_persistent_vars: Names of variables that should persist from
+                                        sub-script call to sub-script definition.
+            buffer_names: Names of code buffers (with respective template blocks) to be processed
+                          (n-dim list of strings).
+            buffer_types: Types of code buffers to be processed
+                          (n-dim list of strings ('list' or 'dict')).
+            container_insertion_order: Container buffer insertion order rules
+                                       (n-dim list of strings ('append' or 'prepend')).
+            buffer_insertion_order: Buffer insertion order rules
+                                    (n-dim list of strings ('append' or 'prepend')).
+            local_var_lists: Local variable list names that are intended to contain variable names in templates
+                             that should be non-persistent between states (i.e. local).
+                    
+        RETURNS:
+            N/A.
+        """
         # Flag to enable verbose output to terminal 
         self._verbose = verbose
 
@@ -43,10 +72,6 @@ class Generator():
         
         # Initialise a list of names of variables that should persist from parent to child states
         self._container_persistent_vars = container_persistent_vars
-        
-        # Initialise a list of names of variables that should NOT persist from sub-script call
-        # to sub-script definition.
-        self._sub_script_non_persistent_vars = sub_script_non_persistent_vars
         
         # Initialise a list of names of variables that should persist from sub-script call
         # to sub-script definition.
@@ -83,7 +108,17 @@ class Generator():
         self._local_var_lists = local_var_lists 
     
     def _process_script(self, script, script_vars):
-        """Recursively process parsed yaml SMACHA script."""
+        """
+        Recursively process parsed SMACHA YAML script while updating script variables via
+        template rendering.
+
+        INPUTS:
+            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
+            script_vars: Script variables (dict).
+
+        RETURNS:
+            script_vars: Updated script variables (dict). 
+        """
         # Inspect script for list of states
         if isinstance(script, list):
             # Iterate through list of states
@@ -113,10 +148,10 @@ class Generator():
                 for state_var, state_var_val in state_vars.items():
                     if isinstance(state_var_val, list):
                         try:
-                            state_vars[state_var] = self._get_script_var(state_vars, state_var_val)
+                            state_vars[state_var] = self._parser.lookup(state_vars, state_var_val)
                         except:
                             try:
-                                state_vars[state_var] = self._construct_string(state_vars, state_var_val)
+                                state_vars[state_var] = self._parser.construct_string(state_vars, state_var_val)
                             except:
                                 # If no state_vars lookups or string constructs can be parsed from state_var,
                                 # leave it as it is and continue.
@@ -125,10 +160,10 @@ class Generator():
                         for state_var_val_item, state_var_val_item_val in state_var_val.items():
                             if isinstance(state_var_val_item_val, list):
                                 try:
-                                    state_vars[state_var][state_var_val_item] = self._get_script_var(state_vars, state_var_val_item_val)
+                                    state_vars[state_var][state_var_val_item] = self._parser.lookup(state_vars, state_var_val_item_val)
                                 except:
                                     try:
-                                        state_vars[state_var][state_var_val_item] = self._construct_string(state_vars, state_var_val_item_val)
+                                        state_vars[state_var][state_var_val_item] = self._parser.construct_string(state_vars, state_var_val_item_val)
                                     except:
                                         # If no state_vars lookups or string constructs can be parsed from
                                         # the state_var dict item, leave it as it is and continue.
@@ -269,9 +304,7 @@ class Generator():
                 # If state_vars contains a 'script' key,
                 # we're dealing with an included sub-script.
                 #
-                # NOTE: The code for the below case was written in haste while approaching
-                # a deadline and much could, and probably should, be improved with respect
-                # to error-handling and input validation.
+                # TODO: Improve error-handling and input validation.
                 elif 'script' in state_vars:
                     # Process included sub-script
                     try:
@@ -297,25 +330,16 @@ class Generator():
                         sub_script[state_name] = sub_script.pop(sub_script_state_name)
 
                         # Find and replace sub-script variables with current state variables
-                        # (i.e. variables defined by the state that called the sub-script)
-                        #
-                        # Certain sub-script variables (i.e. 'input_keys', 'output_keys', 'outcomes')
-                        # should not be re-defined, as doing so would break modularity.
-                        #
-                        # If 'remapping' is defined in the current state variables,
-                        # then it should be defined in the sub-script variables, even if it was
-                        # not originally present there, as doing otherwise would break modularity.
-                        #
-                        # The presence/non-presence of 'transitions' should be taken care of in the
-                        # sub-script, since certain containers (e.g. Concurrence) do not define
-                        # transitions.
+                        # (i.e. variables defined by the state that called the sub-script).
+                        # If the variables have been defined in both the current state and the sub-script or
+                        # if they have been defined in the current state and are marked as being persistent,
+                        # then they should be replaced in the sub-script.
                         for state_var, state_var_val in state_vars.items():
-                            if state_var not in self._sub_script_non_persistent_vars:
-                                if state_var in sub_script[state_name].keys() or state_var in self._sub_script_persistent_vars:
-                                    if state_var in sub_script[state_name].keys():
-                                        sub_script[state_name][state_var].update(state_var_val)
-                                    else:
-                                        sub_script[state_name][state_var] = state_var_val
+                            if state_var in sub_script[state_name].keys() or state_var in self._sub_script_persistent_vars:
+                                if state_var in sub_script[state_name].keys():
+                                    sub_script[state_name][state_var].update(state_var_val)
+                                else:
+                                    sub_script[state_name][state_var] = state_var_val
                         
                         # Add persistent state_vars to script_vars.
                         # E.g. parameters that need to be passed between parent and child states.
@@ -392,93 +416,31 @@ class Generator():
         
         return script_vars
 
-    def _get_script_var(self, script_vars, query):
+    def _gen_code_string(self, code_buffer):
         """
-        Retrieve a variable from script_vars as specified by query.
-    
-        Query should be either a 1 or 2-element list, e.g. ['params', 'robot'],
-        in which case a robot name would be retrieved from the 'params'
-        entry in 'script_vars'.
-        """
-        if not isinstance(query, list):
-            raise ValueError('script_vars query should be a list!')
-        elif len(query) == 1:
-            if not isinstance(query[0], str):
-                raise ValueError('script_vars query list should contain strings!')
-            elif query[0] not in script_vars:
-                raise ValueError('Query "{}" not found in script_vars!'.format(query[0]))
-            else:
-                return script_vars[query[0]]
-        elif len(query) == 2:
-            if not isinstance(query[0], str) or not isinstance(query[1], str):
-                raise ValueError('script_vars query list should contain strings!')
-            elif query[0] not in script_vars:
-                raise ValueError('Query "{}" not found in script_vars!'.format(query[0]))
-            elif query[1] not in script_vars[query[0]]:
-                raise ValueError('Query "{}" not found in script_vars["{}"]!'.format(query[1], query[0]))
-            else:
-                return script_vars[query[0]][query[1]]
-        else:
-            raise ValueError('script_vars query should be a list of length 1 or 2!')
-    
-    def _construct_string(self, script_vars, string_construct):
-        """
-        Construct a string given a list of script_vars lookups (specified as 1 or 2-element lists- see
-        _get_script_var() method) and/or strings.
-        
-        E.g. the string_construct ['/', ['params', 'robot'], '/joint_states']
-        would return an output string '/robot_1/joint_states' if script_vars['params']['robot'] == 'robot_1'
-        and '/robot_2/joint_states' if script_vars['params']['robot'] == 'robot_2'.
+        Generate code string from code list buffer.
         
         INPUTS:
-            script_vars: A dictionary of script/state variables.
-            string_construct: A list of either script_vars lookups or strings describing how a string should
-                              be constructed, as demonstrated in the above example.
-        RETURNS:
-            output_string: The constructed string is returned, as long as the string_construct can be parsed
-                           successfully and as long as it contains at least one script_vars lookup.
-            string_construct: If the string_construct can be parsed, but does not contain a lookup,
-                              the original string_construct list is returned as-is. This is done
-                              to avoid confusion with a genuine list.
-        """
-        output_string = ''
-        contains_lookup = False
-        if not isinstance(string_construct, list):
-            raise ParsingError(error='String construct should be a list!')
-        
-        for string_part in string_construct:
-            if isinstance(string_part, list):
-                try:
-                    # print('string_construct: {}'.format(string_construct))
-                    # print('string_part: {}'.format(string_part))
-                    # print('script_vars: {}'.format(script_vars))
-                    output_string = output_string + str(self._get_script_var(script_vars, string_part))
-                    # print('output_string: {}'.format(output_string))
-                    contains_lookup = True
-                except:
-                    raise ParsingError(error='Could not parse script_vars lookup in string construct!')
-            elif isinstance(string_part, str):
-                output_string = output_string + string_part
-            else:
-                try:
-                    output_string = output_string + str(string_part)
-                except:
-                    raise ParsingError(error='Could not convert string construct part to string!')
+            code_buffer: A list buffer of code strings (list of str's).
 
-        if contains_lookup:    
-            return output_string
-        else:
-            return string_construct
-    
-    def _gen_code_string(self, code_buffer):
-        """Generate code string from code list buffer."""
+        RETURNS:
+            code_string: A concatenation of the strings in the list buffer (str).
+        """
         code_string = ''
         for code_snippet in code_buffer:
             code_string = code_string + code_snippet + '\n'
         return code_string
     
     def run(self, script):
-        """Generate SMACH code from a parsed SMACHA yaml script."""
+        """
+        Generate SMACH code from a parsed SMACHA yaml script.
+        
+        INPUTS:
+            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
+
+        RETURNS:
+            base_code: The generated code (str).
+        """
         
         # TODO: Clean up this logic
         if not isinstance(script, dict):

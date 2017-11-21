@@ -24,9 +24,9 @@ class TestGenerator(unittest.TestCase):
         # Load parser
         parser = smacha.Parser(script_dirs = script_dirs)
         
-        # Load and parse smacha yaml script
-        with open(smacha_script_filename) as smacha_script_file:
-            smacha_script = parser.parse(smacha_script_file)
+        # Load and parse SMACHA script
+        script_str, _ = parser.load(smacha_script_filename)
+        script = parser.parse(script_str)
         
         # Load template processor
         templater = smacha.Templater(template_dirs)
@@ -35,7 +35,7 @@ class TestGenerator(unittest.TestCase):
         generator = smacha.Generator(parser, templater, verbose=False)
         
         # Generate the SMACH code
-        smach_code = generator.run(smacha_script)
+        smach_code = generator.run(script)
         
         # Write the final output to a SMACH python file
         if self.write_output_files:
@@ -46,6 +46,30 @@ class TestGenerator(unittest.TestCase):
                         stat.S_IRGRP | stat.S_IXGRP)
 
         return smach_code
+
+    def _contain(self,
+                 smacha_script_filename, script_dirs,
+                 container_name, container_type, states):
+        """Containerize a sequence of states in a script."""
+        # Load parser
+        parser = smacha.Parser(script_dirs = script_dirs)
+
+        # Load and parse SMACHA script
+        script_str, _ = parser.load(smacha_script_filename)
+        script = parser.parse(script_str)
+    
+        # Use the contain method in the parser to do script conversion
+        contained_script = parser.contain(script, container_name, container_type, states)
+
+        # Dump the script to string
+        contained_script_string = parser.dump(contained_script)
+        
+        # Write the final output to a SMACHA YAML file
+        if self.write_output_files:
+            with open(smacha_script_filename + '_contain_output.yml', 'w') as contained_script_file:
+                contained_script_file.write(contained_script_string)
+
+        return contained_script_string
 
     def _compare(self, code_a, code_b, file_a='code_a', file_b='code_b'):
         """Diff compare code_a with code_b."""
@@ -123,6 +147,16 @@ class TestGenerator(unittest.TestCase):
             generated_code = self._generate(base_path + '/smacha_scripts/smacha_test_examples/nesting_params_with_sub_script.yml',
                                             [base_path + '/smacha_scripts/smacha_test_examples'],
                                             [base_path + '/smacha_templates/smacha_test_examples'])
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_contain_seq(self):
+        """Test containerizing seq.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_1.yml') as original_file:
+            generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
+                                            [base_path + '/smacha_scripts/smacha_test_examples'],
+                                            'SUB', 'StateMachine', ['FOO_0', 'FOO_1'])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 

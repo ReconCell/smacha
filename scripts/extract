@@ -29,13 +29,13 @@ if __name__ == '__main__':
     arg_parser.add_argument('-sub', '--sub-script-output',
                             dest='sub_script_output_file',
                             action='store',
-                            default='./sub_script_output.yml',
+                            default='./smacha_extract_sub_script_output.yml',
                             help='Generated SMACHA sub-script output (YAML file).')
     
     arg_parser.add_argument('-sup', '--super-script-output',
                             dest='super_script_output_file',
                             action='store',
-                            default='./super_script_output.yml',
+                            default='./smacha_extract_super_script_output.yml',
                             help='Generated SMACHA super-script output (YAML file).')
     
     
@@ -45,7 +45,8 @@ if __name__ == '__main__':
     parser = smacha.Parser(script_dirs = args.script_dirs)
     
     # Load and parse SMACHA script
-    script = parser.parse(args.script_file, include_line_numbers=False)
+    script_str, _ = parser.load(args.script_file)
+    script = parser.parse(script_str)
 
     # Find the container state
     for i_state, state in enumerate(script['states']):
@@ -91,4 +92,4 @@ if __name__ == '__main__':
     parser.dump(args.super_script_output_file, script)
 
     # Write the sub-script to a YAML file
-    parser.dump(args.sub_script_output_file, [sub_script_state])
+    parser.dump([sub_script_state], output_file=args.sub_script_output_file)
