@@ -304,9 +304,7 @@ class Generator():
                 # If state_vars contains a 'script' key,
                 # we're dealing with an included sub-script.
                 #
-                # NOTE: The code for the below case was written in haste while approaching
-                # a deadline and much could, and probably should, be improved with respect
-                # to error-handling and input validation.
+                # TODO: Improve error-handling and input validation.
                 elif 'script' in state_vars:
                     # Process included sub-script
                     try:
@@ -332,18 +330,10 @@ class Generator():
                         sub_script[state_name] = sub_script.pop(sub_script_state_name)
 
                         # Find and replace sub-script variables with current state variables
-                        # (i.e. variables defined by the state that called the sub-script)
-                        #
-                        # Certain sub-script variables (i.e. 'input_keys', 'output_keys', 'outcomes')
-                        # should not be re-defined, as doing so would break modularity.
-                        #
-                        # If 'remapping' is defined in the current state variables,
-                        # then it should be defined in the sub-script variables, even if it was
-                        # not originally present there, as doing otherwise would break modularity.
-                        #
-                        # The presence/non-presence of 'transitions' should be taken care of in the
-                        # sub-script, since certain containers (e.g. Concurrence) do not define
-                        # transitions.
+                        # (i.e. variables defined by the state that called the sub-script).
+                        # If the variables have been defined in both the current state and the sub-script or
+                        # if they have been defined in the current state and are marked as being persistent,
+                        # then they should be replaced in the sub-script.
                         for state_var, state_var_val in state_vars.items():
                             if state_var in sub_script[state_name].keys() or state_var in self._sub_script_persistent_vars:
                                 if state_var in sub_script[state_name].keys():

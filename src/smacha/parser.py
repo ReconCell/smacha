@@ -13,7 +13,11 @@ class Parser():
     SMACHA-specific script constructs.
     """
 
-    def __init__(self, script_dirs=[]):
+    def __init__(self, script_dirs=[],
+                 container_persistent_vars =
+                     ['params'],
+                 sub_script_persistent_vars =
+                     ['userdata', 'remapping', 'transitions']):
         """
         Constructor.
 
@@ -22,6 +26,10 @@ class Parser():
 
         INPUTS:
             script_dirs: A list of directories in which to search for SMACHA scripts.
+            container_persistent_vars: Names of variables that should persist from
+                                       parent to child states (list).
+            sub_script_persistent_vars: Names of variables that should persist from
+                                        sub-script call to sub-script definition.
 
         RETURNS:
             N/A.
@@ -29,7 +37,13 @@ class Parser():
         self._loader = yaml.RoundTripLoader
         self._dumper = yaml.RoundTripDumper
         self._script_dirs = script_dirs
-        pass
+        
+        # Initialise a list of names of variables that should persist from parent to child states
+        self._container_persistent_vars = container_persistent_vars
+        
+        # Initialise a list of names of variables that should persist from sub-script call
+        # to sub-script definition.
+        self._sub_script_persistent_vars = sub_script_persistent_vars
 
     def load(self, script):
         """
@@ -94,7 +108,7 @@ class Parser():
         Parse YAML script.
 
         INPUTS:
-            script: Either a file name (str) or script string (bytes)
+            script: Either a file name (str) or script string (bytes).
 
         RETURNS:
             parsed_script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap).
@@ -240,3 +254,208 @@ class Parser():
         else:
             return string_construct
     
+    def contain(self, script, container_name, container_type, states):
+        """
+        Convert a sequence of states in a script to a container state.
+
+        NOTE: Currently only works for the 'StateMachine' container type!
+
+        INPUTS:
+            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
+            container_name: A name for the container (str).
+            container_type: The container type (str, e.g. 'StateMachine' or 'Concurrence') 
+            states: The sequence of states to be contained (list of str's).
+
+        RETURNS:
+            script: Either a file name (str) or a file handle to a SMACHA YAML script.
+        """
+        #
+        # Find the list of states to be contained
+        #
+        states_buffer = list()
+        i_state = 0
+        i_script_container_state = 0
+        for i_script_state, script_state in enumerate(script['states']):
+            # Ensure we haven't run off a cliff
+            if i_state >= len(states):
+                break
+
+            # Find the state name and variables in the current state
+            script_state_name, script_state_vars = list(script_state.items())[0]
+
+            # Record a script state buffer and the script state index of
+            # the new container state.
+            if script_state_name == states[i_state] and states_buffer:
+                states_buffer.append(script_state)
+                i_state = i_state + 1
+            elif script_state_name != states[i_state] and states_buffer:
+                raise ParsingError('State list does not match script state sequence!')
+            elif script_state_name == states[i_state] and not states_buffer:
+                states_buffer.append(script_state)
+                i_script_container_state = i_script_state
+                i_state = i_state + 1
+            else:
+                continue
+
+        #
+        # Construct skeleton of container state entry 
+        #
+        container_state_name = container_name
+        container_state_vars = dict()
+        container_state_vars['template'] = container_type
+   
+        # 
+        # Generate new container state outcomes as appropriate and remap transitions
+        #
+        container_state_vars['outcomes'] = set()
+        container_state_vars['transitions'] = dict()
+        outcome_map = dict()
+        for state in states_buffer:
+            for outcome, transition in list(state.items())[0][1]['transitions'].items():
+                if transition not in states:
+                    # Add the transition to the outcome_map and container state outcomes if necessary
+                    if transition not in outcome_map.keys():
+                        new_container_outcome = container_state_name.lower() + '_outcome_' + str(len(outcome_map.keys()) + 1)
+                        outcome_map[transition] = new_container_outcome
+                        container_state_vars['outcomes'].update([new_container_outcome])
+                        # Update the container transition
+                        container_state_vars['transitions'][new_container_outcome] = transition
+                    # Update the state transition
+                    list(state.items())[0][1]['transitions'][outcome] = outcome_map[transition]
+        container_state_vars['outcomes'] = list(container_state_vars['outcomes'])
+
+        #
+        # Adjust transitions of all other states in script to point to container state as appropriate.
+        #
+        for state in script['states']:
+            if list(state.items())[0][0] not in states:
+                for outcome, transition in list(state.items())[0][1]['transitions'].items():
+                    if transition in states:
+                        list(state.items())[0][1]['transitions'][outcome] = container_state_name
+
+        #
+        # Handle container persistent variables by moving them outside of the container as appropriate.
+        #
+        for persistent_var in self._container_persistent_vars:
+            # Create a dict for the persistent variable in container_state_vars if it doesn't exist yet.
+            if persistent_var not in container_state_vars:
+                container_state_vars[persistent_var] = dict()
+
+            for state in states_buffer:
+                if persistent_var in list(state.items())[0][1]:
+                    # We assume persistent_var is a dict of vars
+                    for var, val in list(state.items())[0][1][persistent_var].items():
+                        # If it doesn't yet exist in the container state, add it
+                        if var not in container_state_vars[persistent_var].keys():
+                            container_state_vars[persistent_var][var] = val
+                        # If it does exist, but the var value is different, generate a new var key
+                        elif container_state_vars[persistent_var][var] != val:
+                            # Generate a new var
+                            i_new_key = 1
+                            while var + '_' + str(i_new_key) in container_state_vars[persistent_var][var]:
+                                i_new_key = i_new_key + 1
+                            container_state_vars[persistent_var][var + '_' + str(i_new_key)] = val
+                        # If it exists, and the var value is the same, skip it
+                        else:
+                            continue
+                    # Delete persistent variable from the state
+                    list(state.items())[0][1].pop(persistent_var, 0)
+
+            # Delete the persistent variable from container_state_vars if it's still empty
+            if not container_state_vars[persistent_var]:
+                container_state_vars.pop(persistent_var, 0)
+
+        #
+        # Handle userdata and remapping by moving certain userdata entries outside of the container as appropriate.
+        #
+        container_state_vars['remapping'] = dict()
+
+        # Create a dict for userdata in script_vars if it doesn't exist yet.
+        if 'userdata' not in script:
+            script['userdata'] = dict()
+
+        for state in states_buffer:
+            if 'userdata' in list(state.items())[0][1]:
+                for var, val in list(list(state.items())[0][1]['userdata'].items()):
+                    # Userdata should only be lifted out of the container if it
+                    # does not contain variable lookups.
+                    if not self.contains_lookups(val, self._container_persistent_vars):
+                        # If it doesn't yet exist in the script userdata, add it
+                        if var not in script['userdata'].keys():
+                            # Add it to script userdata
+                            script['userdata'][var] = val
+
+                            # Update the remapping
+                            container_state_vars['remapping'][var] = var
+
+                        # If it does exist, generate a new var key
+                        else:
+                            # Generate a new var
+                            i_new_key = 1
+                            while var + '_' + str(i_new_key) in script['userdata'][var]:
+                                i_new_key = i_new_key + 1
+                            script['userdata'][var + '_' + str(i_new_key)] = val
+
+                            # Update the remapping
+                            container_state_vars['remapping'][var] = var + '_' + str(i_new_key)
+
+                        # Delete the variable from the userdata in the state
+                        list(state.items())[0][1]['userdata'].pop(var, 0)
+
+                # If the state userdata is now empty, delete it
+                if not list(state.items())[0][1]['userdata']:
+                    list(state.items())[0][1].pop('userdata', 0)
+        
+        # Delete the remapping variable from the container_state_vars if it's still empty
+        if not container_state_vars['remapping']:
+            container_state_vars.pop('remapping', 0)
+
+        # Delete the userdata variable from the script if it's still empty
+        if not script['userdata']:
+            script.pop('userdata', 0)
+        
+        #
+        # Handle input_keys and output_keys by cross-checking between userdata and remappings
+        #
+        preceding_userdata = dict()
+        input_keys = set()
+        output_keys = set()
+
+        # Collate userdata from the parent script
+        if 'userdata' in script:
+            preceding_userdata.update(script['userdata'])
+
+        # Collate userdata from preceding states
+        for i_state in range(0,i_script_container_state):
+            if 'userdata' in script['states'][i_state].items()[0][1]:
+                preceding_userdata.update(script['states'][i_state].items()[0][1]['userdata'])
+
+        for state in states_buffer:
+            if 'remapping' in list(state.items())[0][1]:
+                for var, val in list(state.items())[0][1]['remapping'].items():
+                    # If val appears in the current state's userdata, it is neither an input nor an output key
+                    if 'userdata' in list(state.items())[0][1] and val in list(state.items())[0][1]['userdata'].keys():
+                        continue
+                    # Otherwise, if val appears in the preceding userdata, we assume it must be an input key
+                    elif val in preceding_userdata.keys():
+                        input_keys.add(val)
+                    # Otherwise, we assume it's an output key
+                    else:
+                        output_keys.add(val)
+
+        # Add input_keys and output_keys to container_state_vars
+        container_state_vars['input_keys'] = list(input_keys)
+        container_state_vars['output_keys'] = list(output_keys)
+
+        # Add states_buffer to container
+        container_state_vars['states'] = states_buffer
+
+        # Construct container state
+        container_state = dict()
+        container_state[container_state_name] = container_state_vars
+
+        # Remove old states from script and add container
+        del script['states'][i_script_container_state+1:i_script_container_state+len(states_buffer)]
+        script['states'][i_script_container_state] = container_state
+
+        return script
