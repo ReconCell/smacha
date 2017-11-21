@@ -279,7 +279,7 @@ class Parser():
         #
         # Find the list of states to be contained
         #
-        states_buffer = list()
+        states_buffer = yaml.comments.CommentedSeq()
         i_state = 0
         i_script_container_state = 0
         for i_script_state, script_state in enumerate(script['states']):
@@ -314,9 +314,9 @@ class Parser():
         # 
         # Generate new container state outcomes as appropriate and remap transitions
         #
-        container_state_vars['outcomes'] = set()
-        container_state_vars['transitions'] = dict()
-        outcome_map = dict()
+        container_state_vars['outcomes'] = yaml.comments.CommentedSet()
+        container_state_vars['transitions'] = yaml.comments.CommentedMap()
+        outcome_map = yaml.comments.CommentedMap()
         for state in states_buffer:
             for outcome, transition in list(state.items())[0][1]['transitions'].items():
                 if transition not in states:
@@ -324,12 +324,12 @@ class Parser():
                     if transition not in outcome_map.keys():
                         new_container_outcome = container_state_name.lower() + '_outcome_' + str(len(outcome_map.keys()) + 1)
                         outcome_map[transition] = new_container_outcome
-                        container_state_vars['outcomes'].update([new_container_outcome])
+                        container_state_vars['outcomes'].add(new_container_outcome)
                         # Update the container transition
                         container_state_vars['transitions'][new_container_outcome] = transition
                     # Update the state transition
                     list(state.items())[0][1]['transitions'][outcome] = outcome_map[transition]
-        container_state_vars['outcomes'] = list(container_state_vars['outcomes'])
+        container_state_vars['outcomes'] = yaml.comments.CommentedSeq(container_state_vars['outcomes'])
 
         #
         # Adjust transitions of all other states in script to point to container state as appropriate.
@@ -346,7 +346,7 @@ class Parser():
         for persistent_var in self._container_persistent_vars:
             # Create a dict for the persistent variable in container_state_vars if it doesn't exist yet.
             if persistent_var not in container_state_vars:
-                container_state_vars[persistent_var] = dict()
+                container_state_vars[persistent_var] = yaml.comments.CommentedMap()
 
             for state in states_buffer:
                 if persistent_var in list(state.items())[0][1]:
@@ -375,11 +375,11 @@ class Parser():
         #
         # Handle userdata and remapping by moving certain userdata entries outside of the container as appropriate.
         #
-        container_state_vars['remapping'] = dict()
+        container_state_vars['remapping'] = yaml.comments.CommentedMap()
 
         # Create a dict for userdata in script_vars if it doesn't exist yet.
         if 'userdata' not in script:
-            script['userdata'] = dict()
+            script['userdata'] = yaml.comments.CommentedMap()
 
         for state in states_buffer:
             if 'userdata' in list(state.items())[0][1]:
@@ -425,8 +425,8 @@ class Parser():
         # Handle input_keys and output_keys by cross-checking between userdata and remappings
         #
         preceding_userdata = dict()
-        input_keys = set()
-        output_keys = set()
+        input_keys = yaml.comments.CommentedSet()
+        output_keys = yaml.comments.CommentedSet()
 
         # Collate userdata from the parent script
         if 'userdata' in script:
@@ -452,16 +452,37 @@ class Parser():
 
         # Add input_keys and output_keys to container_state_vars
         if input_keys:
-            container_state_vars['input_keys'] = list(input_keys)
+            container_state_vars['input_keys'] = yaml.comments.CommentedSeq(input_keys)
         if output_keys:
-            container_state_vars['output_keys'] = list(output_keys)
+            container_state_vars['output_keys'] = yaml.comments.CommentedSeq(output_keys)
 
         # Add states_buffer to container
         container_state_vars['states'] = states_buffer
 
+        # Reorder the container_state_vars appropriately in a CommentedMap type
+        ordered_container_state_vars = yaml.comments.CommentedMap()
+        if 'template' in container_state_vars:
+            ordered_container_state_vars['template'] = container_state_vars['template']
+        if 'params' in container_state_vars:
+            ordered_container_state_vars['params'] = container_state_vars['params']
+        if 'userdata' in container_state_vars:
+            ordered_container_state_vars['userdata'] = container_state_vars['userdata']
+        if 'input_keys' in container_state_vars:
+            ordered_container_state_vars['input_keys'] = container_state_vars['input_keys']
+        if 'output_keys' in container_state_vars:
+            ordered_container_state_vars['output_keys'] = container_state_vars['output_keys']
+        if 'remapping' in container_state_vars:
+            ordered_container_state_vars['remapping'] = container_state_vars['remapping']
+        if 'outcomes' in container_state_vars:
+            ordered_container_state_vars['outcomes'] = container_state_vars['outcomes']
+        if 'transitions' in container_state_vars:
+            ordered_container_state_vars['transitions'] = container_state_vars['transitions']
+        if 'states' in container_state_vars:
+            ordered_container_state_vars['states'] = container_state_vars['states']
+
         # Construct container state
-        container_state = dict()
-        container_state[container_state_name] = container_state_vars
+        container_state = yaml.comments.CommentedMap()
+        container_state[container_state_name] = ordered_container_state_vars
 
         # Remove old states from script and add container
         del script['states'][i_script_container_state+1:i_script_container_state+len(states_buffer)]
