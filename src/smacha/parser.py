@@ -503,7 +503,7 @@ class Parser():
 
         # Collate userdata from preceding states
         for i_state in range(0,i_script_container_state):
-            if 'userdata' in script['states'][i_state].items()[0][1]:
+            if 'userdata' in list(script['states'][i_state].items())[0][1]:
                 preceding_userdata.update(script['states'][i_state].items()[0][1]['userdata'])
 
         for state in states_buffer:
