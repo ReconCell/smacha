@@ -175,6 +175,21 @@ class Parser():
                         else:
                             continue
                     return False
+
+            elif isinstance(script_var, dict):
+                try:
+                    for script_var_var, script_var_val in list(script_var.items()):
+                        if self.contains_lookups(script_var_val, lookup_vars):
+                            return True
+                        else:
+                            continue
+                    return False
+                except:
+                    return False
+
+            else:
+                return False
+
         except:
             return False
     
@@ -362,6 +377,12 @@ class Parser():
                             while var + '_' + str(i_new_key) in container_state_vars[persistent_var][var]:
                                 i_new_key = i_new_key + 1
                             container_state_vars[persistent_var][var + '_' + str(i_new_key)] = val
+
+                            # Swap every reference to the old key for the new key in the state
+                            # for state_var, state_val in 
+                            # state[persistent_var][var + '_' + str(i_new_key)] = val
+                            # state[persistent_var].pop(var)
+
                         # If it exists, and the var value is the same, skip it
                         else:
                             continue
