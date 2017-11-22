@@ -49,7 +49,8 @@ class TestGenerator(unittest.TestCase):
 
     def _contain(self,
                  smacha_script_filename, script_dirs,
-                 container_name, container_type, states):
+                 container_name, container_type, states,
+                 output_file_stub = '_contain_output.yml'):
         """Containerize a sequence of states in a script."""
         # Load parser
         parser = smacha.Parser(script_dirs = script_dirs)
@@ -66,7 +67,7 @@ class TestGenerator(unittest.TestCase):
         
         # Write the final output to a SMACHA YAML file
         if self.write_output_files:
-            with open(smacha_script_filename + '_contain_output.yml', 'w') as contained_script_file:
+            with open(os.path.splitext(smacha_script_filename)[0] + output_file_stub, 'w') as contained_script_file:
                 contained_script_file.write(contained_script_string)
 
         return contained_script_string
@@ -150,16 +151,38 @@ class TestGenerator(unittest.TestCase):
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
-    def test_contain_seq(self):
+    def test_containerize_seq_1(self):
         """Test containerizing seq.yml"""
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_1.yml') as original_file:
             generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
                                             [base_path + '/smacha_scripts/smacha_test_examples'],
-                                            'SUB', 'StateMachine', ['FOO_0', 'FOO_1'])
+                                            'SUB', 'StateMachine', ['FOO_0', 'FOO_1'],
+                                            output_file_stub = '_nesting_1_contain_output.yml')
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_containerize_seq_2(self):
+        """Test containerizing seq.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_2.yml') as original_file:
+            generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
+                                            [base_path + '/smacha_scripts/smacha_test_examples'],
+                                            'SUB', 'StateMachine', ['FOO_1', 'FOO_2'],
+                                            output_file_stub = '_nesting_2_contain_output.yml')
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
+    def test_containerize_seq_3(self):
+        """Test containerizing seq.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_3.yml') as original_file:
+            generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
+                                            [base_path + '/smacha_scripts/smacha_test_examples'],
+                                            'SUB', 'StateMachine', ['FOO_0', 'FOO_1', 'FOO_2'],
+                                            output_file_stub = '_nesting_3_contain_output.yml')
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
 if __name__=="__main__":
     

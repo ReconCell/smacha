@@ -2,6 +2,8 @@ import os
 from ruamel import yaml
 from smacha.exceptions import ScriptNotFoundError
 
+import pdb
+
 __all__ = ['Parser']
 
 class Parser():
@@ -146,37 +148,100 @@ class Parser():
         return script_string
 
 
-    def contains_lookups(self, script_var, lookup_vars):
+    def contains_lookups(self, script, lookup_vars):
         """
         Check if a script variable contains variable lookups.
+        
+        Given a script and a list of possible lookup variables, e.g. ['params'],
+        recursively check to see if the script contains any lookups to those variables,
+        e.g. regular lookups like ['params', 'robot'] or string constructs like [['params', 'robot'], '/base'].
 
         INPUTS:
-            script_var: An arbitrarily typed script variable.  E.g. it could be a string like 'robot' or
-                        a dict like {'foo': 'bar'} or a list containing script variable lookups like
-                        [['params', 'robot'], '/base'].
+            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
             lookup_vars: A list of names of possible lookup variables, e.g. ['params'].
 
         RETURNS:
-            True: If script_var contains lookups.
+            True: If script contains lookups.
             False: Otherwise.
         """
         try:
-            if isinstance(script_var, list):
+            if isinstance(script, list):
                 try:
-                    if (len(script_var) == 2 and isinstance(script_var[0], str) and isinstance(script_var[1], str) and
-                        script_var[0] in lookup_vars):
+                    if (len(script) == 2 and isinstance(script[0], str) and isinstance(script[1], str) and
+                        script[0] in lookup_vars):
                             return True
                     else:
                         raise Exception
                 except:
-                    for script_var_var in script_var:
-                        if self.contains_lookups(script_var_var, lookup_vars):
+                    for script_val in script:
+                        if self.contains_lookups(script_val, lookup_vars):
                             return True
                         else:
                             continue
                     return False
+            elif isinstance(script, dict):
+                try:
+                    for script_var, script_val in list(script.items()):
+                        if self.contains_lookups(script_val, lookup_vars):
+                            return True
+                        else:
+                            continue
+                    return False
+                except:
+                    return False
+            else:
+                return False
         except:
             return False
+
+    def sub_lookups(self, script, old_key, old_val, new_key, new_val):
+        """
+        Substitute lookup key/value names throughout a script.
+
+        Given a script, recursively substitute [old_key, old_val] lookups
+        with [new_key, new_val] lookups everywhere.
+
+        NOTE: This method, in its current form, will modify the input script object!
+
+        INPUTS:
+            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
+            old_key: The old_key in [old_key, old_val] lookups (str).
+            old_val: The old_val in [old_key, old_val] lookups (str).
+            new_key: The new_key in [new_key, new_val] lookups (str).
+            new_val: The new_val in [new_key, new_val] lookups (str).
+
+        RETURNS:
+            script: The updated YAML script with substituted lookups.
+        """
+        try:
+            if isinstance(script, list):
+                try:
+                    if (len(script) == 2 and isinstance(script[0], str) and isinstance(script[1], str) and
+                        script[0] == old_key and script[1] == old_val):
+                        # Perform the substitution
+                        script[0] = new_key
+                        script[1] = new_val
+                    else:
+                        raise Exception
+                except:
+                    try:
+                        for script_val in script:
+                            script_val = self.sub_lookups(script_val, old_key, old_val, new_key, new_val)
+                    except:
+                        raise
+                return script
+            elif isinstance(script, dict):
+                try:
+                    for script_var, script_val in list(script.items()):
+                        script_val = self.sub_lookups(script_val, old_key, old_val, new_key, new_val)
+                        script[script_var] = script_val
+                except:
+                    raise
+                return script
+            else:
+                return script
+        except:
+            raise
     
     def lookup(self, script_vars, query):
         """
@@ -359,9 +424,13 @@ class Parser():
                         elif container_state_vars[persistent_var][var] != val:
                             # Generate a new var
                             i_new_key = 1
-                            while var + '_' + str(i_new_key) in container_state_vars[persistent_var][var]:
+                            while var + '_' + str(i_new_key) in container_state_vars[persistent_var]:
                                 i_new_key = i_new_key + 1
                             container_state_vars[persistent_var][var + '_' + str(i_new_key)] = val
+
+                            # Substitute every reference to the old key for the new key in the state
+                            self.sub_lookups(state, persistent_var, var, persistent_var, var + '_' + str(i_new_key))
+
                         # If it exists, and the var value is the same, skip it
                         else:
                             continue
@@ -399,7 +468,7 @@ class Parser():
                         else:
                             # Generate a new var
                             i_new_key = 1
-                            while var + '_' + str(i_new_key) in script['userdata'][var]:
+                            while var + '_' + str(i_new_key) in script['userdata']:
                                 i_new_key = i_new_key + 1
                             script['userdata'][var + '_' + str(i_new_key)] = val
 
@@ -434,7 +503,7 @@ class Parser():
 
         # Collate userdata from preceding states
         for i_state in range(0,i_script_container_state):
-            if 'userdata' in script['states'][i_state].items()[0][1]:
+            if 'userdata' in list(script['states'][i_state].items())[0][1]:
                 preceding_userdata.update(script['states'][i_state].items()[0][1]['userdata'])
 
         for state in states_buffer:
