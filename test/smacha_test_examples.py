@@ -71,6 +71,39 @@ class TestGenerator(unittest.TestCase):
                 contained_script_file.write(contained_script_string)
 
         return contained_script_string
+                
+    def _extract(self,
+                 smacha_script_filename, script_dirs,
+                 container_state_name,
+                 sub_script_filename,
+                 output_sub_script_file_stub = '_sub_script_extract_output.yml',
+                 output_super_script_file_stub = '_super_script_extract_output.yml'):
+        """Extract a container state in a script and export to sub-script and super-script."""
+        # Load parser
+        parser = smacha.Parser(script_dirs = script_dirs)
+
+        # Load and parse SMACHA script
+        script_str, _ = parser.load(smacha_script_filename)
+        script = parser.parse(script_str)
+
+        # Use the extract() method in the parser to perform the extraction
+        sub_script, super_script = parser.extract(script, container_state_name, sub_script_filename=sub_script_filename)
+        
+        # Dump the sub-script to a string
+        extracted_sub_script_string = parser.dump([sub_script])
+        
+        # Dump the super-script to a string
+        extracted_super_script_string = parser.dump(super_script)
+
+        # Write the final output to a SMACHA YAML files
+        if self.write_output_files:
+            with open(os.path.splitext(smacha_script_filename)[0] + output_sub_script_file_stub, 'w') as extracted_sub_script_file:
+                extracted_sub_script_file.write(extracted_sub_script_string)
+            
+            with open(os.path.splitext(smacha_script_filename)[0] + output_super_script_file_stub, 'w') as extracted_super_script_file:
+                extracted_super_script_file.write(extracted_super_script_string)
+
+        return extracted_sub_script_string, extracted_super_script_string
 
     def _compare(self, code_a, code_b, file_a='code_a', file_b='code_b'):
         """Diff compare code_a with code_b."""
@@ -183,6 +216,48 @@ class TestGenerator(unittest.TestCase):
                                             output_file_stub = '_nesting_3_contain_output.yml')
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_extract_seq_nesting_1(self):
+        """Test extracting container state as sub-script from seq_nesting_1.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_1_sub_script.yml') as original_sub_script_file, open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_1_super_script.yml') as original_super_script_file:
+            generated_sub_script_code, generated_super_script_code = (
+                self._extract(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_1.yml',
+                              [base_path + '/smacha_scripts/smacha_test_examples'],
+                              'SUB', '/smacha_scripts/seq_nesting_1_sub_script.yml'))
+            original_sub_script_code = original_sub_script_file.read()
+            original_super_script_code = original_super_script_file.read()
+            self.assertTrue(
+                self._compare(generated_sub_script_code, original_sub_script_code, file_a='generated', file_b='original') and
+                self._compare(generated_super_script_code, original_super_script_code, file_a='generated', file_b='original'))
+    
+    def test_extract_seq_nesting_2(self):
+        """Test extracting container state as sub-script from seq_nesting_2.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_2_sub_script.yml') as original_sub_script_file, open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_2_super_script.yml') as original_super_script_file:
+            generated_sub_script_code, generated_super_script_code = (
+                self._extract(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_2.yml',
+                              [base_path + '/smacha_scripts/smacha_test_examples'],
+                              'SUB', '/smacha_scripts/seq_nesting_2_sub_script.yml'))
+            original_sub_script_code = original_sub_script_file.read()
+            original_super_script_code = original_super_script_file.read()
+            self.assertTrue(
+                self._compare(generated_sub_script_code, original_sub_script_code, file_a='generated', file_b='original') and
+                self._compare(generated_super_script_code, original_super_script_code, file_a='generated', file_b='original'))
+    
+    def test_extract_seq_nesting_3(self):
+        """Test extracting container state as sub-script from seq_nesting_3.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_3_sub_script.yml') as original_sub_script_file, open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_3_super_script.yml') as original_super_script_file:
+            generated_sub_script_code, generated_super_script_code = (
+                self._extract(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_3.yml',
+                              [base_path + '/smacha_scripts/smacha_test_examples'],
+                              'SUB', '/smacha_scripts/seq_nesting_3_sub_script.yml'))
+            original_sub_script_code = original_sub_script_file.read()
+            original_super_script_code = original_super_script_file.read()
+            self.assertTrue(
+                self._compare(generated_sub_script_code, original_sub_script_code, file_a='generated', file_b='original') and
+                self._compare(generated_super_script_code, original_super_script_code, file_a='generated', file_b='original'))
 
 if __name__=="__main__":
     
