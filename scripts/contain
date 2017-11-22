@@ -55,7 +55,7 @@ if __name__ == '__main__':
     script_str, _ = parser.load(args.script_file)
     script = parser.parse(script_str)
 
-    # Use the contain method in the parser to do script conversion
+    # Use the contain() method in the parser to perform the container conversion
     contained_script = parser.contain(script, args.container_name, args.container_type, args.states)
     
     # Write the updated script to a YAML file
