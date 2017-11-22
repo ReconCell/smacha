@@ -230,6 +230,20 @@ class TestGenerator(unittest.TestCase):
             self.assertTrue(
                 self._compare(generated_sub_script_code, original_sub_script_code, file_a='generated', file_b='original') and
                 self._compare(generated_super_script_code, original_super_script_code, file_a='generated', file_b='original'))
+    
+    def test_extract_seq_nesting_2(self):
+        """Test extracting container state as sub-script from seq_nesting_2.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_2_sub_script.yml') as original_sub_script_file, open(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_2_super_script.yml') as original_super_script_file:
+            generated_sub_script_code, generated_super_script_code = (
+                self._extract(base_path + '/smacha_scripts/smacha_test_examples/seq_nesting_2.yml',
+                              [base_path + '/smacha_scripts/smacha_test_examples'],
+                              'SUB', '/smacha_scripts/seq_nesting_2_sub_script.yml'))
+            original_sub_script_code = original_sub_script_file.read()
+            original_super_script_code = original_super_script_file.read()
+            self.assertTrue(
+                self._compare(generated_sub_script_code, original_sub_script_code, file_a='generated', file_b='original') and
+                self._compare(generated_super_script_code, original_super_script_code, file_a='generated', file_b='original'))
 
 if __name__=="__main__":
     

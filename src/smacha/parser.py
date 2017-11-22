@@ -596,7 +596,7 @@ class Parser():
         sub_script_state_vars = state_vars
 
         # Move persistent variables from the container state to the super-script
-        for state_var, state_var_val in state_vars.items():
+        for state_var, state_var_val in list(state_vars.items()):
             if state_var in self._container_persistent_vars or state_var in self._sub_script_persistent_vars:
                 # Add to super-script
                 super_script_state_vars[state_var] = state_var_val
