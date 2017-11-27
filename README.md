@@ -273,6 +273,16 @@ been implemented.
 
 ## Installation
 
+### Dependencies
+
+SMACHA relies on [ruamel.yaml](https://pypi.python.org/pypi/ruamel.yaml) for YAML parsing, and
+ruamel is not available as a system package under Ubuntu Trusty or below, thus rosdep will not
+install the package on ROS Jade or Indigo.  It may still be possible to install ruamel on
+Trusty/Jade or Trusty/Indigo using pip, but this has not been tested.  Kinetic and Lunar installations
+should work fine, however.
+
+### Install
+
 Simply clone into the `src` directory of your catkin workspace and run `catkin_make` or `catkin build` from the
 root of the workspace.  It may be necessary to update dependencies using `rosdep` as follows:
 
