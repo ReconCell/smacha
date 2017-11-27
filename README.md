@@ -273,27 +273,12 @@ been implemented.
 
 ## Installation
 
-SMACHA uses the [ruamel.yaml](https://pypi.python.org/pypi/ruamel.yaml) in place of
-[pyyaml](https://pypi.python.org/pypi/PyYAML/) in order to take advantage of its enhanced
-YAML processing functionality.  However, ruamel is not currently available as a [rosdep](http://wiki.ros.org/rosdep)
-package, so a fork of [rosdisto](https://github.com/ros/rosdistro) must be used in order to
-update the rosdep sources database so that it can find the package.
-
-### Update `sources.list`
-
-```
-sudo sh -c 'echo "yaml https://github.com/ReconCell/rosdistro/raw/master/rosdep/python.yaml" > /etc/ros/rosdep/sources.list.d/reconcell.list'
-rosdep update
-```
-
-### Clone, Update Dependencies and Build
-
 Simply clone into the `src` directory of your catkin workspace and run `catkin_make` or `catkin build` from the
 root of the workspace.  It may be necessary to update dependencies using `rosdep` as follows:
 
 ```
-cd ~/catkin_ws
-rosdep install --from-paths src --ignore-src -r -y
+rosdep update
+rosdep install smacha
 ```
 
 ## Usage
