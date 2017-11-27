@@ -176,8 +176,9 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 install(PROGRAMS
-  scripts/smacha
+  scripts/generate
   scripts/extract
+  scripts/contain
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
