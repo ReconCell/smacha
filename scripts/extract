@@ -48,48 +48,11 @@ if __name__ == '__main__':
     script_str, _ = parser.load(args.script_file)
     script = parser.parse(script_str)
 
-    # Find the container state
-    for i_state, state in enumerate(script['states']):
-        # Find the state name and variables in the current state
-        state_name, state_vars = state.items()[0]
-
-        # Check if it's the state we're looking for
-        if state_name == args.state:
-            break
-
-    # Make note of persistent/non-persistent container and sub-script variables
-    container_persistent_vars = ['params']
-    sub_script_non_persistent_vars = ['states', 'template', 'script', 'input_keys', 'output_keys', 'outcomes']
-    sub_script_persistent_vars = ['userdata', 'remapping', 'transitions']
-
-    # Construct skeleton of super-script state entry 
-    super_script_state_name = state_name
-    super_script_state_vars = dict()
-    super_script_state_vars['script'] = os.path.splitext(os.path.basename(args.sub_script_output_file))[0]
-    
-    # Construct skeleton of sub-script
-    sub_script_name = state_name
-    sub_script_state_vars = state_vars
-
-    # Move persistent variables from the container state to the super-script
-    for state_var, state_var_val in state_vars.items():
-        if state_var in container_persistent_vars or state_var in sub_script_persistent_vars:
-            # Add to super-script
-            super_script_state_vars[state_var] = state_var_val
-            # Remove from sub-script
-            sub_script_state_vars.pop(state_var, 0)
-
-    # Update the super-script state entry
-    super_script_state = dict()
-    super_script_state[super_script_state_name] = super_script_state_vars
-    script['states'][i_state] = super_script_state
-    
-    # Update the sub-script
-    sub_script_state = dict()
-    sub_script_state[sub_script_name] = sub_script_state_vars
+    # Use the extract() method in the parser to perform the extraction
+    sub_script, super_script = parser.extract(script, args.state, sub_script_filename=args.sub_script_output_file)
     
     # Write the updated super-script to a YAML file
-    parser.dump(args.super_script_output_file, script)
+    parser.dump(super_script, output_file=args.super_script_output_file)
 
     # Write the sub-script to a YAML file
-    parser.dump([sub_script_state], output_file=args.sub_script_output_file)
+    parser.dump([sub_script], output_file=args.sub_script_output_file)
