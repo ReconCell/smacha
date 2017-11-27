@@ -1,8 +1,8 @@
 import os
+import copy
 from ruamel import yaml
 from smacha.exceptions import ScriptNotFoundError
 
-import pdb
 
 __all__ = ['Parser']
 
@@ -558,3 +558,61 @@ class Parser():
         script['states'][i_script_container_state] = container_state
 
         return script
+
+    def extract(self, script, container_state, sub_script_filename=None):
+        """
+        Extract a container state from a script and export to sub-script and super-script
+
+        NOTE: Currently only works for the 'StateMachine' container type!
+
+        INPUTS:
+            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
+            state: Name of container state to be extracted (str).
+            sub_script_filename = Desired name for prospective sub-script file (str).
+
+        RETURNS:
+            sub_script: Generated SMACHA YAML sub-script for container state.
+            super_script: Generated SMACHA YAML super-script that calls the sub-script.
+        """
+        # Find the container state
+        for i_state, state in enumerate(script['states']):
+            # Find the state name and variables in the current state
+            state_name, state_vars = list(state.items())[0]
+
+            # Check if it's the state we're looking for
+            if state_name == container_state:
+                break
+
+        # Construct skeleton of super-script state entry 
+        super_script_state_name = state_name
+        super_script_state_vars = yaml.comments.CommentedMap()
+        if sub_script_filename:
+            super_script_state_vars['script'] = os.path.splitext(os.path.basename(sub_script_filename))[0]
+        else:
+            super_script_state_vars['script'] = state_name.lower()
+        
+        # Construct skeleton of sub-script
+        sub_script_name = state_name
+        sub_script_state_vars = state_vars
+
+        # Move persistent variables from the container state to the super-script
+        for state_var, state_var_val in list(state_vars.items()):
+            if state_var in self._container_persistent_vars or state_var in self._sub_script_persistent_vars:
+                # Add to super-script
+                super_script_state_vars[state_var] = state_var_val
+                # Remove from sub-script
+                sub_script_state_vars.pop(state_var, 0)
+
+        # Create the super-script state entry
+        super_script_state = yaml.comments.CommentedMap()
+        super_script_state[super_script_state_name] = super_script_state_vars
+
+        # Copy the script and transform to super-script
+        super_script = copy.copy(script)
+        super_script['states'][i_state] = super_script_state
+        
+        # Create the sub-script
+        sub_script = yaml.comments.CommentedMap()
+        sub_script[sub_script_name] = sub_script_state_vars
+
+        return sub_script, super_script
