@@ -5,13 +5,18 @@ template:
   name: StateMachine
   description: SMACH StateMachine Container 
   language: Python
-variables:
-  name:
-    description: State name.
-    type: str
-  sm_name:
-    description: State variable name.
-    type: str
+  framework: SMACH
+  variables:
+    name:
+      description: State name.
+      type: str
+    sm_name:
+      description: State variable name.
+      type: str
+  state:
+    type: Container
+    input_keys: []
+    output_keys: []
 {% endblock meta %}
 
 {% set sm_name = ['sm_', name | lower()] | join() %}
