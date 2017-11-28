@@ -1,0 +1,89 @@
+#! /usr/bin/env python
+
+import os
+import sys
+import argparse
+
+import smacha
+from smacha.exceptions import ParsingError
+
+# Pretty printing
+from pprint import pprint
+
+# Colors
+from smacha.util import bcolors
+
+if __name__ == '__main__':
+    # Parse arguments
+    arg_parser = argparse.ArgumentParser(description='SMACHA Help: Read template help information.')
+    
+    arg_parser.add_argument('template',
+                            action='store',
+                            help='SMACHA template (.tpl file).')
+    
+    arg_parser.add_argument('-t', '--template-dirs',
+                            nargs = '*',
+                            dest='template_dirs',
+                            action='store',
+                            default=[],
+                            help='Custom SMACHA template directories (directories containing .tpl template files).')
+    
+    args = arg_parser.parse_args()
+
+    # Load templater
+    templater = smacha.Templater(args.template_dirs)
+
+    # Load parser
+    parser = smacha.Parser()
+
+    # Get meta block from template
+    meta_block = templater.render_block(args.template, {}, 'meta')
+
+    # Parse the meta block
+    parsed_meta_block = parser.parse(meta_block)
+
+    # Print general template help info
+    try:
+        if 'name' in parsed_meta_block['template']:
+            print(bcolors.OKGREEN + bcolors.BOLD + bcolors.UNDERLINE +
+                  'Template:' + ' {}'.format(parsed_meta_block['template']['name']) + bcolors.ENDC)
+        if 'description' in parsed_meta_block['template']:
+            print(bcolors.HEADER + bcolors.BOLD +
+                  'Description:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['template']['description']))
+        if 'language' in parsed_meta_block['template']:
+            print(bcolors.HEADER + bcolors.BOLD + 
+                  'Language:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['template']['language']))
+        if 'framework' in parsed_meta_block['template']:
+            print(bcolors.HEADER + bcolors.BOLD + 
+                  'Framework:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['template']['framework']))
+    except Exception as e:
+        raise ParsingError('Error accessing template meta data: {}'.format(str(e))) 
+   
+    # Print template variable help info
+    try:
+        if 'variables' in parsed_meta_block['template']:
+            print(bcolors.HEADER + bcolors.BOLD +
+                  'Variables:' + bcolors.ENDC)
+            for var, var_info in list(parsed_meta_block['template']['variables'].items()):
+                print(bcolors.OKBLUE + bcolors.BOLD + '    {} ('.format(var) +
+                      bcolors.WARNING + bcolors.BOLD + '{}'.format(var_info['type']) +
+                      bcolors.OKBLUE + bcolors.BOLD + '):' + bcolors.ENDC + ' {}'.format(var_info['description']))
+    except Exception as e:
+        raise ParsingError('Error accessing template variable meta data: {}'.format(str(e))) 
+
+    # Print template state help info
+    try:
+        if 'state' in parsed_meta_block['template']:
+            print(bcolors.HEADER + bcolors.BOLD +
+                  'State:' + bcolors.ENDC)
+            if 'type' in parsed_meta_block['template']['state']:
+                print(bcolors.HEADER + bcolors.BOLD +
+                      '    Type:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['template']['state']['type']))
+            if 'input_keys' in parsed_meta_block['template']['state']:
+                print(bcolors.HEADER + bcolors.BOLD +
+                      '    Input Keys:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['template']['state']['input_keys']))
+            if 'output_keys' in parsed_meta_block['template']['state']:
+                print(bcolors.HEADER + bcolors.BOLD +
+                      '    Output Keys:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['template']['state']['output_keys']))
+    except Exception as e:
+        raise ParsingError('Error accessing template state meta data: {}'.format(str(e))) 
