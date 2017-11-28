@@ -2,6 +2,22 @@
 
 {% set sm_name = ['sm_', name | lower()] | join() %}
 
+{% block meta %}
+template:
+  name: Concurrence
+  description: SMACH Concurrence container for running states in parallel.
+  language: Python
+  framework: SMACH
+  variables:
+    name:
+      description: State name.
+      type: str
+  state:
+    type: Container
+    input_keys: {}
+    output_keys: {}
+{% endblock meta %}
+
 {% block upper_comments %}
 #----------------------------------------------------------------------------------------
 # BEGIN: {{ name }}

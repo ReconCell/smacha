@@ -1,25 +1,22 @@
+{% from "Utils.tpl" import render_outcomes, render_input_keys, render_output_keys, render_userdata, render_transitions, render_remapping %}
+
+{% set sm_name = ['sm_', name | lower()] | join() %}
+
 {% block meta %}
 template:
   name: StateMachine
-  description: SMACH StateMachine Container 
+  description: SMACH StateMachine container for nesting child states in a parent state.
   language: Python
   framework: SMACH
   variables:
     name:
       description: State name.
       type: str
-    sm_name:
-      description: State variable name.
-      type: str
   state:
     type: Container
     input_keys: {}
     output_keys: {}
 {% endblock meta %}
-
-{% from "Utils.tpl" import render_outcomes, render_input_keys, render_output_keys, render_userdata, render_transitions, render_remapping %}
-
-{% set sm_name = ['sm_', name | lower()] | join() %}
 
 {% block upper_comments %}
 #----------------------------------------------------------------------------------------

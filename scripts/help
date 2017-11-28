@@ -37,10 +37,16 @@ if __name__ == '__main__':
     parser = smacha.Parser()
 
     # Get meta block from template
-    meta_block = templater.render_meta_block(args.template)
+    try:
+        meta_block = templater.render_meta_block(args.template)
+    except Exception as e:
+        raise ParsingError('Error when rendering meta block in template {}: {}'.format(args.template, str(e)))
 
     # Parse the meta block
-    parsed_meta_block = parser.parse(meta_block)
+    try:
+        parsed_meta_block = parser.parse(meta_block)
+    except Exception as e:
+        raise ParsingError('Error when parsing meta block in template {}: {}'.format(args.template, str(e)))
 
     # Print general template help info
     try:
@@ -86,4 +92,4 @@ if __name__ == '__main__':
                 print(bcolors.HEADER + bcolors.BOLD +
                       '    Output Keys:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['template']['state']['output_keys']))
     except Exception as e:
-        raise ParsingError('Error accessing template state meta data: {}'.format(str(e))) 
+        raise ParsingError('Error accessing template state meta data: {}'.format(str(e)))

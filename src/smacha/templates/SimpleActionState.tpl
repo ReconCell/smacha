@@ -2,6 +2,37 @@
 
 {% include "State.tpl" %}
 
+{% block meta %}
+template:
+  name: SimpleActionState
+  description: SMACH SimpleActionState for calling actions using an action server. 
+  language: Python
+  framework: SMACH
+  variables:
+    name:
+      description: State name.
+      type: str
+    action_server_namespace:
+      description: The ROS topic/namespace of the action server, e.g. '/robot_1/joint_motion_action'.
+      type: str
+    action:
+      description: The action type.
+      type: str
+    goal:
+      description: The goal as defined by a .action file.
+      type: str
+    goal_slots:
+      description: Goal slots as defined by userdata.
+      type: list
+    goal_cb:
+      description: A goal callback.
+      type: str
+  state:
+    type: Container
+    input_keys: {}
+    output_keys: {}
+{% endblock meta %}
+
 {% block base_header %}
 {% endblock base_header %}
 
