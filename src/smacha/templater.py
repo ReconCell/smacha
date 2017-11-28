@@ -285,10 +285,31 @@ class Templater():
         # Read the state template file into a template object using the environment object
         template = self._template_env.select_template([template_name, template_name + '.tpl'])
 
-        # Render template code for each of the template blocks
-        template_block_code = {block : self.render_block(template_name, template_vars, block) for block, _ in template.blocks.items()}
+        # Render template code for each of the template blocks (all except the meta block)
+        template_block_code = {block : self.render_block(template_name, template_vars, block) for block, _ in template.blocks.items() if block != 'meta'}
 
         return template_block_code
+    
+    def render_meta_block(self, template_name):
+        """
+        Render meta block from code template.
+        
+        INPUTS:
+            template_name: The name of the template (str).
+
+        RETURNS:
+            meta_block_code: The rendered code for the template meta block (str).
+        """
+        # Read the state template file into a template object using the environment object
+        template = self._template_env.select_template([template_name, template_name + '.tpl'])
+
+        # Generate a context placeholder
+        context = template.new_context
+
+        # Render template code for the template meta block 
+        meta_block_code = template.blocks['meta'](context(vars={})).next()
+
+        return meta_block_code
 
     def get_template_vars(self, template_name, context = None):
         """

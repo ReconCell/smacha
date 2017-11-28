@@ -1,5 +1,3 @@
-{% from "Utils.tpl" import render_outcomes, render_input_keys, render_output_keys, render_userdata, render_transitions, render_remapping %}
-
 {% block meta %}
 template:
   name: StateMachine
@@ -15,9 +13,11 @@ template:
       type: str
   state:
     type: Container
-    input_keys: []
-    output_keys: []
+    input_keys: {}
+    output_keys: {}
 {% endblock meta %}
+
+{% from "Utils.tpl" import render_outcomes, render_input_keys, render_output_keys, render_userdata, render_transitions, render_remapping %}
 
 {% set sm_name = ['sm_', name | lower()] | join() %}
 

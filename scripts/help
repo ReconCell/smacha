@@ -37,7 +37,7 @@ if __name__ == '__main__':
     parser = smacha.Parser()
 
     # Get meta block from template
-    meta_block = templater.render_block(args.template, {}, 'meta')
+    meta_block = templater.render_meta_block(args.template)
 
     # Parse the meta block
     parsed_meta_block = parser.parse(meta_block)
