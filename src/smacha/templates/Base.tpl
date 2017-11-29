@@ -1,6 +1,36 @@
-{% from "Utils.tpl" import render_userdata %}
+{% block meta %}
+name: Base
+description: SMACH base template.
+language: Python
+framework: SMACH
+type: None
+includes: []
+extends: []
+variables:
+- - manifest:
+      description: ROS manifest name.
+      type: str
+- - node_name:
+      description: ROS node name for the state machine.
+      type: str
+- outcomes:
+    description: A list of possible outcomes of the state machine.
+    type: list
+- - userdata:
+      description: Definitions for userdata needed by child states.
+      type: dict
+- - function_name:
+      description: A name for the main executable state machine function.
+      type: str
+input_keys: []
+output_keys: []
+{% endblock meta %}
+
+{% from "Utils.tpl" import render_outcomes, render_userdata %}
+
 {% set defined_headers = [] %}
 {% set local_vars = [] %}
+
 {% block base_header %}
 #!/usr/bin/env python
 {{ base_header }}
@@ -32,7 +62,7 @@ def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main
 {% endblock main_def %}
    
 {% block body %}
-    {{ sm_name }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
+    {{ sm_name }} = smach.StateMachine({{ render_outcomes(outcomes) }})
 
     {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) | indent(4) }}{% endif %}
     {% if name in header %}{{ header[name] | indent(4, true) }}{% endif %}

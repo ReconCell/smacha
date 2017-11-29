@@ -169,8 +169,31 @@ class Templater():
         RETURNS:
             code: The rendered template code (str).
         """
+        # For reasons not entirely clear, a temporary environment must be created
+        # to make this work.
+        template_env = jinja2.Environment(loader=self._template_loader,
+                                          extensions = [jinja2.ext.do, SkipBlockExtension],
+                                          trim_blocks=False,
+                                          lstrip_blocks=True)
+        
+        # Always skip the meta block
+        template_env.skip_blocks.append('meta')
+
+        # Skip comment blocks as required
+        if self._include_comments == False:
+            template_env.skip_blocks.append('upper_comments')
+            template_env.skip_blocks.append('lower_comments')
+        
+        # Skip introspection server blocks as required
+        if self._include_introspection_server == False:
+            template_env.skip_blocks.append('introspection_server')
+            template_env.skip_blocks.append('spin')
+
+        # Register custom tests with the environment
+        template_env.tests['not_string'] = not_string
+
         # Read the state template file into a template object using the environment object
-        template = self._template_env.select_template([template_name, template_name + '.tpl'])
+        template = template_env.select_template([template_name, template_name + '.tpl'])
         
         # Render code
         code = template.render(**template_vars) 
@@ -233,6 +256,10 @@ class Templater():
                                           extensions = [jinja2.ext.do, SkipBlockExtension],
                                           trim_blocks=False,
                                           lstrip_blocks=True)
+        
+        # Always skip the meta block unless it is the target block
+        if target_block != 'meta':
+            template_env.skip_blocks.append('meta')
 
         # Be sure to also skip comment blocks here as required
         if self._include_comments == False:
