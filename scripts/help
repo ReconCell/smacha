@@ -56,38 +56,61 @@ if __name__ == '__main__':
         except Exception as e:
             raise ParsingError('Error processing template variable type meta data: {}'.format(str(e))) 
 
-    def print_var(var, tabs=0, end=''):
+    def print_var(var, tabs=0, optional=False, end=''):
         name = var.keys()[0]
         info = var.values()[0]
         print_tabs(tabs)
+
         print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(name) + bcolors.ENDC, end='')
+
+        if optional:
+            print(bcolors.BOLD + ' (optional)' + bcolors.ENDC, end='')
+
         if 'description' in info:
             print(bcolors.OKBLUE + bcolors.BOLD + ': ' + bcolors.ENDC, end='')
             print('{}'.format(info['description']))
+
         if 'type' in info:
             print_tabs(tabs+1)
-            print(bcolors.OKBLUE + 'Type:' + bcolors.ENDC)
-            print_tabs(tabs+2)
-            print_types(info['type'], tabs=tabs+2, end='')
+            if isinstance(info['type'], list):
+                print(bcolors.OKBLUE + 'Type:' + bcolors.ENDC)
+                print_tabs(tabs+2)
+                print_types(info['type'], tabs=tabs+2, end='')
+            else:
+                print(bcolors.OKBLUE + 'Type: ' + bcolors.ENDC, end='')
+                print_types(info['type'], tabs=tabs+2, end='')
+                
         if 'units' in info:
             print_tabs(tabs+1)
-            print(bcolors.OKBLUE + 'Units:' + bcolors.ENDC)
-            print_tabs(tabs+2)
-            print_types(info['units'], tabs=tabs+2, end='')
+            if isinstance(info['units'], list):
+                print(bcolors.OKBLUE + 'Units:' + bcolors.ENDC)
+                print_tabs(tabs+2)
+                print_types(info['units'], tabs=tabs+2, end='')
+            else:
+                print(bcolors.OKBLUE + 'Units: ' + bcolors.ENDC, end='')
+                print_types(info['units'], tabs=tabs+2, end='')
+
         if 'range' in info:
             print_tabs(tabs+1)
-            print(bcolors.OKBLUE + 'Range:' + bcolors.ENDC)
-            print_tabs(tabs+2)
             if isinstance(info['type'], list):
-                print_types(info['range'], tabs=tabs+2, end='')
+                print(bcolors.OKBLUE + 'Range:' + bcolors.ENDC)
+                print_tabs(tabs+2)
+                if isinstance(info['type'], list):
+                    print_types(info['range'], tabs=tabs+2, end='')
+                else:
+                    print_types(str(info['range']), tabs=tabs+2, end='')
             else:
-                print_types(str(info['range']), tabs=tabs+2, end='')
+                print(bcolors.OKBLUE + 'Range: ' + bcolors.ENDC, end='')
+                if isinstance(info['type'], list):
+                    print_types(info['range'], tabs=tabs+2, end='')
+                else:
+                    print_types(str(info['range']), tabs=tabs+2, end='')
         print(end)
 
     def parse_var(var, tabs=0, parent_is_list=True):
         if parent_is_list and isinstance(var, list):
             if len(var) == 1:
-                print_var(var[0], tabs=1, end = bcolors.BOLD + ' (optional)' + bcolors.ENDC)
+                print_var(var[0], tabs=1, optional=True)
             else:
                 print_tabs(tabs+1)
                 print(bcolors.BOLD + 'Option:' + bcolors.ENDC)
