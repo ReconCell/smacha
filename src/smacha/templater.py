@@ -169,8 +169,31 @@ class Templater():
         RETURNS:
             code: The rendered template code (str).
         """
+        # For reasons not entirely clear, a temporary environment must be created
+        # to make this work.
+        template_env = jinja2.Environment(loader=self._template_loader,
+                                          extensions = [jinja2.ext.do, SkipBlockExtension],
+                                          trim_blocks=False,
+                                          lstrip_blocks=True)
+        
+        # Always skip the meta block
+        template_env.skip_blocks.append('meta')
+
+        # Skip comment blocks as required
+        if self._include_comments == False:
+            template_env.skip_blocks.append('upper_comments')
+            template_env.skip_blocks.append('lower_comments')
+        
+        # Skip introspection server blocks as required
+        if self._include_introspection_server == False:
+            template_env.skip_blocks.append('introspection_server')
+            template_env.skip_blocks.append('spin')
+
+        # Register custom tests with the environment
+        template_env.tests['not_string'] = not_string
+
         # Read the state template file into a template object using the environment object
-        template = self._template_env.select_template([template_name, template_name + '.tpl'])
+        template = template_env.select_template([template_name, template_name + '.tpl'])
         
         # Render code
         code = template.render(**template_vars) 
@@ -233,6 +256,10 @@ class Templater():
                                           extensions = [jinja2.ext.do, SkipBlockExtension],
                                           trim_blocks=False,
                                           lstrip_blocks=True)
+        
+        # Always skip the meta block unless it is the target block
+        if target_block != 'meta':
+            template_env.skip_blocks.append('meta')
 
         # Be sure to also skip comment blocks here as required
         if self._include_comments == False:
@@ -285,10 +312,31 @@ class Templater():
         # Read the state template file into a template object using the environment object
         template = self._template_env.select_template([template_name, template_name + '.tpl'])
 
-        # Render template code for each of the template blocks
-        template_block_code = {block : self.render_block(template_name, template_vars, block) for block, _ in template.blocks.items()}
+        # Render template code for each of the template blocks (all except the meta block)
+        template_block_code = {block : self.render_block(template_name, template_vars, block) for block, _ in template.blocks.items() if block != 'meta'}
 
         return template_block_code
+    
+    def render_meta_block(self, template_name):
+        """
+        Render meta block from code template.
+        
+        INPUTS:
+            template_name: The name of the template (str).
+
+        RETURNS:
+            meta_block_code: The rendered code for the template meta block (str).
+        """
+        # Read the state template file into a template object using the environment object
+        template = self._template_env.select_template([template_name, template_name + '.tpl'])
+
+        # Generate a context placeholder
+        context = template.new_context
+
+        # Render template code for the template meta block 
+        meta_block_code = template.blocks['meta'](context(vars={})).next()
+
+        return meta_block_code
 
     def get_template_vars(self, template_name, context = None):
         """

@@ -1,3 +1,30 @@
+{% block meta %}
+name: TF2ListenerState
+description: SMACH state for listening for and returning a particular transform on TF2.
+language: Python
+framework: SMACH
+type: State
+includes:
+  - State
+extends: []
+variables:
+- userdata:
+  - target:
+      description: The name of the target reference frame.
+      type: str
+  - source:
+      description: The name of the source reference frame.
+      type: str
+  - output:
+      description: The transform.
+      type: geometry_msgs/TransformStamped
+input_keys:
+  - target
+  - source
+output_keys:
+  - output  
+{% endblock meta %}
+
 {% from "Utils.tpl" import render_transitions, render_remapping %}
 
 {% include "State.tpl" %}
