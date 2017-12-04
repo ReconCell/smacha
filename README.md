@@ -17,7 +17,7 @@ templates and a custom code generation engine in the background.
 
 ## Overview
 
-![SMACHA API Overview](doc/smacha_overview.png "SMACHA API Overview")
+![SMACHA API Overview](doc/images/smacha_overview.png "SMACHA API Overview")
 
 ## SMACHA Scripts
 
