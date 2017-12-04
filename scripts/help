@@ -90,21 +90,21 @@ if __name__ == '__main__':
                 print(bcolors.OKBLUE + 'Units: ' + bcolors.ENDC, end='')
                 print_types(info['units'], tabs=tabs+2, end='')
 
-        if 'range' in info:
+        if 'values' in info:
             print_tabs(tabs+1)
             if isinstance(info['type'], list):
-                print(bcolors.OKBLUE + 'Range:' + bcolors.ENDC)
+                print(bcolors.OKBLUE + 'Values:' + bcolors.ENDC)
                 print_tabs(tabs+2)
                 if isinstance(info['type'], list):
-                    print_types(info['range'], tabs=tabs+2, end='')
+                    print_types(info['values'], tabs=tabs+2, end='')
                 else:
-                    print_types(str(info['range']), tabs=tabs+2, end='')
+                    print_types(str(info['values']), tabs=tabs+2, end='')
             else:
-                print(bcolors.OKBLUE + 'Range: ' + bcolors.ENDC, end='')
+                print(bcolors.OKBLUE + 'Values: ' + bcolors.ENDC, end='')
                 if isinstance(info['type'], list):
-                    print_types(info['range'], tabs=tabs+2, end='')
+                    print_types(info['values'], tabs=tabs+2, end='')
                 else:
-                    print_types(str(info['range']), tabs=tabs+2, end='')
+                    print_types(str(info['values']), tabs=tabs+2, end='')
         print(end)
 
     def parse_var(var, tabs=0, parent_is_list=True):
