@@ -10,10 +10,8 @@ SMACHA Package Documentation
    :maxdepth: 2
    :caption: Contents:
 
-SMACHA is a `YAML <http://yaml.org/>`__ and
-`Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__-based meta-scripting,
-templating, and code generation engine for
-`SMACH <http://wiki.ros.org/smach>`__.
+SMACHA is a meta-scripting, templating, and code generation engine for
+rapid prototyping of `ROS <http://ros.org>`__ `SMACH <http://wiki.ros.org/smach>`__ state machines.
 
 `SMACH <http://wiki.ros.org/smach>`__ is an exceptionally useful and
 comprehensive task-level architecture for state machine construction in
@@ -24,9 +22,9 @@ boilerplate code, intricate structure and lack of code reuse between
 state machine prototypes.
 
 SMACHA (short for "State Machine Assembler", pronounced "smasha") aims
-at distilling the task-level simplicity of SMACH into compact YAML-based
+at distilling the task-level simplicity of SMACH into compact `YAML <http://yaml.org/>`__-based
 scripts in the foreground, while retaining all of its power and
-flexibility in Jinja2-based templates and a custom code generation
+flexibility in `Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__-based templates and a custom code generation
 engine in the background.
 
 Overview
@@ -98,8 +96,8 @@ example; see the `SMACH User Data
 Tutorial <http://wiki.ros.org/smach/Tutorials/User%20Data>`__ for more
 details) may be specified as an associative array in each state.
 
-Jinja2 Templating
------------------
+Templating
+----------
 
 `Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__ is a powerful template
 engine for Python. Jinja2 templates are used to specify how code should
