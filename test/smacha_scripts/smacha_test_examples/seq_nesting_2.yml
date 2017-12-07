@@ -3,36 +3,36 @@ name: sm_top
 template: Base
 manifest: smacha
 node_name: smacha_params_test
-outcomes: [final_outcome_1, final_outcome_2, final_outcome_3]
+outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
 states:
 - FOO_0:
     template: ParamFoo
-    params: {name: FOO_0, outcome: outcome1}
+    params: {name: FOO_0, outcome: outcome_a}
     name_param: [params, name]
     outcome_param: [params, outcome]
-    transitions: {outcome1: SUB, outcome2: final_outcome_2}
+    transitions: {outcome_a: SUB, outcome_b: final_outcome_b}
 - SUB:
     template: StateMachine
     params:
       name: FOO_1
-      outcome: outcome1
+      outcome: outcome_a
       name_1: FOO_2
     outcomes:
     - sub_outcome_1
     - sub_outcome_2
     - sub_outcome_3
     transitions:
-      sub_outcome_1: final_outcome_2
-      sub_outcome_2: final_outcome_1
-      sub_outcome_3: final_outcome_3
+      sub_outcome_1: final_outcome_b
+      sub_outcome_2: final_outcome_a
+      sub_outcome_3: final_outcome_c
     states:
     - FOO_1:
         template: ParamFoo
         name_param: [params, name]
         outcome_param: [params, outcome]
-        transitions: {outcome1: FOO_2, outcome2: sub_outcome_1}
+        transitions: {outcome_a: FOO_2, outcome_b: sub_outcome_1}
     - FOO_2:
         template: ParamFoo
         name_param: [params, name_1]
         outcome_param: [params, outcome]
-        transitions: {outcome1: sub_outcome_2, outcome2: sub_outcome_3}
+        transitions: {outcome_a: sub_outcome_2, outcome_b: sub_outcome_3}

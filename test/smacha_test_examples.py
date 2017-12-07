@@ -258,6 +258,39 @@ class TestGenerator(unittest.TestCase):
             self.assertTrue(
                 self._compare(generated_sub_script_code, original_sub_script_code, file_a='generated', file_b='original') and
                 self._compare(generated_super_script_code, original_super_script_code, file_a='generated', file_b='original'))
+    
+    def test_concurrence_containerize_seq_1(self):
+        """Test concurrence containerizing seq.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_scripts/smacha_test_examples/seq_concurrence_1.yml') as original_file:
+            generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
+                                            [base_path + '/smacha_scripts/smacha_test_examples'],
+                                            'CON', 'Concurrence', ['FOO_0', 'FOO_1'],
+                                            output_file_stub = '_concurrence_1_contain_output.yml')
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_concurrence_containerize_seq_2(self):
+        """Test concurrence containerizing seq.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_scripts/smacha_test_examples/seq_concurrence_2.yml') as original_file:
+            generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
+                                            [base_path + '/smacha_scripts/smacha_test_examples'],
+                                            'CON', 'Concurrence', ['FOO_1', 'FOO_2'],
+                                            output_file_stub = '_concurrence_2_contain_output.yml')
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+
+    def test_concurrence_containerize_seq_3(self):
+        """Test concurrence containerizing seq.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(base_path + '/smacha_scripts/smacha_test_examples/seq_concurrence_3.yml') as original_file:
+            generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
+                                            [base_path + '/smacha_scripts/smacha_test_examples'],
+                                            'CON', 'Concurrence', ['FOO_0', 'FOO_1', 'FOO_2'],
+                                            output_file_stub = '_concurrence_3_contain_output.yml')
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
 if __name__=="__main__":
     

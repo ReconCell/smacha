@@ -2,6 +2,7 @@ import os
 import copy
 from ruamel import yaml
 from smacha.exceptions import ScriptNotFoundError
+from smacha.exceptions import ParsingError
 
 
 __all__ = ['Parser']
@@ -405,16 +406,53 @@ class Parser():
         #
         # Generate an outcome_map for Concurrence containers
         #
+        def find_state_outcome(container_outcome, state_outcome, state_transition):
+            if state_transition not in states and state_transition == container_outcome:
+                return state_outcome
+            elif state_transition in states:
+                state_found = False
+                for state in states_buffer:
+                    state_name = list(state.items())[0][0]
+                    if state_name == state_transition:
+                        state_found = True
+                        try:
+                            return find_state_outcome(container_outcome, state_outcome, list(state.items())[0][1]['transitions'][state_outcome])
+                        except Exception as e:
+                            raise ParsingError('Failed to successfully trace state transition to a state outcome when ' +
+                                               'converting state sequence to Concurrence container: {}'.format(str(e)))
+                        break
+                if not state_found:
+                    raise ParsingError('Failed to successfully trace state transition to a state outcome when ' +
+                                       'converting state sequence to Concurrence container.')
+            else:
+                raise ParsingError('Failed to successfully trace state transition to a state outcome when ' +
+                                   'converting state sequence to Concurrence container.')
+
         if container_type == 'Concurrence':
             container_state_vars['outcome_map'] = yaml.comments.CommentedMap()
             for outcome in container_state_vars['outcomes']:
                 new_outcome_map = yaml.comments.CommentedMap()
                 for state in states_buffer:
                     for state_outcome, state_transition in list(state.items())[0][1]['transitions'].items():
+                        state_name = list(state.items())[0][0]
                         if state_transition not in states and state_transition == outcome:
-                            state_name = list(state.items())[0][0]
                             new_outcome_map[state_name] = state_outcome
+                        elif state_transition in states:
+                            # Trace the state transition to a state outcome and use that
+                            try:
+                                new_outcome_map[state_name] = find_state_outcome(outcome, state_outcome, state_transition)
+                            except:
+                                continue
+                            
+
                 container_state_vars['outcome_map'][outcome] = new_outcome_map
+
+        #
+        # Remove transitions from all states in Concurrence containers
+        #
+        if container_type == 'Concurrence':
+            for state in states_buffer:
+                list(state.items())[0][1].pop('transitions', 0)
 
 
         #
