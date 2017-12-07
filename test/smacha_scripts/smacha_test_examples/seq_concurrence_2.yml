@@ -5,40 +5,43 @@ manifest: smacha
 node_name: smacha_params_test
 outcomes: [final_outcome_1, final_outcome_2, final_outcome_3]
 states:
+- FOO_0:
+    template: ParamFoo
+    params: {name: FOO_0, outcome: outcome1}
+    name_param: [params, name]
+    outcome_param: [params, outcome]
+    transitions: {outcome1: CON, outcome2: final_outcome_2}
 - CON:
     template: Concurrence
     params:
-      name: FOO_0
+      name: FOO_1
       outcome: outcome1
-      name_1: FOO_1
+      name_1: FOO_2
     outcomes:
     - con_outcome_1
     - con_outcome_2
+    - con_outcome_3
     - con_default_outcome
     default_outcome: con_default_outcome
     outcome_map:
       con_outcome_1:
-        FOO_0: outcome1
-        FOO_1: outcome1
-      con_outcome_2:
-        FOO_0: outcome2
         FOO_1: outcome2
+      con_outcome_2:
+        FOO_1: outcome1
+        FOO_2: outcome1
+      con_outcome_3:
+        FOO_2: outcome2
     transitions:
       con_outcome_1: final_outcome_2
-      con_outcome_2: FOO_2
+      con_outcome_2: final_outcome_1
+      con_outcome_3: final_outcome_3
       con_default_outcome: CON
     states:
-    - FOO_0:
+    - FOO_1:
         template: ParamFoo
         name_param: [params, name]
         outcome_param: [params, outcome]
-    - FOO_1:
+    - FOO_2:
         template: ParamFoo
         name_param: [params, name_1]
         outcome_param: [params, outcome]
-- FOO_2:
-    template: ParamFoo
-    params: {name: FOO_2, outcome: outcome1}
-    name_param: [params, name]
-    outcome_param: [params, outcome]
-    transitions: {outcome1: final_outcome_1, outcome2: final_outcome_3}

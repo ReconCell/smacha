@@ -3,6 +3,7 @@
     outcomes:
     - sub_outcome_1
     - sub_outcome_2
+    - sub_outcome_3
     states:
     - FOO_1:
         template: ParamFoo
@@ -13,4 +14,4 @@
         template: ParamFoo
         name_param: [params, name_1]
         outcome_param: [params, outcome]
-        transitions: {outcome1: sub_outcome_2, outcome2: sub_outcome_1}
+        transitions: {outcome1: sub_outcome_2, outcome2: sub_outcome_3}
