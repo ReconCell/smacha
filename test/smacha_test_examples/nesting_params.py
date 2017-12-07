@@ -8,7 +8,7 @@ import smach_ros
 # define state Foo
 class Foo(smach.State):
     def __init__(self, name, outcome):
-        smach.State.__init__(self, outcomes=['outcome1','outcome2'])
+        smach.State.__init__(self, outcomes=['outcome_a','outcome_b'])
 
         self._name = name
         self._outcome = outcome
@@ -27,20 +27,20 @@ def main():
 
     with sm_top:
 
-        sm_sub = smach.StateMachine(outcomes=['outcome3'])
+        sm_sub = smach.StateMachine(outcomes=['outcome_c'])
         
         with sm_sub:
         
-            smach.StateMachine.add('FOO_0', Foo('FOO_0', 'outcome1'), 
-                                   transitions={'outcome1':'FOO_1',
-                                                'outcome2':'outcome3'})
+            smach.StateMachine.add('FOO_0', Foo('FOO_0', 'outcome_a'), 
+                                   transitions={'outcome_a':'FOO_1',
+                                                'outcome_b':'outcome_c'})
             
-            smach.StateMachine.add('FOO_1', Foo('FOO_1', 'outcome2'), 
-                                   transitions={'outcome1':'FOO_1',
-                                                'outcome2':'outcome3'})
+            smach.StateMachine.add('FOO_1', Foo('FOO_1', 'outcome_b'), 
+                                   transitions={'outcome_a':'FOO_1',
+                                                'outcome_b':'outcome_c'})
             
         smach.StateMachine.add('SUB', sm_sub,
-                               transitions={'outcome3':'final_outcome'})
+                               transitions={'outcome_c':'final_outcome'})
 
     outcome = sm_top.execute()
 

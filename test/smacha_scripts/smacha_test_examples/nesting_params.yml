@@ -10,16 +10,16 @@ states:
   - SUB:
       template: StateMachine
       params: {name_0: FOO_0, name_1: FOO_1}
-      outcomes: [outcome3]
-      transitions: {outcome3: final_outcome}
+      outcomes: [outcome_c]
+      transitions: {outcome_c: final_outcome}
       states:
         # These child states are able to make use of the parameters that persist
         # from the parent container, while also defining their own (outcome).
-        - FOO_0: {template: ParamFoo, params: {outcome: outcome1},
+        - FOO_0: {template: ParamFoo, params: {outcome: outcome_a},
                   name_param: [params, name_0], outcome_param: [params, outcome],
-                  transitions: {outcome1: FOO_1, outcome2: outcome3}}
+                  transitions: {outcome_a: FOO_1, outcome_b: outcome_c}}
         # Parameters should only persist from parent to child state,
         # not from sibling state to sibling state.
-        - FOO_1: {template: ParamFoo, params: {outcome: outcome2},
+        - FOO_1: {template: ParamFoo, params: {outcome: outcome_b},
                   name_param: [params, name_1], outcome_param: [params, outcome],
-                  transitions: {outcome1: FOO_1, outcome2: outcome3}}
+                  transitions: {outcome_a: FOO_1, outcome_b: outcome_c}}

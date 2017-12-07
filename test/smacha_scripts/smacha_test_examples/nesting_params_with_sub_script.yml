@@ -10,4 +10,4 @@ states:
       # that are passed to the sub-script.
       script: params_sub_script
       params: {name_0: FOO_0, name_1: FOO_1}
-      transitions: {outcome3: final_outcome}
+      transitions: {outcome_c: final_outcome}
