@@ -1,0 +1,219 @@
+#! /usr/bin/env python
+
+from __future__ import print_function
+
+import os
+import sys
+import argparse
+
+import smacha
+from smacha.exceptions import ParsingError
+
+# Colors
+from smacha.util import bcolors
+
+if __name__ == '__main__':
+    # Parse arguments
+    arg_parser = argparse.ArgumentParser(description='SMACHA Help: Read template help information.')
+    
+    arg_parser.add_argument('template',
+                            action='store',
+                            help='SMACHA template (.tpl file).')
+    
+    arg_parser.add_argument('-t', '--template-dirs',
+                            nargs = '*',
+                            dest='template_dirs',
+                            action='store',
+                            default=[],
+                            help='Custom SMACHA template directories (directories containing .tpl template files).')
+    
+    args = arg_parser.parse_args()
+
+    # Load templater
+    templater = smacha.Templater(args.template_dirs)
+
+    # Load parser
+    parser = smacha.Parser()
+    
+    def print_tabs(num_tabs):
+        for i in range(num_tabs):
+            print('    ', end='')
+
+    def print_types(types, tabs=0, end=''):
+        try:
+            if isinstance(types, list):
+                for i_type, type_ in enumerate(types):
+                    if i_type > 0:
+                        if len(types) > 2:
+                            print(' or ')
+                            print_tabs(tabs)
+                        else:
+                            print(' or ', end='')
+                    print(bcolors.WARNING + str(type_) + bcolors.ENDC, end='')
+            else:
+                print(bcolors.WARNING + types + bcolors.ENDC, end='')
+            print(end)
+        except Exception as e:
+            raise ParsingError('Error processing template variable type meta data: {}'.format(str(e))) 
+
+    def print_var(var, tabs=0, optional=False, end=''):
+        name = var.keys()[0]
+        info = var.values()[0]
+        print_tabs(tabs)
+
+        print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(name) + bcolors.ENDC, end='')
+
+        if optional:
+            print(bcolors.BOLD + ' (optional)' + bcolors.ENDC, end='')
+
+        if 'description' in info:
+            print(bcolors.OKBLUE + bcolors.BOLD + ': ' + bcolors.ENDC, end='')
+            print('{}'.format(info['description']))
+
+        if 'type' in info:
+            print_tabs(tabs+1)
+            if isinstance(info['type'], list):
+                print(bcolors.OKBLUE + 'Type:' + bcolors.ENDC)
+                print_tabs(tabs+2)
+                print_types(info['type'], tabs=tabs+2, end='')
+            else:
+                print(bcolors.OKBLUE + 'Type: ' + bcolors.ENDC, end='')
+                print_types(info['type'], tabs=tabs+2, end='')
+                
+        if 'units' in info:
+            print_tabs(tabs+1)
+            if isinstance(info['units'], list):
+                print(bcolors.OKBLUE + 'Units:' + bcolors.ENDC)
+                print_tabs(tabs+2)
+                print_types(info['units'], tabs=tabs+2, end='')
+            else:
+                print(bcolors.OKBLUE + 'Units: ' + bcolors.ENDC, end='')
+                print_types(info['units'], tabs=tabs+2, end='')
+
+        if 'values' in info:
+            print_tabs(tabs+1)
+            if isinstance(info['type'], list):
+                print(bcolors.OKBLUE + 'Values:' + bcolors.ENDC)
+                print_tabs(tabs+2)
+                if isinstance(info['type'], list):
+                    print_types(info['values'], tabs=tabs+2, end='')
+                else:
+                    print_types(str(info['values']), tabs=tabs+2, end='')
+            else:
+                print(bcolors.OKBLUE + 'Values: ' + bcolors.ENDC, end='')
+                if isinstance(info['type'], list):
+                    print_types(info['values'], tabs=tabs+2, end='')
+                else:
+                    print_types(str(info['values']), tabs=tabs+2, end='')
+        print(end)
+
+    def parse_var(var, tabs=0, parent_is_list=True):
+        if parent_is_list and isinstance(var, list):
+            if len(var) == 1:
+                print_var(var[0], tabs=1, optional=True)
+            else:
+                print_tabs(tabs+1)
+                print(bcolors.BOLD + 'Option:' + bcolors.ENDC)
+                for var_option in var:
+                    print_var(var_option, tabs=tabs+2)
+        elif isinstance(var, list):
+            for var_option in var:
+                print_var(var_option, tabs=tabs)
+        elif isinstance(var, dict):
+            var_key = var.keys()[0]
+            var_val = var.values()[0]
+            if isinstance(var_val, list):
+                print_tabs(tabs+1)
+                print(bcolors.HEADER + bcolors.BOLD + var_key + ':' + bcolors.ENDC)
+                parse_var(var_val, tabs=tabs+2, parent_is_list=False)
+            else:
+                print_var(var, tabs=tabs+1)
+
+    # Get meta block from template
+    try:
+        meta_block = templater.render_meta_block(args.template)
+    except Exception as e:
+        raise ParsingError('Error when rendering meta block in template {}: {}'.format(args.template, str(e)))
+
+    # Parse the meta block
+    try:
+        parsed_meta_block = parser.parse(meta_block)
+    except Exception as e:
+        raise ParsingError('Error when parsing meta block in template {}: {}'.format(args.template, str(e)))
+
+    # Print general template help info
+    try:
+        if 'name' in parsed_meta_block and parsed_meta_block['name']:
+            print(bcolors.OKGREEN + bcolors.BOLD + bcolors.UNDERLINE +
+                  'Template:' + ' {}'.format(parsed_meta_block['name']) + bcolors.ENDC)
+
+        if 'description' in parsed_meta_block and parsed_meta_block['description']:
+            print(bcolors.HEADER + bcolors.BOLD +
+                  'Description:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['description']))
+
+        if 'language' in parsed_meta_block and parsed_meta_block['language']:
+            print(bcolors.HEADER + bcolors.BOLD + 
+                  'Language:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['language']))
+
+        if 'framework' in parsed_meta_block and parsed_meta_block['framework']:
+            print(bcolors.HEADER + bcolors.BOLD + 
+                  'Framework:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['framework']))
+
+        if 'type' in parsed_meta_block and parsed_meta_block['type']:
+            print(bcolors.HEADER + bcolors.BOLD + 
+                  'Type:' + bcolors.ENDC + ' {}'.format(parsed_meta_block['type']))
+
+        if 'includes' in parsed_meta_block and parsed_meta_block['includes']:
+            print(bcolors.HEADER + bcolors.BOLD + 'Includes:' + bcolors.ENDC)
+            if isinstance(parsed_meta_block['includes'], list):
+                for var in parsed_meta_block['includes']:
+                    print_tabs(1)
+                    print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(var) + bcolors.ENDC)
+            else:
+                print_tabs(1)
+                print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(parsed_meta_block['includes']) + bcolors.ENDC)
+
+        if 'extends' in parsed_meta_block and parsed_meta_block['extends']:
+            print(bcolors.HEADER + bcolors.BOLD + 'Extends:' + bcolors.ENDC)
+            if isinstance(parsed_meta_block['extends'], list):
+                for var in parsed_meta_block['extends']:
+                    print_tabs(1)
+                    print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(var) + bcolors.ENDC)
+            else:
+                print_tabs(1)
+                print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(parsed_meta_block['extends']) + bcolors.ENDC)
+    except Exception as e:
+        raise ParsingError('Error accessing template meta data: {}'.format(str(e))) 
+
+    # Print template variable help info
+    try:
+        if 'variables' in parsed_meta_block and parsed_meta_block['variables']:
+            print(bcolors.HEADER + bcolors.BOLD + 'Variables:' + bcolors.ENDC)
+            for var in parsed_meta_block['variables']:
+                parse_var(var)
+    except Exception as e:
+        raise ParsingError('Error processing template variable meta data: {}'.format(str(e)))
+        
+    # Print template input_keys and output_keys help info
+    try:
+        if 'input_keys' in parsed_meta_block and parsed_meta_block['input_keys']:
+            print(bcolors.HEADER + bcolors.BOLD + 'Input Keys:' + bcolors.ENDC)
+            if isinstance(parsed_meta_block['input_keys'], list):
+                for var in parsed_meta_block['input_keys']:
+                    print_tabs(1)
+                    print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(var) + bcolors.ENDC)
+            else:
+                print_tabs(1)
+                print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(parsed_meta_block['input_keys']) + bcolors.ENDC)
+        
+        if 'output_keys' in parsed_meta_block and parsed_meta_block['output_keys']:
+            print(bcolors.HEADER + bcolors.BOLD + 'Output Keys:' + bcolors.ENDC)
+            if isinstance(parsed_meta_block['output_keys'], list):
+                for var in parsed_meta_block['output_keys']:
+                    print_tabs(1)
+                    print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(var) + bcolors.ENDC)
+            else:
+                print_tabs(1)
+                print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(parsed_meta_block['output_keys']) + bcolors.ENDC)
+    except Exception as e:
+        raise ParsingError('Error processing template input_keys or output_keys meta data: {}'.format(str(e)))

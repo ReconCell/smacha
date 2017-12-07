@@ -1,3 +1,16 @@
+{% block meta %}
+name: Utils
+description: SMACH template containing macros commonly used by other templates.
+language: Python
+framework: SMACH
+type: None
+includes: []
+extends: []
+variables: []
+input_keys: []
+output_keys: []
+{% endblock meta %}
+
 #
 # Macro for rendering 'userdata' state machine headers.
 #
