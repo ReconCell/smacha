@@ -5,7 +5,7 @@
 # define state Foo
 class Foo(smach.State):
     def __init__(self, name, outcome):
-        smach.State.__init__(self, outcomes=['outcome1','outcome2'])
+        smach.State.__init__(self, outcomes=['outcome_a','outcome_b'])
 
         self._name = name
         self._outcome = outcome

@@ -2,6 +2,7 @@ import os
 import copy
 from ruamel import yaml
 from smacha.exceptions import ScriptNotFoundError
+from smacha.exceptions import ParsingError
 
 
 __all__ = ['Parser']
@@ -326,7 +327,7 @@ class Parser():
         else:
             return string_construct
     
-    def contain(self, script, container_name, container_type, states):
+    def contain(self, script, container_name, container_type, states, default_outcome_transition=None):
         """
         Convert a sequence of states in a script to a container state.
 
@@ -337,10 +338,17 @@ class Parser():
             container_name: A name for the container (str).
             container_type: The container type (str, e.g. 'StateMachine' or 'Concurrence') 
             states: The sequence of states to be contained (list of str's).
+            default_outcome_transition: The transition for the default_outcome associated with Concurrence containers.
+                                        Set to container_name if None.
 
         RETURNS:
             script: Either a file name (str) or a file handle to a SMACHA YAML script.
         """
+        #
+        # Set defaults
+        #
+        default_outcome_transition = container_name 
+
         #
         # Find the list of states to be contained
         #
@@ -381,19 +389,87 @@ class Parser():
         #
         container_state_vars['outcomes'] = yaml.comments.CommentedSet()
         container_state_vars['transitions'] = yaml.comments.CommentedMap()
-        outcome_map = yaml.comments.CommentedMap()
+        container_outcome_map = yaml.comments.CommentedMap()
         for state in states_buffer:
             for outcome, transition in list(state.items())[0][1]['transitions'].items():
                 if transition not in states:
-                    # Add the transition to the outcome_map and container state outcomes if necessary
-                    if transition not in outcome_map.keys():
-                        new_container_outcome = container_state_name.lower() + '_outcome_' + str(len(outcome_map.keys()) + 1)
-                        outcome_map[transition] = new_container_outcome
+                    # Add the transition to the container_outcome_map and container state outcomes if necessary
+                    if transition not in container_outcome_map.keys():
+                        new_container_outcome = container_state_name.lower() + '_outcome_' + str(len(container_outcome_map.keys()) + 1)
+                        container_outcome_map[transition] = new_container_outcome
                         container_state_vars['outcomes'].add(new_container_outcome)
                         # Update the container transition
                         container_state_vars['transitions'][new_container_outcome] = transition
                     # Update the state transition
-                    list(state.items())[0][1]['transitions'][outcome] = outcome_map[transition]
+                    list(state.items())[0][1]['transitions'][outcome] = container_outcome_map[transition]
+        
+        #
+        # Generate an outcome_map for Concurrence containers
+        #
+        def find_state_outcome(container_outcome, state_outcome, state_transition):
+            if state_transition not in states and state_transition == container_outcome:
+                return state_outcome
+            elif state_transition in states:
+                state_found = False
+                for state in states_buffer:
+                    state_name = list(state.items())[0][0]
+                    if state_name == state_transition:
+                        state_found = True
+                        try:
+                            return find_state_outcome(container_outcome, state_outcome, list(state.items())[0][1]['transitions'][state_outcome])
+                        except Exception as e:
+                            raise ParsingError('Failed to successfully trace state transition to a state outcome when ' +
+                                               'converting state sequence to Concurrence container: {}'.format(str(e)))
+                        break
+                if not state_found:
+                    raise ParsingError('Failed to successfully trace state transition to a state outcome when ' +
+                                       'converting state sequence to Concurrence container.')
+            else:
+                raise ParsingError('Failed to successfully trace state transition to a state outcome when ' +
+                                   'converting state sequence to Concurrence container.')
+
+        if container_type == 'Concurrence':
+            container_state_vars['outcome_map'] = yaml.comments.CommentedMap()
+            for outcome in container_state_vars['outcomes']:
+                new_outcome_map = yaml.comments.CommentedMap()
+                for state in states_buffer:
+                    for state_outcome, state_transition in list(state.items())[0][1]['transitions'].items():
+                        state_name = list(state.items())[0][0]
+                        if state_transition not in states and state_transition == outcome:
+                            new_outcome_map[state_name] = state_outcome
+                        elif state_transition in states:
+                            # Trace the state transition to a state outcome and use that
+                            try:
+                                new_outcome_map[state_name] = find_state_outcome(outcome, state_outcome, state_transition)
+                            except:
+                                continue
+                            
+
+                container_state_vars['outcome_map'][outcome] = new_outcome_map
+
+        #
+        # Remove transitions from all states in Concurrence containers
+        #
+        if container_type == 'Concurrence':
+            for state in states_buffer:
+                list(state.items())[0][1].pop('transitions', 0)
+
+
+        #
+        # Generate a default outcome for Concurrence containers
+        #
+        if container_type == 'Concurrence':
+            # Update the outcomes list
+            new_container_outcome = container_state_name.lower() + '_default_outcome'
+            container_state_vars['outcomes'].add(new_container_outcome)
+            # Create a default_outcome variable
+            container_state_vars['default_outcome'] = new_container_outcome
+            # Update the container transition
+            container_state_vars['transitions'][new_container_outcome] = default_outcome_transition
+        
+        #
+        # Convert outcomes from a set to a sequence
+        #
         container_state_vars['outcomes'] = yaml.comments.CommentedSeq(container_state_vars['outcomes'])
 
         #
@@ -544,6 +620,10 @@ class Parser():
             ordered_container_state_vars['remapping'] = container_state_vars['remapping']
         if 'outcomes' in container_state_vars:
             ordered_container_state_vars['outcomes'] = container_state_vars['outcomes']
+        if 'default_outcome' in container_state_vars:
+            ordered_container_state_vars['default_outcome'] = container_state_vars['default_outcome']
+        if 'outcome_map' in container_state_vars:
+            ordered_container_state_vars['outcome_map'] = container_state_vars['outcome_map']
         if 'transitions' in container_state_vars:
             ordered_container_state_vars['transitions'] = container_state_vars['transitions']
         if 'states' in container_state_vars:

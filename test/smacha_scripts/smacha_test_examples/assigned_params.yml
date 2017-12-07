@@ -7,9 +7,9 @@ outcomes: [final_outcome]
 states:
   # This state shows examples of parameter assignment and lookup.
   - FOO_0: {template: ParamFoo,
-            params: {name: FOO_0, outcome: outcome1}, name_param: [params, name], outcome_param: [params, outcome],
-            transitions: {outcome1: FOO_1, outcome2: final_outcome}}
+            params: {name: FOO_0, outcome: outcome_a}, name_param: [params, name], outcome_param: [params, outcome],
+            transitions: {outcome_a: FOO_1, outcome_b: final_outcome}}
   # This state shows examples of string constructions using parameter lookups.
   - FOO_1: {template: ParamFoo,
-            params: {name: FOO, outcome: outcome}, name_param: [[params, name], '_1'], outcome_param: [[params, outcome], '2'],
-            transitions: {outcome1: FOO_1, outcome2: final_outcome}}
+            params: {name: FOO, outcome: outcome}, name_param: [[params, name], '_1'], outcome_param: [[params, outcome], '_b'],
+            transitions: {outcome_a: FOO_1, outcome_b: final_outcome}}
