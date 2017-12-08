@@ -179,6 +179,9 @@ class Templater():
         # Always skip the meta block
         template_env.skip_blocks.append('meta')
 
+        # Always skip the script block
+        template_env.skip_blocks.append('script')
+
         # Skip comment blocks as required
         if self._include_comments == False:
             template_env.skip_blocks.append('upper_comments')
@@ -260,6 +263,10 @@ class Templater():
         # Always skip the meta block unless it is the target block
         if target_block != 'meta':
             template_env.skip_blocks.append('meta')
+        
+        # Always skip the script block unless it is the target block
+        if target_block != 'script':
+            template_env.skip_blocks.append('script')
 
         # Be sure to also skip comment blocks here as required
         if self._include_comments == False:
@@ -312,8 +319,8 @@ class Templater():
         # Read the state template file into a template object using the environment object
         template = self._template_env.select_template([template_name, template_name + '.tpl'])
 
-        # Render template code for each of the template blocks (all except the meta block)
-        template_block_code = {block : self.render_block(template_name, template_vars, block) for block, _ in template.blocks.items() if block != 'meta'}
+        # Render template code for each of the template blocks (all except the meta and script blocks)
+        template_block_code = {block : self.render_block(template_name, template_vars, block) for block, _ in template.blocks.items() if block != 'meta' and block != 'script'}
 
         return template_block_code
     
