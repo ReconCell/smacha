@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+
+from smacha_ros.srv import *
+import rospy
+
+import argparse
+
+import smacha
+
+class SMACHAServer(object):
+
+    def __init__(self,
+                 script_dirs=[],
+                 template_dirs=[],
+                 include_comments = False,
+                 include_introspection_server = False,
+                 verbose = False):
+        # Initialise ROS node
+        rospy.init_node('smacha_server')
+    
+        # Load parser
+        self._parser = smacha.Parser(script_dirs = script_dirs)
+        
+        # Load template processor
+        self._templater = smacha.Templater(template_dirs,
+                                           include_comments=include_comments,
+                                           include_introspection_server=include_introspection_server)
+
+        # Load code generator
+        self._generator = smacha.Generator(self._parser, self._templater, verbose=verbose)
+
+        # Start SMACHA generate service
+        self._generate_service = rospy.Service('smacha/generate', Generate, self._generate)
+        print "Starting SMACHA generate service."
+        
+        # Start SMACHA contain service
+        self._contain_service = rospy.Service('smacha/contain', Contain, self._contain)
+        print "Starting SMACHA contain service."
+    
+        rospy.spin()
+
+    def _generate(self, req):
+        
+        # Get the script from the param server
+        script = rospy.get_param(req.script)
+
+        # Generate the SMACH code
+        smach_code = self._generator.run(script)
+    
+        return GenerateResponse(smach_code)
+    
+    def _contain(self, req):
+        
+        # Get the script from the param server
+        script = rospy.get_param(req.script)
+
+        # Generate the SMACH code
+        contained_script = self._parser.contain(script, req.container_name, req.container_type, req.states)
+    
+        return ContainResponse(contained_script)
+    
+if __name__ == "__main__":
+    # Parse arguments
+    arg_parser = argparse.ArgumentParser(description='SMACHA Server: Start a ROS node that ' +
+                                                     'serves SMACHA requests.')
+    
+    arg_parser.add_argument('-t', '--templates',
+                            nargs = '*',
+                            dest='template_dirs',
+                            action='store',
+                            default=[],
+                            help='Custom SMACHA template directories (directories containing .tpl template files).')
+    
+    arg_parser.add_argument('-s', '--scripts',
+                            nargs = '*',
+                            dest='script_dirs',
+                            action='store',
+                            default=[],
+                            help='SMACHA script directories (directories containing yaml files).')
+    
+    arg_parser.add_argument('-c', '--comments',
+                            action='store_true',
+                            default=False,
+                            help='Include template header and footer comments in generated code.')
+    
+    arg_parser.add_argument('-i', '--introspection-server',
+                            action='store_true',
+                            default=False,
+                            help='Include an introspection server (for use with smach_viewer) in generated code.')
+    
+    arg_parser.add_argument('-v', '--verbose',
+                            action='store_true',
+                            default=False,
+                            help='Print verbose output to terminal.')
+    
+    args = arg_parser.parse_args()
+
+    server = SMACHAServer(script_dirs = args.script_dirs,
+                          template_dirs = args.template_dirs,
+                          include_comments = args.comments,
+                          include_introspection_server = args.introspection_server,
+                          verbose = args.verbose)
