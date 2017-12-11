@@ -66,6 +66,7 @@ add_service_files(
   FILES
   Generate.srv
   Contain.srv
+  Extract.srv
 )
 
 ## Generate actions in the 'action' folder

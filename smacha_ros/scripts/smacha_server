@@ -2,10 +2,10 @@
 
 from smacha_ros.srv import *
 import rospy
-
 import argparse
-
 import smacha
+import yaml as pyyaml
+import os
 
 class SMACHAServer(object):
 
@@ -36,6 +36,35 @@ class SMACHAServer(object):
         # Start SMACHA contain service
         self._contain_service = rospy.Service('smacha/contain', Contain, self._contain)
         print "Starting SMACHA contain service."
+        
+        # Start SMACHA extract service
+        self._contain_service = rospy.Service('smacha/extract', Extract, self._extract)
+        print "Starting SMACHA extract service."
+
+        # Add template meta block data to param server
+        templates = self._templater.list_templates()
+
+        for template in templates:
+            # Get meta block from template
+            try:
+                meta_block = self._templater.render_meta_block(template)
+            except Exception as e:
+                raise ParsingError('Error when rendering meta block in template {}: {}'.format(template, str(e)))
+
+            # Parse the meta block
+            #
+            # NOTE: We must use PyYAML instead of ruamel.yaml to parse here in order to successfully
+            # interact with the ROS param server.
+            try:
+                parsed_meta_block = pyyaml.load(meta_block)
+            except Exception as e:
+                raise ParsingError('Error when parsing meta block in template {}: {}'.format(template, str(e)))
+
+            # Add the meta block to the param server
+            if parsed_meta_block:
+                print(parsed_meta_block)
+                template_name = os.path.splitext(template)[0]
+                rospy.set_param('smacha/templates/' + template_name + '/meta/', parsed_meta_block)
     
         rospy.spin()
 
@@ -50,14 +79,31 @@ class SMACHAServer(object):
         return GenerateResponse(smach_code)
     
     def _contain(self, req):
-        
+
         # Get the script from the param server
         script = rospy.get_param(req.script)
 
         # Generate the SMACH code
         contained_script = self._parser.contain(script, req.container_name, req.container_type, req.states)
+
+        # Convert to string
+        contained_script_str = self._parser.dump(contained_script)
+
+        return ContainResponse(contained_script_str)
     
-        return ContainResponse(contained_script)
+    def _extract(self, req):
+
+        # Get the script from the param server
+        script = rospy.get_param(req.script)
+
+        # Generate the SMACH code
+        sub_script, super_script = self._parser.extract(script, req.state)
+
+        # Convert to string
+        sub_script_str = self._parser.dump(sub_script)
+        super_script_str = self._parser.dump(super_script)
+
+        return ExtractResponse(sub_script_str, super_script_str)
     
 if __name__ == "__main__":
     # Parse arguments
