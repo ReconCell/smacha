@@ -7,7 +7,7 @@ import smacha
 import yaml as pyyaml
 import os
 
-class SMACHAServer(object):
+class SMACHAServer():
 
     def __init__(self,
                  script_dirs=[],
@@ -44,6 +44,8 @@ class SMACHAServer(object):
         # Add template meta block data to param server
         templates = self._templater.list_templates()
 
+        self._template_params = list()
+
         for template in templates:
             # Get meta block from template
             try:
@@ -65,8 +67,16 @@ class SMACHAServer(object):
                 template_name = os.path.splitext(template)[0]
                 print('Adding {} template meta data to param server.'.format(template_name))
                 rospy.set_param('smacha/templates/' + template_name + '/meta/', parsed_meta_block)
+                self._template_params.append('smacha/templates/' + template_name)
+
+        rospy.on_shutdown(self._cleanup)
     
         rospy.spin()
+
+    def _cleanup(self):
+        # Delete template meta data from param server
+        for template_param in self._template_params:
+            rospy.delete_param(template_param)
 
     def _generate(self, req):
         
