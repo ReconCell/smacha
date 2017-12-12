@@ -38,6 +38,10 @@ variables:
 - - userdata:
       description: The definitions for the userdata keys named in the input_keys and output_keys variables.
       type: dict
+outcomes:
+  - succeeded
+  - aborted
+  - preempted
 {% endblock meta %}
 
 {% from "Utils.tpl" import render_goal_slots, render_input_keys, render_result_slots, render_output_keys, render_transitions, render_remapping %}
