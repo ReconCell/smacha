@@ -1,5 +1,5 @@
 # the following block is needed for the shared Docker-based runner
-image: docker:git
+image: docker:latest
 variables:
   DOCKER_DRIVER: "overlay" # recommended for docker-in-docker
 services:
@@ -13,4 +13,4 @@ kinetic:
   variables:
     ROS_DISTRO: "kinetic"
   tags:
-    - docker
+    - docker-in-docker
