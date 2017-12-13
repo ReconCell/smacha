@@ -1,35 +1,14 @@
-test_python2:
-  image: python:2.7
-  script:
-    - "# Test with python 2"
-    - apt-get update -qy
-    - apt-get install -y python-dev python-pip
-    - pip install virtualenv
-    - virtualenv --system-site-packages --python=/usr/bin/python2 venv2
-    - venv2/bin/pip install nose
-    - venv2/bin/pip install ruamel.yaml
-    - venv2/bin/pip install jinja2
-    - cd smacha
-    - ../venv2/bin/nosetests test/executive_smach_tutorials_test.py
-    - ../venv2/bin/nosetests test/smacha_test_examples.py
-  tags:
-    - docker
-    - python2
-
-test_python3:
-  image: python:3.5
-  script:
-    - "# Test with python 3"
-    - apt-get update -qy
-    - apt-get install -y python3-dev python3-pip
-    - pip install virtualenv
-    - virtualenv --system-site-packages --python=/usr/bin/python3 venv3
-    - venv3/bin/pip install nose
-    - venv3/bin/pip install ruamel.yaml
-    - venv3/bin/pip install jinja2
-    - cd smacha
-    - ../venv3/bin/nosetests test/executive_smach_tutorials_test.py
-    - ../venv3/bin/nosetests test/smacha_test_examples.py
-  tags:
-    - docker
-    - python3
+# the following block is needed for the shared Docker-based runner
+image: docker:git
+variables:
+  DOCKER_DRIVER: "overlay" # recommended for docker-in-docker
+services:
+  - docker:dind # enable docker-in-docker
+before_script:
+  - apk add --update bash coreutils # install travis depedencies
+  - git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
+kinetic:
+  script: 
+    - .ci_config/gitlab.sh
+  variables:
+    ROS_DISTRO: "kinetic"
