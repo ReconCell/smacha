@@ -158,6 +158,24 @@ class Templater():
         
         pass
 
+    def list_templates(self):
+        """
+        List the available templates.
+
+        INPUTS:
+            None
+
+        RETURNS:
+            template_list: A list of names of templates.
+        """
+        # Compile regular expression to match all templates with '.tpl' extension
+        regex = re.compile('(.+)\.tpl$')
+        
+        # Find templates matching the regex
+        template_list = self._template_env.list_templates(filter_func = lambda template_name: re.search(regex, template_name))
+
+        return template_list
+
     def render(self, template_name, template_vars):
         """
         Render code template.
@@ -203,6 +221,8 @@ class Templater():
     def render_all(self, state_name, template_vars):
         """
         Render all code templates for a given state.
+
+        NOTE: This is an OLD method and not currently used in SMACHA.
 
         This function searches for all templates with file names beginning
         with state_name and possibly proceeded by an underscore followed by a stub name,

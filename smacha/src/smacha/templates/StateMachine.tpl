@@ -7,6 +7,9 @@ type: Container
 includes: []
 extends: []
 variables:
+- outcomes:
+    description: The possible StateMachine container state outcomes.
+    type: list
 - - input_keys:
       description: The names of the userdata input keys needed by the state.
       type: list

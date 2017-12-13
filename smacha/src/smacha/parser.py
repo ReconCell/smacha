@@ -342,7 +342,8 @@ class Parser():
                                         Set to container_name if None.
 
         RETURNS:
-            script: Either a file name (str) or a file handle to a SMACHA YAML script.
+            script: Parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap) with
+                    the specified states now contained in the container state.
         """
         #
         # Set defaults
