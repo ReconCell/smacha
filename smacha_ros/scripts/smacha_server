@@ -31,15 +31,15 @@ class SMACHAServer():
 
         # Start SMACHA generate service
         self._generate_service = rospy.Service('smacha/generate', Generate, self._generate)
-        print("Starting SMACHA generate service.")
+        rospy.loginfo("Starting SMACHA generate service.")
         
         # Start SMACHA contain service
         self._contain_service = rospy.Service('smacha/contain', Contain, self._contain)
-        print("Starting SMACHA contain service.")
+        rospy.loginfo("Starting SMACHA contain service.")
         
         # Start SMACHA extract service
         self._contain_service = rospy.Service('smacha/extract', Extract, self._extract)
-        print("Starting SMACHA extract service.")
+        rospy.loginfo("Starting SMACHA extract service.")
 
         # Add template meta block data to param server
         templates = self._templater.list_templates()
@@ -51,7 +51,7 @@ class SMACHAServer():
             try:
                 meta_block = self._templater.render_meta_block(template)
             except Exception as e:
-                raise ParsingError('Error when rendering meta block in template {}: {}'.format(template, str(e)))
+                rospy.logwarn('Error when rendering meta block in template %s: %s', template, str(e))
 
             # Parse the meta block
             #
@@ -60,12 +60,12 @@ class SMACHAServer():
             try:
                 parsed_meta_block = pyyaml.load(meta_block)
             except Exception as e:
-                raise ParsingError('Error when parsing meta block in template {}: {}'.format(template, str(e)))
+                rospy.logwarn('Error when parsing meta block in template %s: %s', template, str(e))
 
             # Add the meta block to the param server
             if parsed_meta_block:
                 template_name = os.path.splitext(template)[0]
-                print('Adding {} template meta data to param server.'.format(template_name))
+                rospy.loginfo('Adding {} template meta data to param server.'.format(template_name))
                 rospy.set_param('smacha/templates/' + template_name + '/meta/', parsed_meta_block)
                 self._template_params.append('smacha/templates/' + template_name)
 

@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="smacha_ros" type="smacha_server" name="smacha_ros_generate_test" args="-v -t $(find smacha)/test/smacha_templates/smacha_test_examples -s $(find smacha)/test/smacha_scripts/smacha_test_examples" output="screen" />
+  <test test-name="generate" pkg="smacha_ros" time-limit="60.0" type="generate.py" />
+</launch>
