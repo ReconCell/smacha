@@ -15,7 +15,7 @@ kinetic:
   tags:
     - docker-in-docker
 
-image: ros:kinetic-ros-core
+# image: ros:kinetic-ros-core
 
 # variables:
 #   ROS_PACKAGES_TO_INSTALL: ""
