@@ -5,7 +5,7 @@ variables:
 services:
   - docker:dind # enable docker-in-docker
 before_script:
-  - apk add --update bash coreutils # install travis depedencies
+  - apk add --update bash git coreutils # install travis depedencies
   - git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
 kinetic:
   script: 
