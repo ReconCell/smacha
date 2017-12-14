@@ -79,12 +79,25 @@ class SMACHAServer():
             rospy.delete_param(template_param)
 
     def _generate(self, req):
-        
-        # Get the script from the param server
-        script = rospy.get_param(req.script)
+        # Try treating the script as a parameter and
+        # loading it from the param server
+        try:
+            # Get the script from the param server
+            script = rospy.get_param(req.script)
 
-        # Generate the SMACH code
-        smach_code = self._generator.run(script)
+            # Generate the SMACH code
+            smach_code = self._generator.run(script)
+        except:
+            # Try treating the script as a script string and
+            # parsing it
+            try:
+                # Parse the script string
+                script_str = self._parser.parse(req.script)
+
+                # Generate the SMACH code
+                smach_code = self._generator.run(script_str)
+            except Exception as e:
+                rospy.logerr('Error when loading script from generate request: %s', str(e))
     
         return GenerateResponse(smach_code)
     
