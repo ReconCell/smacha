@@ -1,0 +1,158 @@
+#!/usr/bin/env python
+
+from smacha_ros.srv import *
+import rospy
+import argparse
+import smacha
+import yaml as pyyaml
+import os
+
+class SMACHAServer():
+
+    def __init__(self,
+                 script_dirs=[],
+                 template_dirs=[],
+                 include_comments = False,
+                 include_introspection_server = False,
+                 verbose = False):
+        # Initialise ROS node
+        rospy.init_node('smacha_server')
+    
+        # Load parser
+        self._parser = smacha.Parser(script_dirs = script_dirs)
+        
+        # Load template processor
+        self._templater = smacha.Templater(template_dirs,
+                                           include_comments=include_comments,
+                                           include_introspection_server=include_introspection_server)
+
+        # Load code generator
+        self._generator = smacha.Generator(self._parser, self._templater, verbose=verbose)
+
+        # Start SMACHA generate service
+        self._generate_service = rospy.Service('smacha/generate', Generate, self._generate)
+        rospy.loginfo("Starting SMACHA generate service.")
+        
+        # Start SMACHA contain service
+        self._contain_service = rospy.Service('smacha/contain', Contain, self._contain)
+        rospy.loginfo("Starting SMACHA contain service.")
+        
+        # Start SMACHA extract service
+        self._contain_service = rospy.Service('smacha/extract', Extract, self._extract)
+        rospy.loginfo("Starting SMACHA extract service.")
+
+        # Add template meta block data to param server
+        templates = self._templater.list_templates()
+
+        self._template_params = list()
+
+        for template in templates:
+            # Get meta block from template
+            try:
+                meta_block = self._templater.render_meta_block(template)
+            except Exception as e:
+                rospy.logwarn('Error when rendering meta block in template %s: %s', template, str(e))
+
+            # Parse the meta block
+            #
+            # NOTE: We must use PyYAML instead of ruamel.yaml to parse here in order to successfully
+            # interact with the ROS param server.
+            try:
+                parsed_meta_block = pyyaml.load(meta_block)
+            except Exception as e:
+                rospy.logwarn('Error when parsing meta block in template %s: %s', template, str(e))
+
+            # Add the meta block to the param server
+            if parsed_meta_block:
+                template_name = os.path.splitext(template)[0]
+                rospy.loginfo('Adding {} template meta data to param server.'.format(template_name))
+                rospy.set_param('smacha/templates/' + template_name + '/meta/', parsed_meta_block)
+                self._template_params.append('smacha/templates/' + template_name)
+
+        rospy.on_shutdown(self._cleanup)
+    
+        rospy.spin()
+
+    def _cleanup(self):
+        # Delete template meta data from param server
+        for template_param in self._template_params:
+            rospy.delete_param(template_param)
+
+    def _generate(self, req):
+        
+        # Get the script from the param server
+        script = rospy.get_param(req.script)
+
+        # Generate the SMACH code
+        smach_code = self._generator.run(script)
+    
+        return GenerateResponse(smach_code)
+    
+    def _contain(self, req):
+
+        # Get the script from the param server
+        script = rospy.get_param(req.script)
+
+        # Generate the SMACH code
+        contained_script = self._parser.contain(script, req.container_name, req.container_type, req.states)
+
+        # Convert to string
+        contained_script_str = self._parser.dump(contained_script)
+
+        return ContainResponse(contained_script_str)
+    
+    def _extract(self, req):
+
+        # Get the script from the param server
+        script = rospy.get_param(req.script)
+
+        # Generate the SMACH code
+        sub_script, super_script = self._parser.extract(script, req.state)
+
+        # Convert to string
+        sub_script_str = self._parser.dump(sub_script)
+        super_script_str = self._parser.dump(super_script)
+
+        return ExtractResponse(sub_script_str, super_script_str)
+    
+if __name__ == "__main__":
+    # Parse arguments
+    arg_parser = argparse.ArgumentParser(description='SMACHA Server: Start a ROS node that ' +
+                                                     'serves SMACHA requests.')
+    
+    arg_parser.add_argument('-t', '--templates',
+                            nargs = '*',
+                            dest='template_dirs',
+                            action='store',
+                            default=[],
+                            help='Custom SMACHA template directories (directories containing .tpl template files).')
+    
+    arg_parser.add_argument('-s', '--scripts',
+                            nargs = '*',
+                            dest='script_dirs',
+                            action='store',
+                            default=[],
+                            help='SMACHA script directories (directories containing yaml files).')
+    
+    arg_parser.add_argument('-c', '--comments',
+                            action='store_true',
+                            default=False,
+                            help='Include template header and footer comments in generated code.')
+    
+    arg_parser.add_argument('-i', '--introspection-server',
+                            action='store_true',
+                            default=False,
+                            help='Include an introspection server (for use with smach_viewer) in generated code.')
+    
+    arg_parser.add_argument('-v', '--verbose',
+                            action='store_true',
+                            default=False,
+                            help='Print verbose output to terminal.')
+    
+    args = arg_parser.parse_args()
+
+    server = SMACHAServer(script_dirs = args.script_dirs,
+                          template_dirs = args.template_dirs,
+                          include_comments = args.comments,
+                          include_introspection_server = args.introspection_server,
+                          verbose = args.verbose)
