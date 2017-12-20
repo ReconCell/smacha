@@ -7,22 +7,18 @@ type: State
 includes:
   - State
 extends: []
-variables:
-- userdata:
-  - target:
-      description: The name of the target reference frame.
-      type: str
-  - source:
-      description: The name of the source reference frame.
-      type: str
-  - output:
-      description: The transform.
-      type: geometry_msgs/TransformStamped
+variables: []
 input_keys:
-  - target
-  - source
+- target:
+    description: The name of the target reference frame.
+    type: str
+- source:
+    description: The name of the source reference frame.
+    type: str
 output_keys:
-  - output  
+- output:
+    description: The transform.
+    type: geometry_msgs/TransformStamped
 {% endblock meta %}
 
 {% from "Utils.tpl" import render_transitions, render_remapping %}

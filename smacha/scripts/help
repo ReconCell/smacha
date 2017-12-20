@@ -193,31 +193,25 @@ if __name__ == '__main__':
                 parse_var(var)
     except Exception as e:
         raise ParsingError('Error processing template variable meta data: {}'.format(str(e)))
-        
-    # Print template input_keys and output_keys help info
+    
+    # Print template input_keys info
     try:
         if 'input_keys' in parsed_meta_block and parsed_meta_block['input_keys']:
             print(bcolors.HEADER + bcolors.BOLD + 'Input Keys:' + bcolors.ENDC)
-            if isinstance(parsed_meta_block['input_keys'], list):
-                for var in parsed_meta_block['input_keys']:
-                    print_tabs(1)
-                    print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(var) + bcolors.ENDC)
-            else:
-                print_tabs(1)
-                print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(parsed_meta_block['input_keys']) + bcolors.ENDC)
-        
+            for var in parsed_meta_block['input_keys']:
+                parse_var(var)
+    except Exception as e:
+        raise ParsingError('Error processing template input_keys meta data: {}'.format(str(e)))
+    
+    # Print template output_keys info
+    try:
         if 'output_keys' in parsed_meta_block and parsed_meta_block['output_keys']:
             print(bcolors.HEADER + bcolors.BOLD + 'Output Keys:' + bcolors.ENDC)
-            if isinstance(parsed_meta_block['output_keys'], list):
-                for var in parsed_meta_block['output_keys']:
-                    print_tabs(1)
-                    print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(var) + bcolors.ENDC)
-            else:
-                print_tabs(1)
-                print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(parsed_meta_block['output_keys']) + bcolors.ENDC)
+            for var in parsed_meta_block['output_keys']:
+                parse_var(var)
     except Exception as e:
-        raise ParsingError('Error processing template input_keys or output_keys meta data: {}'.format(str(e)))
-    
+        raise ParsingError('Error processing template output_keys meta data: {}'.format(str(e)))
+        
     # Print template outcomes help info
     try:
         if 'outcomes' in parsed_meta_block and parsed_meta_block['outcomes']:
