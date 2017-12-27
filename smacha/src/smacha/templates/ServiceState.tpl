@@ -4,6 +4,7 @@ description: SMACH ServiceState for calling services.
 language: Python
 framework: SMACH
 type: Container
+tags: [core]
 includes:
   - State
 extends: []

@@ -4,6 +4,7 @@ description: SMACH Concurrence container for running states in parallel.
 language: Python
 framework: SMACH
 type: Container
+tags: [core]
 includes: []
 extends: []
 variables: []

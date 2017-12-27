@@ -4,6 +4,7 @@ description: SMACH template containing macros commonly used by other templates.
 language: Python
 framework: SMACH
 type: None
+tags: [core]
 includes: []
 extends: []
 variables: []
