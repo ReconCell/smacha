@@ -87,6 +87,14 @@ class TestServices(Tester):
             generated_code = self._generate(os.path.join(smacha_path, 'test/smacha_scripts/smacha_test_examples/assigned_params.yml'))
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_generate_nesting_params(self):
+        """Test generating nesting_params.yml"""
+        smacha_path = self._rospack.get_path('smacha')
+        with open(os.path.join(smacha_path, 'test/smacha_test_examples/nesting_params.py')) as original_file:
+            generated_code = self._generate(os.path.join(smacha_path, 'test/smacha_scripts/smacha_test_examples/nesting_params.yml'))
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
 
 if __name__=="__main__":
