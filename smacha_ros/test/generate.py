@@ -3,11 +3,7 @@
 import rospy
 import rospkg
 import rostest
-import unittest
-import argparse
 import os
-import re
-import difflib
 import yaml as pyyaml
 import stat
 
