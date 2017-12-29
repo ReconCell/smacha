@@ -3,23 +3,21 @@
 import rospy
 import rospkg
 import rostest
-import unittest
-import argparse
 import os
-import re
-import difflib
 import yaml as pyyaml
 import stat
+
 import smacha
 from smacha_ros.srv import *
+from smacha.util import Tester
 
-class TestGenerate(unittest.TestCase):
+class TestServices(Tester):
     
     write_output_files = False
     debug_level = 1
     
     def __init__(self, *args, **kwargs):
-        super(TestGenerate, self).__init__(*args, **kwargs)
+        super(TestServices, self).__init__(*args, **kwargs)
 
         # Use the SMACHA parser for loading YAML scripts
         self._parser = smacha.Parser()
@@ -45,7 +43,7 @@ class TestGenerate(unittest.TestCase):
         # Name the script param
         script_param = 'smacha/scripts/' + os.path.splitext(os.path.basename(smacha_script_filename))[0]
 
-        # Load the script into the param server
+        # Load the script onto the param server
         try:
             rospy.set_param(script_param, script)
         except Exception as e:
@@ -70,45 +68,6 @@ class TestGenerate(unittest.TestCase):
 
         return smach_code
     
-    def _compare(self, code_a, code_b, file_a='code_a', file_b='code_b'):
-        """Diff compare code_a with code_b."""
-        # Strip single-line comments
-        code_a = re.sub('\s*#.*\n', '\n', code_a)
-        code_b = re.sub('\s*#.*\n', '\n', code_b)
-
-        # Squeeze whitespace after commas
-        code_a = re.sub(',\s+', ',', code_a)
-        code_b = re.sub(',\s+', ',', code_b)
-        
-        # Squeeze whitespace before and after colons
-        code_a = re.sub('\s*\:\s*', ':', code_a)
-        code_b = re.sub('\s*\:\s*', ':', code_b)
-
-        # Strip (python agnostic!) whitespace from both code strings and convert to lists
-        code_a_stripped = [line for line in code_a.strip().splitlines() if line != '' and
-                                                                           re.match('^\s+$', line) is None]
-        code_b_stripped = [line for line in code_b.strip().splitlines() if line != '' and
-                                                                           re.match('^\s+$', line) is None]
-        # Strip trailing whitespace from each line
-        code_a_stripped = [line.rstrip() for line in code_a_stripped]
-        code_b_stripped = [line.rstrip() for line in code_b_stripped]
-
-        if self.debug_level > 1:
-            print('\n' + file_a + ':\n')
-            print(code_a_stripped)
-            print('\n' + file_b + ':\n')
-            print(code_b_stripped)
-
-        # Use difflib to compare
-        same = True
-        for line in difflib.unified_diff(code_a_stripped, code_b_stripped, fromfile=file_a, tofile=file_b, lineterm=''):
-            if line:
-                if self.debug_level > 0:
-                    print(line)
-                same = False
-
-        return same
-
     def test_generate_hard_coded_params(self):
         """Test generating hard_coded_params.yml"""
         smacha_path = self._rospack.get_path('smacha')
@@ -116,9 +75,33 @@ class TestGenerate(unittest.TestCase):
             generated_code = self._generate(os.path.join(smacha_path, 'test/smacha_scripts/smacha_test_examples/hard_coded_params.yml'))
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_generate_assigned_params(self):
+        """Test generating assigned_params.yml"""
+        smacha_path = self._rospack.get_path('smacha')
+        with open(os.path.join(smacha_path, 'test/smacha_test_examples/params.py')) as original_file:
+            generated_code = self._generate(os.path.join(smacha_path, 'test/smacha_scripts/smacha_test_examples/assigned_params.yml'))
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_generate_nesting_params(self):
+        """Test generating nesting_params.yml"""
+        smacha_path = self._rospack.get_path('smacha')
+        with open(os.path.join(smacha_path, 'test/smacha_test_examples/nesting_params.py')) as original_file:
+            generated_code = self._generate(os.path.join(smacha_path, 'test/smacha_scripts/smacha_test_examples/nesting_params.yml'))
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_generate_nesting_params_with_sub_script(self):
+        """Test generating nesting_params_with_sub_script.yml"""
+        smacha_path = self._rospack.get_path('smacha')
+        with open(os.path.join(smacha_path, 'test/smacha_test_examples/nesting_params.py')) as original_file:
+            generated_code = self._generate(os.path.join(smacha_path, 'test/smacha_scripts/smacha_test_examples/nesting_params_with_sub_script.yml'))
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
 
 if __name__=="__main__":
     
     rospy.init_node('test_smacha_ros_generate',log_level=rospy.DEBUG)
-    rostest.rosrun('smacha_ros', 'test_smacha_ros_generate', TestGenerate)
+    rostest.rosrun('smacha_ros', 'test_smacha_ros_generate', TestServices)
