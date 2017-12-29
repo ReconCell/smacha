@@ -4,6 +4,7 @@ description: SMACH StateMachine container for nesting child states in a parent s
 language: Python
 framework: SMACH
 type: Container
+tags: [core]
 includes: []
 extends: []
 variables:

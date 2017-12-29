@@ -4,6 +4,7 @@ description: SMACH state for listening for and returning a particular transform 
 language: Python
 framework: SMACH
 type: State
+tags: [core]
 includes:
   - State
 extends: []
@@ -19,6 +20,10 @@ output_keys:
 - output:
     description: The transform.
     type: geometry_msgs/TransformStamped
+outcomes:
+- succeeded
+- aborted
+- preempted
 {% endblock meta %}
 
 {% from "Utils.tpl" import render_transitions, render_remapping %}

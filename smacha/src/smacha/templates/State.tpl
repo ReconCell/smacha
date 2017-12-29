@@ -4,6 +4,7 @@ description: SMACH template containing code common to all state templates.
 language: Python
 framework: SMACH
 type: None
+tags: [core]
 includes: []
 extends: []
 variables: []

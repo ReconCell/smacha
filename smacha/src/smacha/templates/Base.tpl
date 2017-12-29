@@ -3,7 +3,8 @@ name: Base
 description: SMACH base template.
 language: Python
 framework: SMACH
-type: None
+type: Base
+tags: [core]
 includes: []
 extends: []
 variables:

@@ -7,16 +7,9 @@ outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
 states:
 - SUB:
     template: StateMachine
-    params:
-      name: FOO_0
-      outcome: outcome_a
-      name_1: FOO_1
-    outcomes:
-    - sub_outcome_1
-    - sub_outcome_2
-    transitions:
-      sub_outcome_1: final_outcome_b
-      sub_outcome_2: FOO_2
+    params: {name: FOO_0, outcome: outcome_a, name_1: FOO_1}
+    outcomes: [sub_outcome_1, sub_outcome_2]
+    transitions: {sub_outcome_1: final_outcome_b, sub_outcome_2: FOO_2}
     states:
     - FOO_0:
         template: ParamFoo
