@@ -534,7 +534,7 @@ class Parser():
         # Create a dict for userdata in script_vars if it doesn't exist yet.
         # Insert it after outcomes.
         if 'userdata' not in script:
-            script.insert(script.index('outcomes'), 'userdata', yaml.comments.CommentedMap())
+            script.insert(script.index('outcomes')+1, 'userdata', yaml.comments.CommentedMap())
             script['userdata'].fa.set_block_style()
 
         for state in states_buffer:
