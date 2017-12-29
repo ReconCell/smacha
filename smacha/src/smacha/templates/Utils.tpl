@@ -4,6 +4,7 @@ description: SMACH template containing macros commonly used by other templates.
 language: Python
 framework: SMACH
 type: None
+tags: [core]
 includes: []
 extends: []
 variables: []
@@ -58,11 +59,8 @@ output_keys: []
 #
 # Macro for rendering 'outcome_map' in state instantiations.
 #
-{% macro render_outcome_map(outcome_map, indent=35) %}{{ 'outcome_map=' | indent(indent, true) }}{{ '{' }}{% for outcome_map_key, outcome_map_val in outcome_map.items() | sort %}{% if outcome_map_val is mapping %}'{{ outcome_map_key }}':
-{{ '' | indent(indent+17, true) }}{{ '{' }} {% for outcome_map_sub_key, outcome_map_sub_val in outcome_map_val.items() | sort %}'{{ outcome_map_sub_key }}': '{{ outcome_map_sub_val }}'{% if not loop.last %},
-{{ '' | indent(indent+19, true) }}{% endif %}{% endfor %}{{ '}' }}{% else %}
-{{ '' | indent(indent+13, true) }}'{{ outcome_map_key }}': '{{ outcome_map_val }}'{% endif %}{% if not loop.last %},
-{% endif %}{% endfor %}{{ '}' }}{% endmacro %}
+{% macro render_outcome_map(outcome_map, indent=35) %}{{ 'outcome_map=' | indent(indent, true) }}{{ '{' }}{% for outcome_map_key, outcome_map_val in outcome_map.items() | sort %}{% if outcome_map_val is mapping %}'{{ outcome_map_key }}': {{ '{' }} {% for outcome_map_sub_key, outcome_map_sub_val in outcome_map_val.items() | sort %}'{{ outcome_map_sub_key }}': '{{ outcome_map_sub_val }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }}{% else %}'{{ outcome_map_key }}': '{{ outcome_map_val }}'{% endif %}{% if not loop.last %},
+{{ '' | indent(indent+13, true) }}{% endif %}{% endfor %}{{ '}' }}{% endmacro %}
 
 #
 # Macro for rendering 'transitions' in state machine add() methods.

@@ -1,4 +1,3 @@
-# SMACHA state sequence example
 name: sm_top
 template: Base
 manifest: smacha

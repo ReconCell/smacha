@@ -57,17 +57,32 @@ class SMACHAServer():
             #
             # NOTE: We must use PyYAML instead of ruamel.yaml to parse here in order to successfully
             # interact with the ROS param server.
-            try:
-                parsed_meta_block = pyyaml.load(meta_block)
-            except Exception as e:
-                rospy.logwarn('Error when parsing meta block in template %s: %s', template, str(e))
+            #
+            # NOTE: Loading the parsed YAML onto the param server is actually not a good solution
+            # at the moment due to the fact that roscpp's abilities to load and parse arbitrarily
+            # nested YAML constructs using getParam() are currently lacking. A viable alternative
+            # is to simply directly dump the YAML string to the param server and parse it using
+            # yaml-cpp at the ROS node level after getParam()'ing the string from the param server.
+            #
+            # See:
+            # https://github.com/ros/ros_comm/issues/263
+            # https://github.com/ros/ros_comm/pull/279
+            # https://github.com/ros/ros_comm/issues/390
+            # 
+            # try:
+            #     parsed_meta_block = pyyaml.load(meta_block)
+            # except Exception as e:
+            #     rospy.logwarn('Error when parsing meta block in template %s: %s', template, str(e))
 
-            # Add the meta block to the param server
-            if parsed_meta_block:
-                template_name = os.path.splitext(template)[0]
-                rospy.loginfo('Adding {} template meta data to param server.'.format(template_name))
-                rospy.set_param('smacha/templates/' + template_name + '/meta/', parsed_meta_block)
-                self._template_params.append('smacha/templates/' + template_name)
+            try:
+                # Add the meta block to the param server
+                if meta_block:
+                    template_name = os.path.splitext(template)[0]
+                    rospy.loginfo('Adding {} template meta data to param server.'.format(template_name))
+                    rospy.set_param('smacha/templates/' + template_name + '/meta/', meta_block)
+                    self._template_params.append('smacha/templates/' + template_name)
+            except Exception as e:
+                rospy.logwarn('Error loading meta block in template %s into param server: %s', template, str(e))
 
         rospy.on_shutdown(self._cleanup)
     

@@ -13,29 +13,14 @@ states:
     transitions: {outcome_a: CON, outcome_b: final_outcome_b}
 - CON:
     template: Concurrence
-    params:
-      name: FOO_1
-      outcome: outcome_a
-      name_1: FOO_2
-    outcomes:
-    - con_outcome_1
-    - con_outcome_2
-    - con_outcome_3
-    - con_default_outcome
+    params: {name: FOO_1, outcome: outcome_a, name_1: FOO_2}
+    outcomes: [con_outcome_1, con_outcome_2, con_outcome_3, con_default_outcome]
     default_outcome: con_default_outcome
-    outcome_map:
-      con_outcome_1:
-        FOO_1: outcome_b
-      con_outcome_2:
-        FOO_1: outcome_a
-        FOO_2: outcome_a
-      con_outcome_3:
-        FOO_2: outcome_b
-    transitions:
-      con_outcome_1: final_outcome_b
-      con_outcome_2: final_outcome_a
-      con_outcome_3: final_outcome_c
-      con_default_outcome: CON
+    outcome_map: {con_outcome_1: {FOO_1: outcome_b},
+                  con_outcome_2: {FOO_1: outcome_a, FOO_2: outcome_a},
+                  con_outcome_3: {FOO_2: outcome_b}}
+    transitions: {con_outcome_1: final_outcome_b, con_outcome_2: final_outcome_a,
+                  con_outcome_3: final_outcome_c, con_default_outcome: CON}
     states:
     - FOO_1:
         template: ParamFoo

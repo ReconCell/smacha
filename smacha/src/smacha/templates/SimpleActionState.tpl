@@ -4,6 +4,7 @@ description: SMACH SimpleActionState for calling actions using an action server.
 language: Python
 framework: SMACH
 type: State
+tags: [core]
 includes:
   - State
 extends: []

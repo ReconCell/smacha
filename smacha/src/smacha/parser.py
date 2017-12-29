@@ -141,10 +141,10 @@ class Parser():
         if output_file:
             with open(output_file, 'w') as output_file_handle:
                 script_string = yaml.dump(script, output_file_handle,
-                                          Dumper = self._dumper, default_flow_style=False, default_style='')
+                                          Dumper = self._dumper, default_flow_style=False, default_style='', width=1000)
         else:
             script_string = yaml.dump(script, None,
-                                      Dumper = self._dumper, default_flow_style=False, default_style='')
+                                      Dumper = self._dumper, default_flow_style=False, default_style='', width=1000)
 
         return script_string
 
@@ -389,8 +389,11 @@ class Parser():
         # Generate new container state outcomes as appropriate and remap transitions
         #
         container_state_vars['outcomes'] = yaml.comments.CommentedSet()
+        container_state_vars['outcomes'].fa.set_flow_style()
         container_state_vars['transitions'] = yaml.comments.CommentedMap()
+        container_state_vars['transitions'].fa.set_flow_style()
         container_outcome_map = yaml.comments.CommentedMap()
+        container_outcome_map.fa.set_flow_style()
         for state in states_buffer:
             for outcome, transition in list(state.items())[0][1]['transitions'].items():
                 if transition not in states:
@@ -431,8 +434,10 @@ class Parser():
 
         if container_type == 'Concurrence':
             container_state_vars['outcome_map'] = yaml.comments.CommentedMap()
+            container_state_vars['outcome_map'].fa.set_flow_style()
             for outcome in container_state_vars['outcomes']:
                 new_outcome_map = yaml.comments.CommentedMap()
+                new_outcome_map.fa.set_flow_style()
                 for state in states_buffer:
                     for state_outcome, state_transition in list(state.items())[0][1]['transitions'].items():
                         state_name = list(state.items())[0][0]
@@ -472,6 +477,7 @@ class Parser():
         # Convert outcomes from a set to a sequence
         #
         container_state_vars['outcomes'] = yaml.comments.CommentedSeq(container_state_vars['outcomes'])
+        container_state_vars['outcomes'].fa.set_flow_style()
 
         #
         # Adjust transitions of all other states in script to point to container state as appropriate.
@@ -489,6 +495,7 @@ class Parser():
             # Create a dict for the persistent variable in container_state_vars if it doesn't exist yet.
             if persistent_var not in container_state_vars:
                 container_state_vars[persistent_var] = yaml.comments.CommentedMap()
+                container_state_vars[persistent_var].fa.set_flow_style()
 
             for state in states_buffer:
                 if persistent_var in list(state.items())[0][1]:
@@ -522,10 +529,13 @@ class Parser():
         # Handle userdata and remapping by moving certain userdata entries outside of the container as appropriate.
         #
         container_state_vars['remapping'] = yaml.comments.CommentedMap()
+        container_state_vars['remapping'].fa.set_flow_style()
 
         # Create a dict for userdata in script_vars if it doesn't exist yet.
+        # Insert it after outcomes.
         if 'userdata' not in script:
-            script['userdata'] = yaml.comments.CommentedMap()
+            script.insert(script.index('outcomes')+1, 'userdata', yaml.comments.CommentedMap())
+            script['userdata'].fa.set_block_style()
 
         for state in states_buffer:
             if 'userdata' in list(state.items())[0][1]:
@@ -572,7 +582,9 @@ class Parser():
         #
         preceding_userdata = dict()
         input_keys = yaml.comments.CommentedSet()
+        input_keys.fa.set_flow_style()
         output_keys = yaml.comments.CommentedSet()
+        output_keys.fa.set_flow_style()
 
         # Collate userdata from the parent script
         if 'userdata' in script:
@@ -599,14 +611,17 @@ class Parser():
         # Add input_keys and output_keys to container_state_vars
         if input_keys:
             container_state_vars['input_keys'] = yaml.comments.CommentedSeq(input_keys)
+            container_state_vars['input_keys'].fa.set_flow_style()
         if output_keys:
             container_state_vars['output_keys'] = yaml.comments.CommentedSeq(output_keys)
+            container_state_vars['output_keys'].fa.set_flow_style()
 
         # Add states_buffer to container
         container_state_vars['states'] = states_buffer
 
         # Reorder the container_state_vars appropriately in a CommentedMap type
         ordered_container_state_vars = yaml.comments.CommentedMap()
+        ordered_container_state_vars.fa.set_block_style()
         if 'template' in container_state_vars:
             ordered_container_state_vars['template'] = container_state_vars['template']
         if 'params' in container_state_vars:
@@ -632,6 +647,7 @@ class Parser():
 
         # Construct container state
         container_state = yaml.comments.CommentedMap()
+        container_state.fa.set_block_style()
         container_state[container_state_name] = ordered_container_state_vars
 
         # Remove old states from script and add container
@@ -667,6 +683,7 @@ class Parser():
         # Construct skeleton of super-script state entry 
         super_script_state_name = state_name
         super_script_state_vars = yaml.comments.CommentedMap()
+        super_script_state_vars.fa.set_block_style()
         if sub_script_filename:
             super_script_state_vars['script'] = os.path.splitext(os.path.basename(sub_script_filename))[0]
         else:
@@ -686,6 +703,7 @@ class Parser():
 
         # Create the super-script state entry
         super_script_state = yaml.comments.CommentedMap()
+        super_script_state.fa.set_block_style()
         super_script_state[super_script_state_name] = super_script_state_vars
 
         # Copy the script and transform to super-script
@@ -694,6 +712,7 @@ class Parser():
         
         # Create the sub-script
         sub_script = yaml.comments.CommentedMap()
+        sub_script.fa.set_block_style()
         sub_script[sub_script_name] = sub_script_state_vars
 
         return sub_script, super_script
