@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
+import sys
+import argparse
 import os
+import unittest
 
 from smacha.util import Tester
 
@@ -53,7 +56,7 @@ class TestTools(Tester):
             generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
                                             [base_path + '/smacha_scripts/smacha_test_examples'],
                                             'SUB', 'StateMachine', ['FOO_0', 'FOO_1'],
-                                            output_file_stub = '_nesting_1_contain_output.yml')
+                                            output_file = 'seq_nesting_1_contain_output.yml')
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
@@ -64,7 +67,7 @@ class TestTools(Tester):
             generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
                                             [base_path + '/smacha_scripts/smacha_test_examples'],
                                             'SUB', 'StateMachine', ['FOO_1', 'FOO_2'],
-                                            output_file_stub = '_nesting_2_contain_output.yml')
+                                            output_file = 'seq_nesting_2_contain_output.yml')
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
@@ -75,7 +78,7 @@ class TestTools(Tester):
             generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
                                             [base_path + '/smacha_scripts/smacha_test_examples'],
                                             'SUB', 'StateMachine', ['FOO_0', 'FOO_1', 'FOO_2'],
-                                            output_file_stub = '_nesting_3_contain_output.yml')
+                                            output_file = 'seq_nesting_3_contain_output.yml')
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
@@ -128,7 +131,7 @@ class TestTools(Tester):
             generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
                                             [base_path + '/smacha_scripts/smacha_test_examples'],
                                             'CON', 'Concurrence', ['FOO_0', 'FOO_1'],
-                                            output_file_stub = '_concurrence_1_contain_output.yml')
+                                            output_file = 'seq_concurrence_1_contain_output.yml')
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
     
@@ -139,7 +142,7 @@ class TestTools(Tester):
             generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
                                             [base_path + '/smacha_scripts/smacha_test_examples'],
                                             'CON', 'Concurrence', ['FOO_1', 'FOO_2'],
-                                            output_file_stub = '_concurrence_2_contain_output.yml')
+                                            output_file = 'seq_concurrence_2_contain_output.yml')
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
@@ -150,7 +153,7 @@ class TestTools(Tester):
             generated_code = self._contain(base_path + '/smacha_scripts/smacha_test_examples/seq.yml',
                                             [base_path + '/smacha_scripts/smacha_test_examples'],
                                             'CON', 'Concurrence', ['FOO_0', 'FOO_1', 'FOO_2'],
-                                            output_file_stub = '_concurrence_3_contain_output.yml')
+                                            output_file = 'seq_concurrence_3_contain_output.yml')
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
@@ -162,6 +165,18 @@ if __name__=="__main__":
     arg_parser.add_argument('-w', '--write',
                             action='store_true',
                             help='Write generated output files to disk.')
+    
+    arg_parser.add_argument('-op', '--output-py-dir',
+                            dest='output_py_dir',
+                            default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'smacha_generated_py/smacha_test_examples/'),
+                            action='store',
+                            help='Specify output SMACH Python executable directory.')
+    
+    arg_parser.add_argument('-oy', '--output-yml-dir',
+                            dest='output_yml_dir',
+                            default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'smacha_generated_scripts/smacha_test_examples/'),
+                            action='store',
+                            help='Specify output SMACHA YAML script directory.')
     
     arg_parser.add_argument('-d', '--debug-level',
                             dest='debug_level',
@@ -175,6 +190,8 @@ if __name__=="__main__":
         sys.argv = sys.argv[:1]
         args = arg_parser.parse_args(argv)
         TestTools.write_output_files = args.write
+        TestTools.output_py_dir = args.output_py_dir
+        TestTools.output_yml_dir = args.output_yml_dir
         TestTools.debug_level = int(args.debug_level)
 
     unittest.main()

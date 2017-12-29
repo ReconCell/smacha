@@ -1,9 +1,6 @@
 from __future__ import unicode_literals
 
-import sys
-import argparse
 import os
-import smacha
 import re
 import difflib
 import unittest
@@ -25,12 +22,17 @@ class bcolors:
 class Tester(unittest.TestCase):
 
     write_output_files = False
+    output_py_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../test/smacha_generated_py')
+    output_yml_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../test/smacha_generated_scripts')
     debug_level = 1
 
     def __init__(self, *args, **kwargs):
         super(Tester, self).__init__(*args, **kwargs)
 
-    def _generate(self, smacha_script_filename, script_dirs, template_dirs):
+    def _generate(self,
+                  smacha_script_filename, script_dirs, template_dirs,
+                  include_introspection_server=False,
+                  output_file = None):
         """Generate smach code using smacha yaml script file and templates."""
         # Load parser
         parser = smacha.Parser(script_dirs = script_dirs)
@@ -40,7 +42,8 @@ class Tester(unittest.TestCase):
         script = parser.parse(script_str)
         
         # Load template processor
-        templater = smacha.Templater(template_dirs)
+        templater = smacha.Templater(template_dirs,
+                                     include_introspection_server=include_introspection_server)
         
         # Load code generator
         generator = smacha.Generator(parser, templater, verbose=False)
@@ -50,9 +53,11 @@ class Tester(unittest.TestCase):
         
         # Write the final output to a SMACH python file
         if self.write_output_files:
-            with open(smacha_script_filename + '.py', 'w') as smach_file:
+            if not output_file:
+                output_file = os.path.splitext(os.path.basename(smacha_script_filename))[0] + '_generate_output.py'
+            with open(os.path.join(self.output_py_dir, output_file), 'w') as smach_file:
                 smach_file.write(smach_code)
-            os.chmod(smacha_script_filename + '.py',
+            os.chmod(os.path.join(self.output_py_dir, output_file),
                         stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
                         stat.S_IRGRP | stat.S_IXGRP)
         
@@ -61,7 +66,7 @@ class Tester(unittest.TestCase):
     def _contain(self,
                  smacha_script_filename, script_dirs,
                  container_name, container_type, states,
-                 output_file_stub = '_contain_output.yml'):
+                 output_file = None):
         """Containerize a sequence of states in a script."""
         # Load parser
         parser = smacha.Parser(script_dirs = script_dirs)
@@ -78,7 +83,9 @@ class Tester(unittest.TestCase):
         
         # Write the final output to a SMACHA YAML file
         if self.write_output_files:
-            with open(os.path.splitext(smacha_script_filename)[0] + output_file_stub, 'w') as contained_script_file:
+            if not output_file:
+                output_file = os.path.splitext(os.path.basename(smacha_script_filename))[0] + '_contain_output.yml'
+            with open(os.path.join(self.output_yml_dir, output_file), 'w') as contained_script_file:
                 contained_script_file.write(contained_script_string)
 
         return contained_script_string
@@ -87,8 +94,8 @@ class Tester(unittest.TestCase):
                  smacha_script_filename, script_dirs,
                  container_state_name,
                  sub_script_filename,
-                 output_sub_script_file_stub = '_sub_script_extract_output.yml',
-                 output_super_script_file_stub = '_super_script_extract_output.yml'):
+                 output_sub_script_file = None,
+                 output_super_script_file = None):
         """Extract a container state in a script and export to sub-script and super-script."""
         # Load parser
         parser = smacha.Parser(script_dirs = script_dirs)
@@ -108,10 +115,13 @@ class Tester(unittest.TestCase):
 
         # Write the final output to a SMACHA YAML files
         if self.write_output_files:
-            with open(os.path.splitext(smacha_script_filename)[0] + output_sub_script_file_stub, 'w') as extracted_sub_script_file:
+            if not output_sub_script_file:
+                output_sub_script_file = os.path.splitext(os.path.basename(smacha_script_filename))[0] + '_sub_script_extract_output.yml'
+            if not output_super_script_file:
+                output_super_script_file = os.path.splitext(os.path.basename(smacha_script_filename))[0] + '_super_script_extract_output.yml'
+            with open(os.path.join(self.output_yml_dir, output_sub_script_file), 'w') as extracted_sub_script_file:
                 extracted_sub_script_file.write(extracted_sub_script_string)
-            
-            with open(os.path.splitext(smacha_script_filename)[0] + output_super_script_file_stub, 'w') as extracted_super_script_file:
+            with open(os.path.join(self.output_yml_dir, output_super_script_file), 'w') as extracted_super_script_file:
                 extracted_super_script_file.write(extracted_super_script_string)
 
         return extracted_sub_script_string, extracted_super_script_string
