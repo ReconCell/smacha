@@ -23,7 +23,6 @@ output_keys:
 outcomes:
 - succeeded
 - aborted
-- preempted
 {% endblock meta %}
 
 {% from "Utils.tpl" import render_transitions, render_remapping %}
@@ -48,7 +47,7 @@ import tf2_ros
 class TF2ListenerState(smach.State):
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=[{% for outcome, transition in transitions.items() %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+                             outcomes=['succeeded', 'aborted'],
                              input_keys=['target', 'source'],
                              output_keys=['output'])
 
@@ -79,8 +78,9 @@ class TF2ListenerState(smach.State):
           setattr(userdata, 'output', self._tf2_buffer.lookup_transform(target, source, time))
         except Exception as e:
           rospy.logerr('Error when reading transform for target ' + target + ' and source ' + source + ' from TF2!')
+          return 'aborted'
 
-        return {% if successful_outcome is defined %}'{{ successful_outcome }}{% else %}'succeeded'{% endif %}
+        return 'succeeded'
 {% do defined_headers.append('class_TF2ListenerState') %}
 {% endif %}
 {% endblock class_defs %}
