@@ -13,9 +13,6 @@ from smacha.util import Tester
 
 class TestServices(Tester):
     
-    write_output_files = False
-    debug_level = 1
-    
     def __init__(self, *args, **kwargs):
         super(TestServices, self).__init__(*args, **kwargs)
 
@@ -59,7 +56,7 @@ class TestServices(Tester):
             print('Service call failed: {}'.format(str(e)))
         
         # Write the final output to a SMACH python file
-        if self.write_output_files:
+        if self._write_output_files:
             with open(smacha_script_filename + '.py', 'w') as smach_file:
                 smach_file.write(smach_code)
             os.chmod(smacha_script_filename + '.py',

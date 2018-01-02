@@ -7,7 +7,22 @@ import unittest
 
 from smacha.util import Tester
 
+WRITE_OUTPUT_FILES = False
+OUTPUT_PY_DIR = '/tmp/smacha/smacha_test_examples/smacha_generated_py'
+OUTPUT_YML_DIR = '/tmp/smacha/smacha_test_examples/smacha_generated_scripts'
+DEBUG_LEVEL = 1
+
 class TestTools(Tester):
+    
+    def __init__(self, *args, **kwargs):
+        # Set Tester member variables
+        self.set_write_output_files(WRITE_OUTPUT_FILES)
+        self.set_output_py_dir(OUTPUT_PY_DIR)
+        self.set_output_yml_dir(OUTPUT_YML_DIR)
+        self.set_debug_level(DEBUG_LEVEL)
+        
+        # Call the parent constructor
+        super(TestTools, self).__init__(*args, **kwargs)
 
     def test_hard_coded_params(self):
         """Test hard_coded_params.yml"""
@@ -164,24 +179,25 @@ if __name__=="__main__":
     
     arg_parser.add_argument('-w', '--write',
                             action='store_true',
+                            default=WRITE_OUTPUT_FILES,
                             help='Write generated output files to disk.')
     
     arg_parser.add_argument('-op', '--output-py-dir',
                             dest='output_py_dir',
-                            default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'smacha_generated_py/smacha_test_examples/'),
+                            default=OUTPUT_PY_DIR,
                             action='store',
                             help='Specify output SMACH Python executable directory.')
     
     arg_parser.add_argument('-oy', '--output-yml-dir',
                             dest='output_yml_dir',
-                            default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'smacha_generated_scripts/smacha_test_examples/'),
+                            default=OUTPUT_YML_DIR,
                             action='store',
                             help='Specify output SMACHA YAML script directory.')
     
     arg_parser.add_argument('-d', '--debug-level',
                             dest='debug_level',
                             action='store',
-                            default=1,
+                            default=DEBUG_LEVEL,
                             help='Set debug level (0-2. Default: 1)')
     
     # Some trickery to avoid disrupting unittest with args
@@ -189,9 +205,9 @@ if __name__=="__main__":
         argv = sys.argv[1:]
         sys.argv = sys.argv[:1]
         args = arg_parser.parse_args(argv)
-        TestTools.write_output_files = args.write
-        TestTools.output_py_dir = args.output_py_dir
-        TestTools.output_yml_dir = args.output_yml_dir
-        TestTools.debug_level = int(args.debug_level)
+        WRITE_OUTPUT_FILES = args.write
+        OUTPUT_PY_DIR = args.output_py_dir
+        OUTPUT_YML_DIR = args.output_yml_dir
+        DEBUG_LEVEL = int(args.debug_level)
 
     unittest.main()
