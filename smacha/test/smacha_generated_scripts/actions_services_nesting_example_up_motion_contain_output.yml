@@ -1,0 +1,54 @@
+    # SMACHA test script for actions and services.
+name: sm_top
+template: ReconCellBase
+function_name: actions_services_example
+node_name: actions_services_example
+outcomes: [top_finished]
+userdata:
+  up_motion_offset: [[0.0, 0.0, -0.2], [0, 0, 0, 1]]
+  up_motion_time: 4
+states:
+- READ_ROBOT_JOINT_CONFIGURATION:
+    template: ReadFromDatabaseState
+    userdata: {db_entry_1: smacha_testing/j_via_1}
+    remapping: {entry: db_entry_1, output: joint_initial_position}
+    transitions: {succeeded: JOINT_TRAP_MOVEMENT, failed: top_finished}
+- JOINT_TRAP_MOVEMENT:
+    template: JointTrapVelActionState
+    params: {robot: ur10_2}
+    robot: [params, robot]
+    userdata: {jt_speed: 0.25, jt_blend: 0}
+    remapping: {joints: joint_initial_position, speed_percent: jt_speed, blend_radius: jt_blend}
+    transitions: {succeeded: UP_MOTION, preempted: top_finished, aborted: top_finished}
+- UP_MOTION:
+    template: StateMachine
+    params: {robot: ur10_2}
+    input_keys: [up_motion_offset, up_motion_time]
+    output_keys: [robot_pose_1]
+    remapping: {up_motion_offset: up_motion_offset, up_motion_time: up_motion_time}
+    outcomes: [up_motion_outcome_1, up_motion_outcome_2]
+    transitions: {up_motion_outcome_1: top_finished, up_motion_outcome_2: READ_CURRENT_POSE_CART_TRAP}
+    states:
+    - READ_ROBOT_CURRENT_POSE_CART_LIN:
+        template: TransformState
+        userdata: {tf_t_1: [[params, robot], /base], tf_s_1: [[params, robot], /tool_changer]}
+        remapping: {target: tf_t_1, source: tf_s_1, output: robot_pose_1}
+        transitions: {succeeded: CART_LIN_MOVEMENT, aborted: up_motion_outcome_1}
+    - CART_LIN_MOVEMENT:
+        template: CartLinTaskActionState
+        robot: [params, robot]
+        remapping: {target_frame: robot_pose_1, offset: up_motion_offset, travel_time: up_motion_time}
+        transitions: {succeeded: up_motion_outcome_2, preempted: up_motion_outcome_1, aborted: up_motion_outcome_1}
+- READ_CURRENT_POSE_CART_TRAP:
+    template: TransformState
+    params: {robot: ur10_2}
+    userdata: {tf_t_2: [[params, robot], /base], tf_s_2: [[params, robot], /tool_changer]}
+    remapping: {target: tf_t_2, source: tf_s_2, output: robot_pose_2}
+    transitions: {succeeded: CART_TRAP_MOVEMENT, aborted: top_finished}
+- CART_TRAP_MOVEMENT:
+    template: CartTrapVelActionState
+    params: {robot: ur10_2}
+    robot: [params, robot]
+    userdata: {down_motion_offset: [[0.0, 0.0, 0.4], [0, 0, 0, 1]], down_motion_speed: 0.25}
+    remapping: {target_frame: robot_pose_2, offset: down_motion_offset, speed_percent: down_motion_speed}
+    transitions: {succeeded: top_finished, preempted: top_finished, aborted: top_finished}

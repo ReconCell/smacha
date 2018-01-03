@@ -13,4 +13,4 @@ kinetic:
   variables:
     ROS_DISTRO: "kinetic"
   tags:
-    - docker-in-docker
+    - reconcell

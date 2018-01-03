@@ -20,15 +20,33 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 class Tester(unittest.TestCase):
-
-    write_output_files = False
-    output_py_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../test/smacha_generated_py')
-    output_yml_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../test/smacha_generated_scripts')
-    debug_level = 1
+        
+    _write_output_files = False
+    _output_py_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../test/smacha_generated_py')
+    _output_yml_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../test/smacha_generated_scripts')
+    _debug_level = 1
 
     def __init__(self, *args, **kwargs):
         super(Tester, self).__init__(*args, **kwargs)
+        
+        # Create the output directories if they don't exist
+        if not os.path.exists(self._output_py_dir):
+            os.makedirs(self._output_py_dir)
+        if not os.path.exists(self._output_yml_dir):
+            os.makedirs(self._output_yml_dir)
+    
+    def set_write_output_files(self, write_output_files):
+        self._write_output_files = write_output_files
 
+    def set_output_py_dir(self, output_py_dir):
+        self._output_py_dir = output_py_dir
+    
+    def set_output_yml_dir(self, output_yml_dir):
+        self._output_yml_dir = output_yml_dir
+    
+    def set_debug_level(self, debug_level):
+        self._debug_level = debug_level
+        
     def _generate(self,
                   smacha_script_filename, script_dirs, template_dirs,
                   include_introspection_server=False,
@@ -52,12 +70,12 @@ class Tester(unittest.TestCase):
         smach_code = generator.run(script)
         
         # Write the final output to a SMACH python file
-        if self.write_output_files:
+        if self._write_output_files:
             if not output_file:
                 output_file = os.path.splitext(os.path.basename(smacha_script_filename))[0] + '_generate_output.py'
-            with open(os.path.join(self.output_py_dir, output_file), 'w') as smach_file:
+            with open(os.path.join(self._output_py_dir, output_file), 'w') as smach_file:
                 smach_file.write(smach_code)
-            os.chmod(os.path.join(self.output_py_dir, output_file),
+            os.chmod(os.path.join(self._output_py_dir, output_file),
                         stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
                         stat.S_IRGRP | stat.S_IXGRP)
         
@@ -82,10 +100,10 @@ class Tester(unittest.TestCase):
         contained_script_string = parser.dump(contained_script)
         
         # Write the final output to a SMACHA YAML file
-        if self.write_output_files:
+        if self._write_output_files:
             if not output_file:
                 output_file = os.path.splitext(os.path.basename(smacha_script_filename))[0] + '_contain_output.yml'
-            with open(os.path.join(self.output_yml_dir, output_file), 'w') as contained_script_file:
+            with open(os.path.join(self._output_yml_dir, output_file), 'w') as contained_script_file:
                 contained_script_file.write(contained_script_string)
 
         return contained_script_string
@@ -114,14 +132,14 @@ class Tester(unittest.TestCase):
         extracted_super_script_string = parser.dump(super_script)
 
         # Write the final output to a SMACHA YAML files
-        if self.write_output_files:
+        if self._write_output_files:
             if not output_sub_script_file:
                 output_sub_script_file = os.path.splitext(os.path.basename(smacha_script_filename))[0] + '_sub_script_extract_output.yml'
             if not output_super_script_file:
                 output_super_script_file = os.path.splitext(os.path.basename(smacha_script_filename))[0] + '_super_script_extract_output.yml'
-            with open(os.path.join(self.output_yml_dir, output_sub_script_file), 'w') as extracted_sub_script_file:
+            with open(os.path.join(self._output_yml_dir, output_sub_script_file), 'w') as extracted_sub_script_file:
                 extracted_sub_script_file.write(extracted_sub_script_string)
-            with open(os.path.join(self.output_yml_dir, output_super_script_file), 'w') as extracted_super_script_file:
+            with open(os.path.join(self._output_yml_dir, output_super_script_file), 'w') as extracted_super_script_file:
                 extracted_super_script_file.write(extracted_super_script_string)
 
         return extracted_sub_script_string, extracted_super_script_string
@@ -149,7 +167,7 @@ class Tester(unittest.TestCase):
         code_a_stripped = [line.rstrip() for line in code_a_stripped]
         code_b_stripped = [line.rstrip() for line in code_b_stripped]
 
-        if self.debug_level > 1:
+        if self._debug_level > 1:
             print('\n' + file_a + ':\n')
             print(code_a_stripped)
             print('\n' + file_b + ':\n')
@@ -159,7 +177,7 @@ class Tester(unittest.TestCase):
         same = True
         for line in difflib.unified_diff(code_a_stripped, code_b_stripped, fromfile=file_a, tofile=file_b, lineterm=''):
             if line:
-                if self.debug_level > 0:
+                if self._debug_level > 0:
                     print(line)
                 same = False
 
