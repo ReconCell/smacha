@@ -73,3 +73,30 @@ output_keys: []
 #
 {% macro render_remapping(remapping, indent=23) %}{{ 'remapping=' | indent(indent, true) }}{{ '{' }}{% for state_key, userdata_key in remapping.items() | sort %}'{{ state_key }}':'{{ userdata_key }}'{% if not loop.last %},
 {{ '' | indent(indent+11, true) }}{% endif %}{% endfor %}{{ '}' }}{% endmacro %}
+
+#
+# Macro for importing std_msg types.
+#
+{% macro import_std_msg(defined_headers, type) %}
+{% if 'std_msgs_msg_import_' + type not in defined_headers %}
+from std_msgs.msg import {{ type }}
+{% do defined_headers.append('std_msgs_msg_import_' + type) %}
+{% endif %}{% endmacro %}
+
+#
+# Macro for importing geometry_msg types.
+#
+{% macro import_geometry_msg(defined_headers, type) %}
+{% if 'geometry_msgs_msg_import_' + type not in defined_headers %}
+from geometry_msgs.msg import {{ type }}
+{% do defined_headers.append('geometry_msgs_msg_import_' + type) %}
+{% endif %}{% endmacro %}
+
+#
+# Macro for importing sensor_msg types.
+#
+{% macro import_sensor_msg(defined_headers, type) %}
+{% if 'sensor_msgs_msg_import_' + type not in defined_headers %}
+from sensor_msgs.msg import {{ type }}
+{% do defined_headers.append('sensor_msgs_msg_import_' + type) %}
+{% endif %}{% endmacro %}
