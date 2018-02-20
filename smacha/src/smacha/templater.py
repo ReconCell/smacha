@@ -48,6 +48,34 @@ class SkipBlockExtension(Extension):
                     if skip_level == block_level+1:
                         skip_level = 0
 
+def expression(value):
+    """
+    Custom test function to check if a template variable is an expression
+    wrapped in backticks (e.g. `rospkg.RosPack().get_path('smacha')`).
+    
+    INPUTS:
+        value: A string.
+
+    RETURNS:
+        True: If value is wrapped in backticks.
+        False: If value is not wrapped in backticks.
+    """
+    if re.match('`.*`$', value):
+        return True
+    else:
+        return False
+
+def exptostr(value):
+    """
+    Custom filter to remove expression backtick wrappers from a template variable.
+    
+    INPUTS:
+        value: A string wrapped in backticks.
+
+    RETURNS:
+        output: The string with backticks removed.
+    """
+    return re.sub(r'`(.*)`', r'\g<1>', value)
 
 def not_string(value):
     """
@@ -154,7 +182,11 @@ class Templater():
             self._template_env.skip_blocks.append('spin')
 
         # Register custom tests with the environment
+        self._template_env.tests['expression'] = expression
         self._template_env.tests['not_string'] = not_string
+        
+        # Register custom filters with the environment
+        self._template_env.filters['exptostr'] = exptostr
         
         pass
 
@@ -208,7 +240,11 @@ class Templater():
             template_env.skip_blocks.append('spin')
 
         # Register custom tests with the environment
+        template_env.tests['expression'] = expression
         template_env.tests['not_string'] = not_string
+        
+        # Register custom filters with the environment
+        template_env.filters['exptostr'] = exptostr
 
         # Read the state template file into a template object using the environment object
         template = template_env.select_template([template_name, template_name + '.tpl'])
@@ -292,7 +328,11 @@ class Templater():
             template_env.skip_blocks.append('spin')
 
         # Register custom tests with the environment
+        template_env.tests['expression'] = expression
         template_env.tests['not_string'] = not_string
+        
+        # Register custom filters with the environment
+        template_env.filters['exptostr'] = exptostr
 
         # Append non-target blocks to environment skip_blocks list
         for block_name, block in template.blocks.items():
