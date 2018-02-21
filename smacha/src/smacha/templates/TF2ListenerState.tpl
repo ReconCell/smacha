@@ -25,7 +25,7 @@ outcomes:
 - aborted
 {% endblock meta %}
 
-{% from "Utils.tpl" import render_transitions, render_remapping %}
+{% from "Utils.tpl" import import_module, render_transitions, render_remapping %}
 
 {% include "State.tpl" %}
 
@@ -33,10 +33,7 @@ outcomes:
 {% endblock base_header %}
 
 {% block imports %}
-{% if 'import_tf2_ros' not in defined_headers %}
-import tf2_ros
-{% do defined_headers.append('import_tf2_ros') %}
-{% endif %}
+{{ import_module(defined_headers, 'tf2_ros') }}
 {% endblock imports %}
 
 {% block defs %}
@@ -81,8 +78,7 @@ class TF2ListenerState(smach.State):
           return 'aborted'
 
         return 'succeeded'
-{% do defined_headers.append('class_TF2ListenerState') %}
-{% endif %}
+{% do defined_headers.append('class_TF2ListenerState') %}{% endif %}
 {% endblock class_defs %}
 
 {% block header %}

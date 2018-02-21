@@ -1,23 +1,13 @@
 {% extends "Base.tpl" %}
 
+{% from "Utils.tpl" import from_import %}
+
 {% block imports %}
 {{ super() }}
-{% if 'smacha_srv_import_GripperSrv' not in defined_headers %}
-from smacha.srv import GripperSrv
-{% do defined_headers.append('smacha_srv_import_GripperSrv') %}
-{% endif %}
-{% if 'smacha_srv_import_GripperSrvRequest' not in defined_headers %}
-from smacha.srv import GripperSrvRequest
-{% do defined_headers.append('smacha_srv_import_GripperSrvRequest') %}
-{% endif %}
-{% if 'smacha_srv_import_GripperSrvResponse' not in defined_headers %}
-from smacha.srv import GripperSrvResponse
-{% do defined_headers.append('smacha_srv_import_GripperSrvResponse') %}
-{% endif %}
-{% if 'geometry_msgs_msg_import' not in defined_headers %}
-from geometry_msgs.msg import *
-{% do defined_headers.append('geometry_msgs_msg_import') %}
-{% endif %}
+{{ from_import(defined_headers, 'smacha.srv', 'GripperSrv') }}
+{{ from_import(defined_headers, 'smacha.srv', 'GripperSrvRequest') }}
+{{ from_import(defined_headers, 'smacha.srv', 'GripperSrvResponse') }}
+{{ from_import(defined_headers, 'geometry_msgs.msg', '*') }}
 {% endblock imports %}
 
 {% block defs %}

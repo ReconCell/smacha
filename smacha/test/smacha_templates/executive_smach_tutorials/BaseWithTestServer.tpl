@@ -1,15 +1,11 @@
 {% extends "Base.tpl" %}
 
+{% from "Utils.tpl" import from_import %}
+
 {% block imports %}
 {{ super() }}
-{% if 'smacha_msg_import_TestAction' not in defined_headers %}
-from smacha.msg import TestAction
-{% do defined_headers.append('smacha_msg_import_TestAction') %}
-{% endif %}
-{% if 'actionlib_msgs_msg_import' not in defined_headers %}
-from actionlib_msgs.msg import *
-{% do defined_headers.append('actionlib_msgs_msg_import') %}
-{% endif %}
+{{ from_import(defined_headers, 'smacha.msg', 'TestAction') }}
+{{ from_import(defined_headers, 'actionlib_msgs.msg', '*') }}
 {% endblock imports %}
 
 {% block class_defs %}

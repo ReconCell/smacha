@@ -15,8 +15,7 @@ class Foo(smach.State):
         rospy.loginfo('Returning {}'.format(self._outcome))
 
         return self._outcome
-{% do defined_headers.append('class_foo') %}
-{% endif %}
+{% do defined_headers.append('class_foo') %}{% endif %}
 {% endblock class_defs %}
 
 {% block body %}
