@@ -1,10 +1,9 @@
 {% extends "ServiceState.tpl" %}
 
+{% from "Utils.tpl" import from_import %}
+
 {% block imports %}
-{% if 'smacha_srv_import_GripperSrvRequest' not in defined_headers %}
-from smacha.srv import GripperSrvRequest
-{% do defined_headers.append('smacha_srv_import_GripperSrvRequest') %}
-{% endif %}
+{{ from_import(defined_headers, 'smacha.srv', 'GripperSrvRequest') }}
 {{ super() }}
 {% endblock imports %}
 

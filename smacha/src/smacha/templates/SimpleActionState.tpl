@@ -45,7 +45,7 @@ outcomes:
   - preempted
 {% endblock meta %}
 
-{% from "Utils.tpl" import render_goal_slots, render_input_keys, render_result_slots, render_output_keys, render_transitions, render_remapping %}
+{% from "Utils.tpl" import from_import, render_goal_slots, render_input_keys, render_result_slots, render_output_keys, render_transitions, render_remapping %}
 
 {% include "State.tpl" %}
 
@@ -53,10 +53,7 @@ outcomes:
 {% endblock base_header %}
 
 {% block imports %}
-{% if 'actionlib_import' not in defined_headers %}
-from actionlib import *
-{% do defined_headers.append('actionlib_import') %}
-{% endif %}
+{{ from_import(defined_headers, 'actionlib', '*') }}
 {% endblock imports %}
 
 {% block defs %}
