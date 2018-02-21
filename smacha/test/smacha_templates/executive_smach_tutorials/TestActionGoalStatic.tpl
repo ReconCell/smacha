@@ -1,14 +1,10 @@
 {% extends "SimpleActionState.tpl" %}
 
+{% from "Utils.tpl" import from_import %}
+
 {% block imports %}
-{% if 'smacha_msg_import_TestAction' not in defined_headers %}
-from smacha.msg import TestAction
-{% do defined_headers.append('smacha_msg_import_TestAction') %}
-{% endif %}
-{% if 'smacha_msg_import_TestGoal' not in defined_headers %}
-from smacha.msg import TestGoal
-{% do defined_headers.append('smacha_msg_import_TestGoal') %}
-{% endif %}
+{{ from_import(defined_headers, 'smacha.msg', 'TestAction') }}
+{{ from_import(defined_headers, 'smacha.msg', 'TestGoal') }}
 {{ super() }}
 {% endblock imports %}
 

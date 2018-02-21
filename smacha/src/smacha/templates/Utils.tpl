@@ -75,28 +75,37 @@ output_keys: []
 {{ '' | indent(indent+11, true) }}{% endif %}{% endfor %}{{ '}' }}{% endmacro %}
 
 #
-# Macro for importing std_msg types.
+# Macro for importing a module.
 #
-{% macro import_std_msg(defined_headers, type) %}
-{% if 'std_msgs_msg_import_' + type not in defined_headers %}
-from std_msgs.msg import {{ type }}
-{% do defined_headers.append('std_msgs_msg_import_' + type) %}
+{% macro import_module(defined_headers, module) %}
+{% if 'import_' + module not in defined_headers %}
+import {{ module }}
+{% do defined_headers.append('import_' + module) %}
 {% endif %}{% endmacro %}
 
 #
-# Macro for importing geometry_msg types.
+# Macro for importing a module and renaming it as something else.
 #
-{% macro import_geometry_msg(defined_headers, type) %}
-{% if 'geometry_msgs_msg_import_' + type not in defined_headers %}
-from geometry_msgs.msg import {{ type }}
-{% do defined_headers.append('geometry_msgs_msg_import_' + type) %}
+{% macro import_module_as(defined_headers, module, new_name) %}
+{% if 'import_' + module + '_as_' + new_name not in defined_headers %}
+import {{ module }} as {{ new_name }}
+{% do defined_headers.append('import_' + module + '_as_' + new_name) %}
 {% endif %}{% endmacro %}
 
 #
-# Macro for importing sensor_msg types.
+# Macro for importing a name from a module.
 #
-{% macro import_sensor_msg(defined_headers, type) %}
-{% if 'sensor_msgs_msg_import_' + type not in defined_headers %}
-from sensor_msgs.msg import {{ type }}
-{% do defined_headers.append('sensor_msgs_msg_import_' + type) %}
+{% macro from_import(defined_headers, module, name) %}
+{% if 'from_' + module + '_import_' + name not in defined_headers %}
+from {{ module }} import {{ name }}
+{% do defined_headers.append('from_' + module + '_import_' + name) %}
+{% endif %}{% endmacro %}
+
+#
+# Macro for importing a name from a module and renaming it as something else.
+#
+{% macro from_import_as(defined_headers, module, name, new_name) %}
+{% if 'from_' + module + '_import_' + name + '_as_' + new_name not in defined_headers %}
+from {{ module }} import {{ name }} as {{ new_name }}
+{% do defined_headers.append('from_' + module + '_import_' + name + '_as_' + new_name) %}
 {% endif %}{% endmacro %}
