@@ -331,8 +331,6 @@ class Parser():
         """
         Convert a sequence of states in a script to a container state.
 
-        NOTE: Currently only works for the 'StateMachine' container type!
-
         INPUTS:
             script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
             container_name: A name for the container (str).
@@ -659,8 +657,6 @@ class Parser():
     def extract(self, script, container_state, sub_script_filename=None):
         """
         Extract a container state from a script and export to sub-script and super-script
-
-        NOTE: Currently only works for the 'StateMachine' container type!
 
         INPUTS:
             script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
