@@ -201,12 +201,37 @@ class Templater():
             template_list: A list of names of templates.
         """
         # Compile regular expression to match all templates with '.tpl' extension
-        regex = re.compile('(.+)\.tpl$')
+        regex = re.compile('(.+)\.tpl(\.\w+)?$')
         
         # Find templates matching the regex
         template_list = self._template_env.list_templates(filter_func = lambda template_name: re.search(regex, template_name))
 
         return template_list
+
+    def find_template_name(self, regex, template_env = None):
+        """
+        Find a template name in the available template list using a regular expression.
+
+        INPUTS:
+            regex: A regular expression used to search the list of templates (str).
+            template_env: Optionally specify the template environment. Defaults to
+                          current template_env member object. (jinja2.environment)
+
+        RETURNS:
+            template_name: The first template name found or an empty string if no template is found. (str)
+        """
+        # Select template_env
+        if not template_env:
+            template_env = self._template_env
+
+        # Find templates matching the regex
+        template_list = template_env.list_templates(filter_func = lambda template_name: re.search(regex, template_name))
+
+        # Select the first match
+        if template_list:
+            return template_list[0]
+        else:
+            return ''
 
     def render(self, template_name, template_vars):
         """
@@ -247,50 +272,14 @@ class Templater():
         template_env.filters['exptostr'] = exptostr
 
         # Read the state template file into a template object using the environment object
-        template = template_env.select_template([template_name, template_name + '.tpl'])
+        found_template_name = self.find_template_name(template_name + '\.tpl(\.\w+)?$', template_env=template_env)
+        template = template_env.select_template([template_name, found_template_name])
         
         # Render code
         code = template.render(**template_vars) 
         
         return code
 
-    def render_all(self, state_name, template_vars):
-        """
-        Render all code templates for a given state.
-
-        NOTE: This is an OLD method and not currently used in SMACHA.
-
-        This function searches for all templates with file names beginning
-        with state_name and possibly proceeded by an underscore followed by a stub name,
-        e.g. MyState.jinja, MyState_header.jinja, MyState_footer.jinja,
-        renders them all, and returns the rendered code in a dict with 'body' + stub names
-        as keys, e.g. {'body': <body>, 'header': <header>, 'footer': <footer>}.
-
-        INPUTS:
-            state_name: The name of the state to be rendered (str).
-            template_vars: The template variables (dict).
-
-        RETURNS:
-            template_code: The rendered template code (str).
-        """
-        # Compile regular expression to match all templates for the given state_name
-        regex = re.compile(state_name + '_(.+)\.tpl')
-        
-        # Find templates matching the regex
-        template_list = self._template_env.list_templates(filter_func = lambda template_name: re.match(regex, template_name))
-        
-        # Create a dict of {template types : template names} from the template names
-        # (where template_type = template name stub: the template name without state name and without file extension)
-        template_dict = {regex.match(template_name).group(1) : template_name for template_name in template_list}
-        
-        # Render template code for each of the templates
-        template_code = {t_type : self.render(t_name, template_vars) for t_type, t_name in template_dict.items()}
-        
-        # Include the main body template, which does not get matched by the above.
-        template_code['body'] = self.render(state_name, template_vars)
-        
-        return template_code
-    
     def render_block(self, template_name, template_vars, target_block):
         """
         Render specific block from code template.
@@ -304,7 +293,8 @@ class Templater():
             block_code: The rendered template block code (str).
         """
         # Read the state template file into a template object using the environment object
-        template = self._template_env.select_template([template_name, template_name + '.tpl'])
+        found_template_name = self.find_template_name(template_name + '\.tpl(\.\w+)?$')
+        template = self._template_env.select_template([template_name, found_template_name])
 
         # For reasons not entirely clear, a temporary environment must be created
         # to make this work.
@@ -341,7 +331,8 @@ class Templater():
        
         # Select the template from the temporary environment with
         # the appropriate skip_blocks list for non-target blocks
-        target_block_template = template_env.select_template([template_name, template_name + '.tpl'])
+        found_template_name = self.find_template_name(template_name + '\.tpl(\.\w+)?$', template_env=template_env)
+        target_block_template = template_env.select_template([template_name, found_template_name])
         
         # Render code for remaining block
         #
@@ -370,7 +361,8 @@ class Templater():
             template_block_code: The rendered code for each template block (dict).
         """
         # Read the state template file into a template object using the environment object
-        template = self._template_env.select_template([template_name, template_name + '.tpl'])
+        found_template_name = self.find_template_name(template_name + '\.tpl(\.\w+)?$')
+        template = self._template_env.select_template([template_name, found_template_name])
 
         # Render template code for each of the template blocks (all except the meta block)
         template_block_code = {block : self.render_block(template_name, template_vars, block) for block, _ in template.blocks.items() if block != 'meta'}
@@ -388,7 +380,8 @@ class Templater():
             meta_block_code: The rendered code for the template meta block (str).
         """
         # Read the state template file into a template object using the environment object
-        template = self._template_env.select_template([template_name, template_name + '.tpl'])
+        found_template_name = self.find_template_name(template_name + '\.tpl(\.\w+)?$')
+        template = self._template_env.select_template([template_name, found_template_name])
 
         # Generate a context placeholder
         context = template.new_context
@@ -410,7 +403,8 @@ class Templater():
             template_vars: The variables defined in the template (dict).
         """
         # Read the state template file into a template object using the environment object
-        template = self._template_env.select_template([template_name, template_name + '.tpl'])
+        found_template_name = self.find_template_name(template_name + '\.tpl(\.\w+)?$')
+        template = self._template_env.select_template([template_name, found_template_name])
 
         # Use Jinja2's module functionality to grab the template variables and create a dict comprehension
         if context is not None:
