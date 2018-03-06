@@ -6,6 +6,7 @@ import argparse
 import smacha
 import yaml as pyyaml
 import os
+import re
 
 class SMACHAServer():
 
@@ -77,7 +78,7 @@ class SMACHAServer():
             try:
                 # Add the meta block to the param server
                 if meta_block:
-                    template_name = os.path.splitext(template)[0]
+                    template_name = re.match(r'(.+?)\.', template).group(1)
                     rospy.loginfo('Adding {} template meta data to param server.'.format(template_name))
                     rospy.set_param('smacha/templates/' + template_name + '/meta/', meta_block)
                     self._template_params.append('smacha/templates/' + template_name)
