@@ -51,7 +51,7 @@ class SMACHAServer():
             try:
                 meta_block = self._templater.render_meta_block(template)
             except Exception as e:
-                rospy.logwarn('Error when rendering meta block in template %s: %s', template, str(e))
+                rospy.logwarn('Error when rendering meta block in template %s: %s', template, repr(e))
 
             # Parse the meta block
             #
@@ -82,7 +82,7 @@ class SMACHAServer():
                     rospy.set_param('smacha/templates/' + template_name + '/meta/', meta_block)
                     self._template_params.append('smacha/templates/' + template_name)
             except Exception as e:
-                rospy.logwarn('Error loading meta block in template %s into param server: %s', template, str(e))
+                rospy.logwarn('Error loading meta block in template %s into param server: %s', template, repr(e))
 
         rospy.on_shutdown(self._cleanup)
     
@@ -111,8 +111,20 @@ class SMACHAServer():
 
                 # Generate the SMACH code
                 smach_code = self._generator.run(script_str)
-            except Exception as e:
-                rospy.logerr('Error when processing generate request: %s', str(e))
+            except:
+                # Try treating the script as a parameter containing
+                # a script string that must be parsed
+                try:
+                    # Get the script from the param server
+                    script = rospy.get_param(req.script)
+
+                    # Parse the script string
+                    script_str = self._parser.parse(script)
+                
+                    # Generate the SMACH code
+                    smach_code = self._generator.run(script_str)
+                except Exception as e:
+                    rospy.logerr('Error when processing generate request: %s', repr(e))
     
         return GenerateResponse(smach_code)
     
@@ -140,8 +152,23 @@ class SMACHAServer():
 
                 # Convert to string
                 contained_script_str = self._parser.dump(contained_script)
-            except Exception as e:
-                rospy.logerr('Error when processing contain request: %s', str(e))
+            except:
+                # Try treating the script as a parameter containing
+                # a script string that must be parsed
+                try:
+                    # Get the script from the param server
+                    script = rospy.get_param(req.script)
+                
+                    # Parse the script string
+                    script_str = self._parser.parse(script)
+                
+                    # Generate the SMACH code
+                    contained_script = self._parser.contain(script_str, req.container_name, req.container_type, req.states)
+
+                    # Convert to string
+                    contained_script_str = self._parser.dump(contained_script)
+                except Exception as e:
+                    rospy.logerr('Error when processing contain request: %s', repr(e))
 
         return ContainResponse(contained_script_str)
     
@@ -171,8 +198,24 @@ class SMACHAServer():
                 # Convert to string
                 sub_script_str = self._parser.dump(sub_script)
                 super_script_str = self._parser.dump(super_script)
-            except Exception as e:
-                rospy.logerr('Error when processing extract request: %s', str(e))
+            except:
+                # Try treating the script as a parameter containing
+                # a script string that must be parsed
+                try:
+                    # Get the script from the param server
+                    script = rospy.get_param(req.script)
+                
+                    # Parse the script string
+                    script_str = self._parser.parse(script)
+
+                    # Generate the SMACH code
+                    sub_script, super_script = self._parser.extract(script_str, req.state)
+
+                    # Convert to string
+                    sub_script_str = self._parser.dump(sub_script)
+                    super_script_str = self._parser.dump(super_script)
+                except Exception as e:
+                    rospy.logerr('Error when processing extract request: %s', repr(e))
 
         return ExtractResponse(sub_script_str, super_script_str)
     
