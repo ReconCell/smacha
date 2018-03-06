@@ -57,6 +57,11 @@ output_keys: []
 {% macro render_response_slots(response_slots, indent=51) %}{{ 'response_slots = ' | indent(indent, true) }}[{% for response_slot in response_slots %}'{{ response_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
 
 #
+# Macro for rendering 'callbacks' dicts in state instantiations.
+#
+{% macro render_callbacks(callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}{{ '{' }}{% for cb_key, cb_val in callbacks.items() %}'{{ cb_key }}': {% if cb_val is expression %}{{ cb_val | exptostr }}{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }}{% endmacro %}
+
+#
 # Macro for rendering 'outcome_map' in state instantiations.
 #
 {% macro render_outcome_map(outcome_map, indent=35) %}{{ 'outcome_map=' | indent(indent, true) }}{{ '{' }}{% for outcome_map_key, outcome_map_val in outcome_map.items() | sort %}{% if outcome_map_val is mapping %}'{{ outcome_map_key }}': {{ '{' }} {% for outcome_map_sub_key, outcome_map_sub_val in outcome_map_val.items() | sort %}'{{ outcome_map_sub_key }}': '{{ outcome_map_sub_val }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }}{% else %}'{{ outcome_map_key }}': '{{ outcome_map_val }}'{% endif %}{% if not loop.last %},
