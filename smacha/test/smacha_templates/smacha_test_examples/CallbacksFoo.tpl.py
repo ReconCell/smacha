@@ -1,4 +1,4 @@
-{% from "Utils.tpl" import render_transitions, render_remapping, render_input_keys, render_output_keys, render_init_callbacks, render_execute_callbacks, render_callbacks %}
+{% from "Utils.tpl" import render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks %}
 
 {% block defs %}
 {% if 'foo_animals_cb' not in defined_headers %}
@@ -22,20 +22,7 @@ def foo_numbers_cb(userdata):
 {% do defined_headers.append('foo_numbers_cb') %}{% endif %}
 
 {% if callbacks is defined %}
-{% for cb_output_key, cb in callbacks.iteritems() %}
-{% if cb is expression %}
-{% set cb_name = name|lower + '_' + cb_output_key|lower + '_lambda_cb' %}
-{% if cb_name not in defined_headers %}
-@smach.cb_interface(input_keys={{ input_keys }}, 
-                    output_keys=['{{ cb_output_key }}'],
-                    outcomes=['succeeded'])
-def {{ cb_name }}(userdata):
-    lambda_cb = {{ cb | exptostr }}
-    userdata['{{ cb_output_key }}'] = lambda_cb(userdata)
-    return 'succeeded'
-{% do defined_headers.append(cb_name) %}{% endif %}
-{% endif %}
-{% endfor %}
+{{ render_def_lambda_callbacks(defined_headers, name, input_keys, callbacks) }}
 {% endif %}
 {% endblock defs %}
 

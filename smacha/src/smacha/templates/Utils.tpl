@@ -57,11 +57,24 @@ output_keys: []
 {% macro render_response_slots(response_slots, indent=51) %}{{ 'response_slots = ' | indent(indent, true) }}[{% for response_slot in response_slots %}'{{ response_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
 
 #
-# Macro for rendering 'callbacks' dicts in state instantiations.
+# Macro for rendering 'callbacks' lambda callback definitions.
 #
-# {% macro render_callbacks(callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}{{ '{' }}{% for cb_key, cb_val in callbacks.items() %}'{{ cb_key }}': {% if cb_val is expression %}{{ cb_val | exptostr }}{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }}{% endmacro %}
-
-{% macro render_callbacks(name, callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}[{% for cb_key, cb_val in callbacks.items() %}{% if cb_val is expression %}'{{ name|lower + '_' + cb_key|lower + '_lambda_cb' }}'{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
+{% macro render_def_lambda_callbacks(defined_headers, name, input_keys, callbacks) %}
+{% for cb_output_key, cb in callbacks.iteritems() %}
+{% if cb is expression %}
+{% set cb_name = name|lower + '_' + cb_output_key|lower + '_lambda_cb' %}
+{% if cb_name not in defined_headers %}
+@smach.cb_interface(input_keys={{ input_keys }}, 
+                    output_keys=['{{ cb_output_key }}'],
+                    outcomes=['succeeded'])
+def {{ cb_name }}(userdata):
+    lambda_cb = {{ cb | exptostr }}
+    userdata['{{ cb_output_key }}'] = lambda_cb(userdata)
+    return 'succeeded'
+{% do defined_headers.append(cb_name) %}{% endif %}
+{% endif %}
+{% endfor %}
+{% endmacro %}
 
 #
 # Macro for rendering 'callbacks' initialization in state class __init__() methods.
@@ -99,6 +112,14 @@ output_keys: []
             # Call callback with limited userdata
             cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 {% endmacro %}
+
+#
+# Macro for rendering 'callbacks' dicts in state instantiations.
+#
+# {% macro render_callbacks(callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}{{ '{' }}{% for cb_key, cb_val in callbacks.items() %}'{{ cb_key }}': {% if cb_val is expression %}{{ cb_val | exptostr }}{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }}{% endmacro %}
+
+{% macro render_callbacks(name, callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}[{% for cb_key, cb_val in callbacks.items() %}{% if cb_val is expression %}'{{ name|lower + '_' + cb_key|lower + '_lambda_cb' }}'{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
+
 
 #
 # Macro for rendering 'outcome_map' in state instantiations.
