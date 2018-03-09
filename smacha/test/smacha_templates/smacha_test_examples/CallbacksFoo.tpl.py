@@ -1,4 +1,4 @@
-{% from "Utils.tpl" import render_transitions, render_remapping, render_input_keys, render_output_keys, render_callbacks %}
+{% from "Utils.tpl" import render_transitions, render_remapping, render_input_keys, render_output_keys, render_init_callbacks, render_callbacks %}
 
 {% block defs %}
 {% if 'foo_animals_cb' not in defined_headers %}
@@ -47,24 +47,7 @@ class Foo(smach.State):
 
         self._name = name
         
-        self._cbs = []
-        for cb in callbacks:
-            if cb in globals():
-                self._cbs.append(globals()[cb])
-
-        self._cb_input_keys = []
-        self._cb_output_keys = []
-        self._cb_outcomes = []
-
-        for cb in self._cbs:
-            if cb and smach.has_smach_interface(cb):
-                self._cb_input_keys.append(cb.get_registered_input_keys())
-                self._cb_output_keys.append(cb.get_registered_output_keys())
-                self._cb_outcomes.append(cb.get_registered_outcomes())
-
-                self.register_input_keys(self._cb_input_keys[-1])
-                self.register_output_keys(self._cb_output_keys[-1])
-                self.register_outcomes(self._cb_outcomes[-1])
+        {{ render_init_callbacks() }}
         
     def execute(self, userdata):
         for input_key in self._input_keys:

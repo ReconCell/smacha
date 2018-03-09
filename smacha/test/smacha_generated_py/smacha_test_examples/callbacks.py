@@ -69,6 +69,7 @@ class Foo(smach.State):
 
         self._name = name
         
+        
         self._cbs = []
         for cb in callbacks:
             if cb in globals():
@@ -87,6 +88,7 @@ class Foo(smach.State):
                 self.register_input_keys(self._cb_input_keys[-1])
                 self.register_output_keys(self._cb_output_keys[-1])
                 self.register_outcomes(self._cb_outcomes[-1])
+
         
     def execute(self, userdata):
         for input_key in self._input_keys:

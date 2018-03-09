@@ -64,6 +64,30 @@ output_keys: []
 {% macro render_callbacks(name, callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}[{% for cb_key, cb_val in callbacks.items() %}{% if cb_val is expression %}'{{ name|lower + '_' + cb_key|lower + '_lambda_cb' }}'{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
 
 #
+# Macro for rendering 'callbacks' initialization in state class __init__ methods.
+#
+{% macro render_init_callbacks() %}
+        self._cbs = []
+        for cb in callbacks:
+            if cb in globals():
+                self._cbs.append(globals()[cb])
+
+        self._cb_input_keys = []
+        self._cb_output_keys = []
+        self._cb_outcomes = []
+
+        for cb in self._cbs:
+            if cb and smach.has_smach_interface(cb):
+                self._cb_input_keys.append(cb.get_registered_input_keys())
+                self._cb_output_keys.append(cb.get_registered_output_keys())
+                self._cb_outcomes.append(cb.get_registered_outcomes())
+
+                self.register_input_keys(self._cb_input_keys[-1])
+                self.register_output_keys(self._cb_output_keys[-1])
+                self.register_outcomes(self._cb_outcomes[-1])
+{% endmacro %}
+
+#
 # Macro for rendering 'outcome_map' in state instantiations.
 #
 {% macro render_outcome_map(outcome_map, indent=35) %}{{ 'outcome_map=' | indent(indent, true) }}{{ '{' }}{% for outcome_map_key, outcome_map_val in outcome_map.items() | sort %}{% if outcome_map_val is mapping %}'{{ outcome_map_key }}': {{ '{' }} {% for outcome_map_sub_key, outcome_map_sub_val in outcome_map_val.items() | sort %}'{{ outcome_map_sub_key }}': '{{ outcome_map_sub_val }}'{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }}{% else %}'{{ outcome_map_key }}': '{{ outcome_map_val }}'{% endif %}{% if not loop.last %},
