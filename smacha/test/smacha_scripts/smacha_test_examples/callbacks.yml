@@ -1,0 +1,48 @@
+--- # SMACHA callbacks example
+name: sm
+template: Base
+manifest: smacha
+node_name: smacha_callbacks_test
+outcomes: [final_outcome]
+userdata: {animals: [cats, dogs, sharks], numbers: [1, 2, 3]}
+states:
+  - FOO_0:
+      template: CallbacksFoo
+      input_keys: [animals]
+      output_keys: [animals]
+      callbacks: {animals: animals_cb}
+      transitions: {succeeded: FOO_1}
+  - FOO_1:
+      template: CallbacksFoo
+      input_keys: [animals]
+      output_keys: [animals]
+      callbacks: {animals: "`lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals`"}
+      transitions: {succeeded: FOO_2}
+  - FOO_2:
+      template: CallbacksFoo
+      input_keys: [numbers]
+      output_keys: [numbers]
+      callbacks: {numbers: numbers_cb}
+      transitions: {succeeded: FOO_3}
+  - FOO_3:
+      template: CallbacksFoo
+      input_keys: [numbers]
+      output_keys: [numbers]
+      callbacks: {numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers`"}
+      transitions: {succeeded: FOO_4}
+  - FOO_4:
+      template: CallbacksFoo
+      input_keys: [animals, numbers]
+      output_keys: [animals, numbers]
+      callbacks:
+        animals: animals_cb
+        numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers`"
+      transitions: {succeeded: FOO_5}
+  - FOO_5:
+      template: CallbacksFoo
+      input_keys: [animals, numbers]
+      output_keys: [animals, numbers]
+      callbacks:
+        animals: "`lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals`"
+        numbers: numbers_cb
+      transitions: {succeeded: final_outcome}
