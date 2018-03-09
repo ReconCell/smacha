@@ -59,7 +59,9 @@ output_keys: []
 #
 # Macro for rendering 'callbacks' dicts in state instantiations.
 #
-{% macro render_callbacks(callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}{{ '{' }}{% for cb_key, cb_val in callbacks.items() %}'{{ cb_key }}': {% if cb_val is expression %}{{ cb_val | exptostr }}{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }}{% endmacro %}
+# {% macro render_callbacks(callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}{{ '{' }}{% for cb_key, cb_val in callbacks.items() %}'{{ cb_key }}': {% if cb_val is expression %}{{ cb_val | exptostr }}{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }}{% endmacro %}
+
+{% macro render_callbacks(name, callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}[{% for cb_key, cb_val in callbacks.items() %}{% if cb_val is expression %}'{{ name|lower + '_' + cb_key|lower + '_lambda_cb' }}'{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
 
 #
 # Macro for rendering 'outcome_map' in state instantiations.
