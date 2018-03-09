@@ -1,4 +1,4 @@
-{% from "Utils.tpl" import render_transitions, render_remapping, render_input_keys, render_output_keys, render_init_callbacks, render_callbacks %}
+{% from "Utils.tpl" import render_transitions, render_remapping, render_input_keys, render_output_keys, render_init_callbacks, render_execute_callbacks, render_callbacks %}
 
 {% block defs %}
 {% if 'foo_animals_cb' not in defined_headers %}
@@ -53,13 +53,7 @@ class Foo(smach.State):
         for input_key in self._input_keys:
             rospy.loginfo('userdata[\'{}\'] BEFORE callback execution: {}'.format(input_key, userdata[input_key]))
 
-        # Call callbacks
-        for (cb, ik, ok) in zip(self._cbs,
-                                self._cb_input_keys,
-                                self._cb_output_keys):
-
-            # Call callback with limited userdata
-            cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+        {{ render_execute_callbacks() }}
 
         for output_key in self._output_keys:
             rospy.loginfo('userdata[\'{}\'] AFTER callback execution: {}'.format(output_key, userdata[output_key]))

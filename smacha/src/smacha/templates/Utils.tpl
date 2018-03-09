@@ -64,7 +64,7 @@ output_keys: []
 {% macro render_callbacks(name, callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}[{% for cb_key, cb_val in callbacks.items() %}{% if cb_val is expression %}'{{ name|lower + '_' + cb_key|lower + '_lambda_cb' }}'{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
 
 #
-# Macro for rendering 'callbacks' initialization in state class __init__ methods.
+# Macro for rendering 'callbacks' initialization in state class __init__() methods.
 #
 {% macro render_init_callbacks() %}
         self._cbs = []
@@ -85,6 +85,19 @@ output_keys: []
                 self.register_input_keys(self._cb_input_keys[-1])
                 self.register_output_keys(self._cb_output_keys[-1])
                 self.register_outcomes(self._cb_outcomes[-1])
+{% endmacro %}
+
+#
+# Macro for rendering 'callbacks' execution in state class execute() methods.
+#
+{% macro render_execute_callbacks() %}
+        # Call callbacks
+        for (cb, ik, ok) in zip(self._cbs,
+                                self._cb_input_keys,
+                                self._cb_output_keys):
+
+            # Call callback with limited userdata
+            cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 {% endmacro %}
 
 #

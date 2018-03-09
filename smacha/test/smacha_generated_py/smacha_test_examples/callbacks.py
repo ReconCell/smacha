@@ -94,6 +94,7 @@ class Foo(smach.State):
         for input_key in self._input_keys:
             rospy.loginfo('userdata[\'{}\'] BEFORE callback execution: {}'.format(input_key, userdata[input_key]))
 
+        
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -101,6 +102,7 @@ class Foo(smach.State):
 
             # Call callback with limited userdata
             cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+
 
         for output_key in self._output_keys:
             rospy.loginfo('userdata[\'{}\'] AFTER callback execution: {}'.format(output_key, userdata[output_key]))
