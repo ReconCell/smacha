@@ -5,6 +5,41 @@ import rospy
 import smach
 import smach_ros
     
+# Define normal callback for 'animals' output key
+@smach.cb_interface(input_keys=['animals'],
+                    output_keys=['animals'],
+                    outcomes=['succeeded'])
+def foo_animals_cb(userdata):
+    userdata['animals'].append('turtles')
+    return 'succeeded'
+
+# Define normal callback for 'numbers' output key
+@smach.cb_interface(input_keys=['numbers'],
+                    output_keys=['numbers'],
+                    outcomes=['succeeded'])
+def foo_numbers_cb(userdata):
+    userdata['numbers'].append(userdata['numbers'][-1]+1)
+    return 'succeeded'
+
+
+# Define lambda callback for 'animals' output key 
+@smach.cb_interface(input_keys=['animals', 'numbers'], 
+                    output_keys=['animals'],
+                    outcomes=['succeeded'])
+def foo_animals_lambda_1_cb(userdata):
+    lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
+    userdata['animals'] = lambda_cb(userdata)
+    return 'succeeded'
+
+# Define lambda callback for 'numbers' output key
+@smach.cb_interface(input_keys=['animals', 'numbers'], 
+                    output_keys=['numbers'],
+                    outcomes=['succeeded'])
+def foo_numbers_lambda_1_cb(userdata):
+    lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers
+    userdata['numbers'] = lambda_cb(userdata)
+    return 'succeeded'
+
 
 class Foo(smach.State):
     def __init__(self, name, input_keys=None, output_keys=None, callbacks=None):
@@ -12,52 +47,10 @@ class Foo(smach.State):
 
         self._name = name
   
-        # Dynamically define normal callback for 'animals' output key
-        if 'animals' in self._input_keys and 'animals' in self._output_keys:
-            print('State {}: Dynamically defining normal callback for \'animals\' output key...'.format(name))
-            @smach.cb_interface(input_keys=['animals'],
-                                output_keys=['animals'],
-                                outcomes=['succeeded'])
-            def animals_cb(userdata):
-                userdata['animals'].append('turtles')
-                return 'succeeded'
-
-        # Dynamically define lambda callback for 'animals' output key 
-        if 'animals' in self._output_keys:
-            print('State {}: Dynamically defining lambda callback for \'animals\' output key...'.format(name))
-            @smach.cb_interface(input_keys=self._input_keys, 
-                                output_keys=['animals'],
-                                outcomes=['succeeded'])
-            def animals_lambda_cb(userdata):
-                lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
-                userdata['animals'] = lambda_cb(userdata)
-                return 'succeeded'
-        
-        # Dynamically define normal callback for 'numbers' output key
-        if 'numbers' in self._input_keys and 'numbers' in self._output_keys:
-            print('State {}: Dynamically defining normal callback for \'numbers\' output key...'.format(name))
-            @smach.cb_interface(input_keys=['numbers'],
-                                output_keys=['numbers'],
-                                outcomes=['succeeded'])
-            def numbers_cb(userdata):
-                userdata['numbers'].append(userdata['numbers'][-1]+1)
-                return 'succeeded'
-
-        # Dynamically define lambda callback for 'numbers' output key
-        if 'numbers' in self._output_keys:
-            print('State {}: Dynamically defining lambda callback for \'numbers\' output key...'.format(name))
-            @smach.cb_interface(input_keys=self._input_keys, 
-                                output_keys=['numbers'],
-                                outcomes=['succeeded'])
-            def numbers_lambda_cb(userdata):
-                lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers
-                userdata['numbers'] = lambda_cb(userdata)
-                return 'succeeded'
-
         self._cbs = []
         for cb in callbacks:
-            if cb in locals():
-                self._cbs.append(locals()[cb])
+            if cb in globals():
+                self._cbs.append(globals()[cb])
 
         self._cb_input_keys = []
         self._cb_output_keys = []
@@ -102,27 +95,27 @@ def main():
     with sm_top:
 
         smach.StateMachine.add('FOO_0', Foo('FOO_0', input_keys=['animals'], output_keys=['animals'],
-                                                     callbacks=['animals_cb']), 
+                                                     callbacks=['foo_animals_cb']), 
                                transitions={'succeeded':'FOO_1'})
         
         smach.StateMachine.add('FOO_1', Foo('FOO_1', input_keys=['animals'], output_keys=['animals'],
-                                                     callbacks=['animals_lambda_cb']), 
+                                                     callbacks=['foo_animals_lambda_1_cb']), 
                                transitions={'succeeded':'FOO_2'})
         
         smach.StateMachine.add('FOO_2', Foo('FOO_2', input_keys=['numbers'], output_keys=['numbers'],
-                                                     callbacks=['numbers_cb']), 
+                                                     callbacks=['foo_numbers_cb']), 
                                transitions={'succeeded':'FOO_3'})
         
         smach.StateMachine.add('FOO_3', Foo('FOO_3', input_keys=['numbers'], output_keys=['numbers'],
-                                                     callbacks=['numbers_lambda_cb']), 
+                                                     callbacks=['foo_numbers_lambda_1_cb']), 
                                transitions={'succeeded':'FOO_4'})
         
         smach.StateMachine.add('FOO_4', Foo('FOO_4', input_keys=['animals', 'numbers'], output_keys=['animals', 'numbers'],
-                                                     callbacks=['animals_cb', 'numbers_lambda_cb']), 
+                                                     callbacks=['foo_animals_cb', 'foo_numbers_lambda_1_cb']), 
                                transitions={'succeeded':'FOO_5'})
         
         smach.StateMachine.add('FOO_5', Foo('FOO_5', input_keys=['animals', 'numbers'], output_keys=['animals', 'numbers'],
-                                                     callbacks=['animals_lambda_cb', 'numbers_cb']), 
+                                                     callbacks=['foo_animals_lambda_1_cb', 'foo_numbers_cb']), 
                                transitions={'succeeded':'final_outcome'})
 
     outcome = sm_top.execute()
