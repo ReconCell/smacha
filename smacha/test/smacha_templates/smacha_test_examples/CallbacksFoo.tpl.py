@@ -1,4 +1,8 @@
-{% from "Utils.tpl" import render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks %}
+{% from "Utils.tpl" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks %}
+
+{% block imports %}
+{{ import_module(defined_headers, 'random') }}
+{% endblock imports %}
 
 {% block defs %}
 {% if 'foo_animals_cb' not in defined_headers %}
@@ -29,7 +33,7 @@ def foo_numbers_cb(userdata):
 {% block class_defs %}
 {% if 'class_foo' not in defined_headers %}
 class Foo(smach.State):
-    def __init__(self, name, input_keys=None, output_keys=None, callbacks=None):
+    def __init__(self, name, input_keys=[], output_keys=[], callbacks=[]):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
 
         self._name = name
@@ -38,12 +42,12 @@ class Foo(smach.State):
         
     def execute(self, userdata):
         for input_key in self._input_keys:
-            rospy.loginfo('userdata[\'{}\'] BEFORE callback execution: {}'.format(input_key, userdata[input_key]))
+            rospy.loginfo('Userdata input key \'{}\' BEFORE callback execution: {}'.format(input_key, userdata[input_key]))
 
         {{ render_execute_callbacks() }}
 
-        for output_key in self._output_keys:
-            rospy.loginfo('userdata[\'{}\'] AFTER callback execution: {}'.format(output_key, userdata[output_key]))
+        for input_key in self._input_keys:
+            rospy.loginfo('Userdata input key \'{}\' AFTER callback execution: {}'.format(input_key, userdata[input_key]))
 
         return 'succeeded'
 {% do defined_headers.append('class_foo') %}{% endif %}

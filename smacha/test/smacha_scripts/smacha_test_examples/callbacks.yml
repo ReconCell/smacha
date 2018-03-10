@@ -45,4 +45,16 @@ states:
       callbacks:
         animals: "`lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals`"
         numbers: foo_numbers_cb
+      transitions: {succeeded: FOO_6}
+  - FOO_6:
+      template: CallbacksFoo
+      output_keys: [random_number]
+      callbacks:
+        random_number: "`lambda ud: random.random()`"
+      transitions: {succeeded: FOO_7}
+  - FOO_7:
+      template: CallbacksFoo
+      input_keys: [numbers,random_number]
+      output_keys: [numbers]
+      callbacks: {numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.random_number) else ud.numbers`"}
       transitions: {succeeded: final_outcome}

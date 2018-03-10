@@ -64,7 +64,7 @@ output_keys: []
 {% if cb is expression %}
 {% set cb_name = name|lower + '_' + cb_output_key|lower + '_lambda_cb' %}
 {% if cb_name not in defined_headers %}
-@smach.cb_interface(input_keys={{ input_keys }}, 
+@smach.cb_interface(input_keys=[{% for input_key in input_keys %}'{{ input_key }}'{% if not loop.last %}, {% endif %}{% endfor %}], 
                     output_keys=['{{ cb_output_key }}'],
                     outcomes=['succeeded'])
 def {{ cb_name }}(userdata):
@@ -81,7 +81,7 @@ def {{ cb_name }}(userdata):
 #
 {% macro render_init_callbacks() %}
         self._cbs = []
-        for cb in callbacks:
+        for cb in sorted(callbacks):
             if cb in globals():
                 self._cbs.append(globals()[cb])
 

@@ -7,7 +7,7 @@ import roslib; roslib.load_manifest('smacha')
 import rospy
 import smach
 import smach_ros
-
+import random
 
 
 
@@ -61,17 +61,33 @@ def foo_5_animals_lambda_cb(userdata):
     userdata['animals'] = lambda_cb(userdata)
     return 'succeeded'
 
+@smach.cb_interface(input_keys=[], 
+                    output_keys=['random_number'],
+                    outcomes=['succeeded'])
+def foo_6_random_number_lambda_cb(userdata):
+    lambda_cb = lambda ud: random.random()
+    userdata['random_number'] = lambda_cb(userdata)
+    return 'succeeded'
+
+@smach.cb_interface(input_keys=['numbers', 'random_number'], 
+                    output_keys=['numbers'],
+                    outcomes=['succeeded'])
+def foo_7_numbers_lambda_cb(userdata):
+    lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.random_number) else ud.numbers
+    userdata['numbers'] = lambda_cb(userdata)
+    return 'succeeded'
+
 
 
 class Foo(smach.State):
-    def __init__(self, name, input_keys=None, output_keys=None, callbacks=None):
+    def __init__(self, name, input_keys=[], output_keys=[], callbacks=[]):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
 
         self._name = name
         
         
         self._cbs = []
-        for cb in callbacks:
+        for cb in sorted(callbacks):
             if cb in globals():
                 self._cbs.append(globals()[cb])
 
@@ -92,7 +108,7 @@ class Foo(smach.State):
         
     def execute(self, userdata):
         for input_key in self._input_keys:
-            rospy.loginfo('userdata[\'{}\'] BEFORE callback execution: {}'.format(input_key, userdata[input_key]))
+            rospy.loginfo('Userdata input key \'{}\' BEFORE callback execution: {}'.format(input_key, userdata[input_key]))
 
         
         # Call callbacks
@@ -104,8 +120,8 @@ class Foo(smach.State):
             cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
 
-        for output_key in self._output_keys:
-            rospy.loginfo('userdata[\'{}\'] AFTER callback execution: {}'.format(output_key, userdata[output_key]))
+        for input_key in self._input_keys:
+            rospy.loginfo('Userdata input key \'{}\' AFTER callback execution: {}'.format(input_key, userdata[input_key]))
 
         return 'succeeded'
 
@@ -123,32 +139,37 @@ def main():
     sm = smach.StateMachine(outcomes=['final_outcome'])
 
 
-
+    
     sm.userdata.animals = ['cats', 'dogs', 'sharks']
-
+    
     sm.userdata.numbers = [1, 2, 3]
-
-
+    
 
 
     with sm:
 
         smach.StateMachine.add('FOO_0', Foo('FOO_0', input_keys = ['animals'], output_keys = ['animals'], callbacks = ['foo_animals_cb']), 
                                transitions={'succeeded':'FOO_1'})
-
+        
         smach.StateMachine.add('FOO_1', Foo('FOO_1', input_keys = ['animals'], output_keys = ['animals'], callbacks = ['foo_1_animals_lambda_cb']), 
                                transitions={'succeeded':'FOO_2'})
-
+        
         smach.StateMachine.add('FOO_2', Foo('FOO_2', input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['foo_numbers_cb']), 
                                transitions={'succeeded':'FOO_3'})
-
+        
         smach.StateMachine.add('FOO_3', Foo('FOO_3', input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['foo_3_numbers_lambda_cb']), 
                                transitions={'succeeded':'FOO_4'})
-
+        
         smach.StateMachine.add('FOO_4', Foo('FOO_4', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['foo_animals_cb', 'foo_4_numbers_lambda_cb']), 
                                transitions={'succeeded':'FOO_5'})
-
+        
         smach.StateMachine.add('FOO_5', Foo('FOO_5', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['foo_5_animals_lambda_cb', 'foo_numbers_cb']), 
+                               transitions={'succeeded':'FOO_6'})
+        
+        smach.StateMachine.add('FOO_6', Foo('FOO_6', output_keys = ['random_number'], callbacks = ['foo_6_random_number_lambda_cb']), 
+                               transitions={'succeeded':'FOO_7'})
+        
+        smach.StateMachine.add('FOO_7', Foo('FOO_7', input_keys = ['numbers', 'random_number'], output_keys = ['numbers'], callbacks = ['foo_7_numbers_lambda_cb']), 
                                transitions={'succeeded':'final_outcome'})
 
 
