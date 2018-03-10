@@ -32,7 +32,7 @@ def foo_numbers_cb(userdata):
 @smach.cb_interface(input_keys=['animals'], 
                     output_keys=['animals'],
                     outcomes=['succeeded'])
-def foo_1_animals_lambda_cb(userdata):
+def animals_foo_1_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
     userdata['animals'] = lambda_cb(userdata)
     return 'succeeded'
@@ -40,7 +40,7 @@ def foo_1_animals_lambda_cb(userdata):
 @smach.cb_interface(input_keys=['numbers'], 
                     output_keys=['numbers'],
                     outcomes=['succeeded'])
-def foo_3_numbers_lambda_cb(userdata):
+def numbers_foo_3_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers
     userdata['numbers'] = lambda_cb(userdata)
     return 'succeeded'
@@ -48,7 +48,7 @@ def foo_3_numbers_lambda_cb(userdata):
 @smach.cb_interface(input_keys=['animals', 'numbers'], 
                     output_keys=['numbers'],
                     outcomes=['succeeded'])
-def foo_4_numbers_lambda_cb(userdata):
+def numbers_foo_4_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers
     userdata['numbers'] = lambda_cb(userdata)
     return 'succeeded'
@@ -56,7 +56,7 @@ def foo_4_numbers_lambda_cb(userdata):
 @smach.cb_interface(input_keys=['animals', 'numbers'], 
                     output_keys=['animals'],
                     outcomes=['succeeded'])
-def foo_5_animals_lambda_cb(userdata):
+def animals_foo_5_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
     userdata['animals'] = lambda_cb(userdata)
     return 'succeeded'
@@ -64,7 +64,7 @@ def foo_5_animals_lambda_cb(userdata):
 @smach.cb_interface(input_keys=[], 
                     output_keys=['random_number'],
                     outcomes=['succeeded'])
-def foo_6_random_number_lambda_cb(userdata):
+def random_number_foo_6_lambda_cb(userdata):
     lambda_cb = lambda ud: random.random()
     userdata['random_number'] = lambda_cb(userdata)
     return 'succeeded'
@@ -72,7 +72,7 @@ def foo_6_random_number_lambda_cb(userdata):
 @smach.cb_interface(input_keys=['numbers', 'random_number'], 
                     output_keys=['numbers'],
                     outcomes=['succeeded'])
-def foo_7_numbers_lambda_cb(userdata):
+def numbers_foo_7_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.random_number) else ud.numbers
     userdata['numbers'] = lambda_cb(userdata)
     return 'succeeded'
@@ -151,25 +151,25 @@ def main():
         smach.StateMachine.add('FOO_0', Foo('FOO_0', input_keys = ['animals'], output_keys = ['animals'], callbacks = ['foo_animals_cb']), 
                                transitions={'succeeded':'FOO_1'})
         
-        smach.StateMachine.add('FOO_1', Foo('FOO_1', input_keys = ['animals'], output_keys = ['animals'], callbacks = ['foo_1_animals_lambda_cb']), 
+        smach.StateMachine.add('FOO_1', Foo('FOO_1', input_keys = ['animals'], output_keys = ['animals'], callbacks = ['animals_foo_1_lambda_cb']), 
                                transitions={'succeeded':'FOO_2'})
         
         smach.StateMachine.add('FOO_2', Foo('FOO_2', input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['foo_numbers_cb']), 
                                transitions={'succeeded':'FOO_3'})
         
-        smach.StateMachine.add('FOO_3', Foo('FOO_3', input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['foo_3_numbers_lambda_cb']), 
+        smach.StateMachine.add('FOO_3', Foo('FOO_3', input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['numbers_foo_3_lambda_cb']), 
                                transitions={'succeeded':'FOO_4'})
         
-        smach.StateMachine.add('FOO_4', Foo('FOO_4', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['foo_animals_cb', 'foo_4_numbers_lambda_cb']), 
+        smach.StateMachine.add('FOO_4', Foo('FOO_4', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['foo_animals_cb', 'numbers_foo_4_lambda_cb']), 
                                transitions={'succeeded':'FOO_5'})
         
-        smach.StateMachine.add('FOO_5', Foo('FOO_5', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['foo_5_animals_lambda_cb', 'foo_numbers_cb']), 
+        smach.StateMachine.add('FOO_5', Foo('FOO_5', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['animals_foo_5_lambda_cb', 'foo_numbers_cb']), 
                                transitions={'succeeded':'FOO_6'})
         
-        smach.StateMachine.add('FOO_6', Foo('FOO_6', output_keys = ['random_number'], callbacks = ['foo_6_random_number_lambda_cb']), 
+        smach.StateMachine.add('FOO_6', Foo('FOO_6', output_keys = ['random_number'], callbacks = ['random_number_foo_6_lambda_cb']), 
                                transitions={'succeeded':'FOO_7'})
         
-        smach.StateMachine.add('FOO_7', Foo('FOO_7', input_keys = ['numbers', 'random_number'], output_keys = ['numbers'], callbacks = ['foo_7_numbers_lambda_cb']), 
+        smach.StateMachine.add('FOO_7', Foo('FOO_7', input_keys = ['numbers', 'random_number'], output_keys = ['numbers'], callbacks = ['numbers_foo_7_lambda_cb']), 
                                transitions={'succeeded':'final_outcome'})
 
 
