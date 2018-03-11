@@ -34,7 +34,7 @@ def foo_numbers_cb(userdata):
                     outcomes=['succeeded'])
 def animals_foo_1_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
-    userdata['animals'] = lambda_cb(userdata)
+    userdata.animals = lambda_cb(userdata)
     return 'succeeded'
 
 @smach.cb_interface(input_keys=['numbers'], 
@@ -42,7 +42,7 @@ def animals_foo_1_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def numbers_foo_3_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers
-    userdata['numbers'] = lambda_cb(userdata)
+    userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
 @smach.cb_interface(input_keys=['animals', 'numbers'], 
@@ -50,7 +50,7 @@ def numbers_foo_3_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def numbers_foo_4_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers
-    userdata['numbers'] = lambda_cb(userdata)
+    userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
 @smach.cb_interface(input_keys=['animals', 'numbers'], 
@@ -58,7 +58,7 @@ def numbers_foo_4_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def animals_foo_5_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
-    userdata['animals'] = lambda_cb(userdata)
+    userdata.animals = lambda_cb(userdata)
     return 'succeeded'
 
 @smach.cb_interface(input_keys=[], 
@@ -66,7 +66,7 @@ def animals_foo_5_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def random_number_foo_6_lambda_cb(userdata):
     lambda_cb = lambda ud: random.random()
-    userdata['random_number'] = lambda_cb(userdata)
+    userdata.random_number = lambda_cb(userdata)
     return 'succeeded'
 
 @smach.cb_interface(input_keys=['numbers', 'random_number'], 
@@ -74,7 +74,7 @@ def random_number_foo_6_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def numbers_foo_7_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.random_number) else ud.numbers
-    userdata['numbers'] = lambda_cb(userdata)
+    userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
 @smach.cb_interface(input_keys=[], 
@@ -82,7 +82,7 @@ def numbers_foo_7_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def random_number_1_foo_8_lambda_cb(userdata):
     lambda_cb = lambda ud: random.random()
-    userdata['random_number_1'] = lambda_cb(userdata)
+    userdata.random_number_1 = lambda_cb(userdata)
     return 'succeeded'
 
 
@@ -95,7 +95,7 @@ def random_number_1_foo_8_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def random_number_2_foo_8_lambda_cb(userdata):
     lambda_cb = lambda ud: random.random()
-    userdata['random_number_2'] = lambda_cb(userdata)
+    userdata.random_number_2 = lambda_cb(userdata)
     return 'succeeded'
 
 @smach.cb_interface(input_keys=['numbers', 'number'], 
@@ -103,7 +103,7 @@ def random_number_2_foo_8_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def numbers_foo_9_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.number) else ud.numbers
-    userdata['numbers'] = lambda_cb(userdata)
+    userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
 @smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
@@ -111,7 +111,7 @@ def numbers_foo_9_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def a_random_number_1_foo_10_lambda_cb(userdata):
     lambda_cb = lambda ud: random.random()
-    userdata['a_random_number_1'] = lambda_cb(userdata)
+    userdata.a_random_number_1 = lambda_cb(userdata)
     return 'succeeded'
 
 
@@ -124,7 +124,7 @@ def a_random_number_1_foo_10_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def a_random_number_2_foo_10_lambda_cb(userdata):
     lambda_cb = lambda ud: random.random()
-    userdata['a_random_number_2'] = lambda_cb(userdata)
+    userdata.a_random_number_2 = lambda_cb(userdata)
     return 'succeeded'
 
 
@@ -137,7 +137,7 @@ def a_random_number_2_foo_10_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def b_random_number_sum_foo_10_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.a_random_number_1 + ud.a_random_number_2
-    userdata['b_random_number_sum'] = lambda_cb(userdata)
+    userdata.b_random_number_sum = lambda_cb(userdata)
     return 'succeeded'
 
 
@@ -150,7 +150,7 @@ def b_random_number_sum_foo_10_lambda_cb(userdata):
                     outcomes=['succeeded'])
 def numbers_foo_10_lambda_cb(userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.b_random_number_sum) else ud.numbers
-    userdata['numbers'] = lambda_cb(userdata)
+    userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
 
@@ -255,17 +255,17 @@ def main():
 
 
     
-    sm.userdata['animals'] = ['cats', 'dogs', 'sharks']
+    sm.userdata.animals = ['cats', 'dogs', 'sharks']
     
-    sm.userdata['numbers'] = [1, 2, 3]
+    sm.userdata.numbers = [1, 2, 3]
     
-    sm.userdata['number'] = 123
+    sm.userdata.number = 123
     
-    sm.userdata['a_random_number_1'] = 0
+    sm.userdata.a_random_number_1 = 0
     
-    sm.userdata['a_random_number_2'] = 0
+    sm.userdata.a_random_number_2 = 0
     
-    sm.userdata['b_random_number_sum'] = 0
+    sm.userdata.b_random_number_sum = 0
 
     with sm:
 

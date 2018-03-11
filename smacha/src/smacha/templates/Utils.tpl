@@ -17,7 +17,7 @@ output_keys: []
 #
 {% macro render_userdata(namespace, userdata) %}
 {% for userdatum_key, userdatum_val in userdata.items() | sort %}
-{{ namespace | lower() }}.userdata['{{ userdatum_key | lower() }}'] = {% if userdatum_val is not_string %}{{ userdatum_val }}{% else %}'{{ userdatum_val }}'{% endif %}
+{{ namespace | lower() }}.userdata.{{ userdatum_key | lower() }} = {% if userdatum_val is not_string %}{{ userdatum_val }}{% else %}'{{ userdatum_val }}'{% endif %}
 {% endfor %}
 {% endmacro %}
 
@@ -69,7 +69,7 @@ output_keys: []
                     outcomes=['succeeded'])
 def {{ cb_name }}(userdata):
     lambda_cb = {{ cb | exptostr }}
-    userdata['{{ cb_output_key }}'] = lambda_cb(userdata)
+    userdata.{{ cb_output_key }} = lambda_cb(userdata)
     return 'succeeded'
 {% do defined_headers.append(cb_name) %}{% endif %}
 {% endif %}

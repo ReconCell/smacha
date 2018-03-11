@@ -171,6 +171,16 @@ class TestTools(Tester):
                                             output_file = 'seq_concurrence_3_contain_output.yml')
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    
+    def test_callbacks(self):
+        """Test callbacks.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(base_path, 'smacha_test_examples/callbacks.py')) as original_file:
+            generated_code = self._generate(os.path.join(base_path, 'smacha_scripts/smacha_test_examples/callbacks.yml'),
+                                            [os.path.join(base_path, 'smacha_scripts/smacha_test_examples')],
+                                            [os.path.join(base_path, 'smacha_templates/smacha_test_examples')])
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
 if __name__=="__main__":
     
