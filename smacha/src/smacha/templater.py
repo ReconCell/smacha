@@ -200,8 +200,9 @@ class Templater():
         RETURNS:
             template_list: A list of names of templates.
         """
-        # Compile regular expression to match all templates with '.tpl' extension
-        regex = re.compile('(.+)\.tpl(\.\w+)?$')
+        # Compile regular expression to match all templates with '.tpl' extension,
+        # while avoiding hidden files (files preceded with a full-stop, e.g. .MyTemplate.py.tpl.swp)
+        regex = re.compile(r'(^[^\.].*)\.tpl(\.\w+)?$')
         
         # Find templates matching the regex
         template_list = self._template_env.list_templates(filter_func = lambda template_name: re.search(regex, template_name))

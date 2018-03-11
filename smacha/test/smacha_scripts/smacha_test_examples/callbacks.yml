@@ -1,0 +1,84 @@
+--- # SMACHA callbacks example
+name: sm
+template: Base
+manifest: smacha
+node_name: smacha_callbacks_test
+outcomes: [final_outcome]
+userdata: {animals: [cats, dogs, sharks], numbers: [1, 2, 3]} 
+states:
+  - FOO_0:
+      template: CallbacksFoo
+      input_keys: [animals]
+      output_keys: [animals]
+      callbacks: {animals: foo_animals_cb}
+      transitions: {succeeded: FOO_1}
+  - FOO_1:
+      template: CallbacksState
+      input_keys: [animals]
+      output_keys: [animals]
+      callbacks: {animals: "`lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals`"}
+      transitions: {succeeded: FOO_2}
+  - FOO_2:
+      template: CallbacksFoo
+      input_keys: [numbers]
+      output_keys: [numbers]
+      callbacks: {numbers: foo_numbers_cb}
+      transitions: {succeeded: FOO_3}
+  - FOO_3:
+      template: CallbacksState
+      input_keys: [numbers]
+      output_keys: [numbers]
+      callbacks: {numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers`"}
+      transitions: {succeeded: FOO_4}
+  - FOO_4:
+      template: CallbacksFoo
+      input_keys: [animals, numbers]
+      output_keys: [animals, numbers]
+      callbacks:
+        animals: foo_animals_cb
+        numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers`"
+      transitions: {succeeded: FOO_5}
+  - FOO_5:
+      template: CallbacksFoo
+      input_keys: [animals, numbers]
+      output_keys: [animals, numbers]
+      callbacks:
+        animals: "`lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals`"
+        numbers: foo_numbers_cb
+      transitions: {succeeded: FOO_6}
+  - FOO_6:
+      template: CallbacksState
+      output_keys: [random_number]
+      callbacks: {random_number: "`lambda ud: random.random()`"}
+      transitions: {succeeded: FOO_7}
+  - FOO_7:
+      template: CallbacksFoo
+      input_keys: [numbers,random_number]
+      output_keys: [numbers]
+      callbacks: {numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.random_number) else ud.numbers`"}
+      transitions: {succeeded: FOO_8}
+  - FOO_8:
+      template: CallbacksFoo
+      output_keys: [random_number_1, random_number_2]
+      callbacks:
+        random_number_1: "`lambda ud: random.random()`"
+        random_number_2: "`lambda ud: random.random()`"
+      transitions: {succeeded: FOO_9}
+  - FOO_9:
+      template: CallbacksFoo
+      userdata: {number: 123}
+      input_keys: [numbers, number]
+      output_keys: [numbers]
+      callbacks: {numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.number) else ud.numbers`"}
+      transitions: {succeeded: FOO_10}
+  - FOO_10:
+      template: CallbacksFoo
+      userdata: {a_random_number_1: 0, a_random_number_2: 0, b_random_number_sum: 0}
+      input_keys: [numbers, a_random_number_1, a_random_number_2, b_random_number_sum]
+      output_keys: [numbers, a_random_number_1, a_random_number_2, b_random_number_sum]
+      callbacks:
+        a_random_number_1: "`lambda ud: random.random()`"
+        a_random_number_2: "`lambda ud: random.random()`"
+        b_random_number_sum: "`lambda ud: ud.a_random_number_1 + ud.a_random_number_2`"
+        numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.b_random_number_sum) else ud.numbers`"
+      transitions: {succeeded: final_outcome}
