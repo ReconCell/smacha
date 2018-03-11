@@ -13,7 +13,7 @@ states:
       callbacks: {animals: foo_animals_cb}
       transitions: {succeeded: FOO_1}
   - FOO_1:
-      template: CallbacksFoo
+      template: CallbacksState
       input_keys: [animals]
       output_keys: [animals]
       callbacks: {animals: "`lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals`"}
@@ -25,7 +25,7 @@ states:
       callbacks: {numbers: foo_numbers_cb}
       transitions: {succeeded: FOO_3}
   - FOO_3:
-      template: CallbacksFoo
+      template: CallbacksState
       input_keys: [numbers]
       output_keys: [numbers]
       callbacks: {numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers`"}

@@ -106,7 +106,7 @@ def numbers_foo_9_lambda_cb(userdata):
     userdata['numbers'] = lambda_cb(userdata)
     return 'succeeded'
 
-@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2'], 
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['a_random_number_1'],
                     outcomes=['succeeded'])
 def a_random_number_1_foo_10_lambda_cb(userdata):
@@ -119,7 +119,7 @@ def a_random_number_1_foo_10_lambda_cb(userdata):
 
 
 
-@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2'], 
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['a_random_number_2'],
                     outcomes=['succeeded'])
 def a_random_number_2_foo_10_lambda_cb(userdata):
@@ -132,7 +132,7 @@ def a_random_number_2_foo_10_lambda_cb(userdata):
 
 
 
-@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2'], 
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['b_random_number_sum'],
                     outcomes=['succeeded'])
 def b_random_number_sum_foo_10_lambda_cb(userdata):
@@ -145,7 +145,7 @@ def b_random_number_sum_foo_10_lambda_cb(userdata):
 
 
 
-@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2'], 
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['numbers'],
                     outcomes=['succeeded'])
 def numbers_foo_10_lambda_cb(userdata):
@@ -201,6 +201,45 @@ class Foo(smach.State):
 
         return 'succeeded'
 
+class CallbacksState(smach.State):
+    def __init__(self, input_keys = [], output_keys = [], callbacks = []):
+        smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
+
+        
+        self._cbs = []
+        for cb in sorted(callbacks):
+            if cb in globals():
+                self._cbs.append(globals()[cb])
+
+        self._cb_input_keys = []
+        self._cb_output_keys = []
+        self._cb_outcomes = []
+
+        for cb in self._cbs:
+            if cb and smach.has_smach_interface(cb):
+                self._cb_input_keys.append(cb.get_registered_input_keys())
+                self._cb_output_keys.append(cb.get_registered_output_keys())
+                self._cb_outcomes.append(cb.get_registered_outcomes())
+
+                self.register_input_keys(self._cb_input_keys[-1])
+                self.register_output_keys(self._cb_output_keys[-1])
+                self.register_outcomes(self._cb_outcomes[-1])
+
+    
+    def execute(self, userdata):
+        
+        
+        # Call callbacks
+        for (cb, ik, ok) in zip(self._cbs,
+                                self._cb_input_keys,
+                                self._cb_output_keys):
+
+            # Call callback with limited userdata
+            cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+
+        
+        return 'succeeded'
+
 
 
 
@@ -225,19 +264,23 @@ def main():
     sm.userdata['a_random_number_1'] = 0
     
     sm.userdata['a_random_number_2'] = 0
+    
+    sm.userdata['b_random_number_sum'] = 0
 
     with sm:
 
         smach.StateMachine.add('FOO_0', Foo('FOO_0', input_keys = ['animals'], output_keys = ['animals'], callbacks = ['foo_animals_cb']), 
                                transitions={'succeeded':'FOO_1'})
         
-        smach.StateMachine.add('FOO_1', Foo('FOO_1', input_keys = ['animals'], output_keys = ['animals'], callbacks = ['animals_foo_1_lambda_cb']), 
+        smach.StateMachine.add('FOO_1',
+                                       CallbacksState(input_keys = ['animals'], output_keys = ['animals'], callbacks = ['animals_foo_1_lambda_cb']),
                                transitions={'succeeded':'FOO_2'})
         
         smach.StateMachine.add('FOO_2', Foo('FOO_2', input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['foo_numbers_cb']), 
                                transitions={'succeeded':'FOO_3'})
         
-        smach.StateMachine.add('FOO_3', Foo('FOO_3', input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['numbers_foo_3_lambda_cb']), 
+        smach.StateMachine.add('FOO_3',
+                                       CallbacksState(input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['numbers_foo_3_lambda_cb']),
                                transitions={'succeeded':'FOO_4'})
         
         smach.StateMachine.add('FOO_4', Foo('FOO_4', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['foo_animals_cb', 'numbers_foo_4_lambda_cb']), 
@@ -258,7 +301,7 @@ def main():
         smach.StateMachine.add('FOO_9', Foo('FOO_9', input_keys = ['numbers', 'number'], output_keys = ['numbers'], callbacks = ['numbers_foo_9_lambda_cb']), 
                                transitions={'succeeded':'FOO_10'})
         
-        smach.StateMachine.add('FOO_10', Foo('FOO_10', input_keys = ['numbers', 'a_random_number_1', 'a_random_number_2'], output_keys = ['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], callbacks = ['a_random_number_1_foo_10_lambda_cb', 'a_random_number_2_foo_10_lambda_cb', 'b_random_number_sum_foo_10_lambda_cb', 'numbers_foo_10_lambda_cb']), 
+        smach.StateMachine.add('FOO_10', Foo('FOO_10', input_keys = ['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], output_keys = ['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], callbacks = ['a_random_number_1_foo_10_lambda_cb', 'a_random_number_2_foo_10_lambda_cb', 'b_random_number_sum_foo_10_lambda_cb', 'numbers_foo_10_lambda_cb']), 
                                transitions={'succeeded':'final_outcome'})
 
 
