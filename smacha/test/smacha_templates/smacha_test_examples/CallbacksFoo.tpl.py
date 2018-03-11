@@ -1,5 +1,7 @@
 {% from "Utils.tpl" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks %}
 
+{% include "State.tpl" %}
+
 {% block imports %}
 {{ import_module(defined_headers, 'random') }}
 {% endblock imports %}
@@ -52,6 +54,9 @@ class Foo(smach.State):
         return 'succeeded'
 {% do defined_headers.append('class_foo') %}{% endif %}
 {% endblock class_defs %}
+
+{% block header %}
+{% endblock header %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}', Foo('{{ name }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, callbacks, indent=0) }}{% endif %}){% if transitions is defined %}, 

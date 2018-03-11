@@ -77,6 +77,82 @@ def numbers_foo_7_lambda_cb(userdata):
     userdata['numbers'] = lambda_cb(userdata)
     return 'succeeded'
 
+@smach.cb_interface(input_keys=[], 
+                    output_keys=['random_number_1'],
+                    outcomes=['succeeded'])
+def random_number_1_foo_8_lambda_cb(userdata):
+    lambda_cb = lambda ud: random.random()
+    userdata['random_number_1'] = lambda_cb(userdata)
+    return 'succeeded'
+
+
+
+
+
+
+@smach.cb_interface(input_keys=[], 
+                    output_keys=['random_number_2'],
+                    outcomes=['succeeded'])
+def random_number_2_foo_8_lambda_cb(userdata):
+    lambda_cb = lambda ud: random.random()
+    userdata['random_number_2'] = lambda_cb(userdata)
+    return 'succeeded'
+
+@smach.cb_interface(input_keys=['numbers', 'number'], 
+                    output_keys=['numbers'],
+                    outcomes=['succeeded'])
+def numbers_foo_9_lambda_cb(userdata):
+    lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.number) else ud.numbers
+    userdata['numbers'] = lambda_cb(userdata)
+    return 'succeeded'
+
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2'], 
+                    output_keys=['a_random_number_1'],
+                    outcomes=['succeeded'])
+def a_random_number_1_foo_10_lambda_cb(userdata):
+    lambda_cb = lambda ud: random.random()
+    userdata['a_random_number_1'] = lambda_cb(userdata)
+    return 'succeeded'
+
+
+
+
+
+
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2'], 
+                    output_keys=['a_random_number_2'],
+                    outcomes=['succeeded'])
+def a_random_number_2_foo_10_lambda_cb(userdata):
+    lambda_cb = lambda ud: random.random()
+    userdata['a_random_number_2'] = lambda_cb(userdata)
+    return 'succeeded'
+
+
+
+
+
+
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2'], 
+                    output_keys=['b_random_number_sum'],
+                    outcomes=['succeeded'])
+def b_random_number_sum_foo_10_lambda_cb(userdata):
+    lambda_cb = lambda ud: ud.a_random_number_1 + ud.a_random_number_2
+    userdata['b_random_number_sum'] = lambda_cb(userdata)
+    return 'succeeded'
+
+
+
+
+
+
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2'], 
+                    output_keys=['numbers'],
+                    outcomes=['succeeded'])
+def numbers_foo_10_lambda_cb(userdata):
+    lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.b_random_number_sum) else ud.numbers
+    userdata['numbers'] = lambda_cb(userdata)
+    return 'succeeded'
+
 
 
 class Foo(smach.State):
@@ -140,11 +216,15 @@ def main():
 
 
     
-    sm.userdata.animals = ['cats', 'dogs', 'sharks']
+    sm.userdata['animals'] = ['cats', 'dogs', 'sharks']
     
-    sm.userdata.numbers = [1, 2, 3]
+    sm.userdata['numbers'] = [1, 2, 3]
     
-
+    sm.userdata['number'] = 123
+    
+    sm.userdata['a_random_number_1'] = 0
+    
+    sm.userdata['a_random_number_2'] = 0
 
     with sm:
 
@@ -170,6 +250,15 @@ def main():
                                transitions={'succeeded':'FOO_7'})
         
         smach.StateMachine.add('FOO_7', Foo('FOO_7', input_keys = ['numbers', 'random_number'], output_keys = ['numbers'], callbacks = ['numbers_foo_7_lambda_cb']), 
+                               transitions={'succeeded':'FOO_8'})
+        
+        smach.StateMachine.add('FOO_8', Foo('FOO_8', output_keys = ['random_number_1', 'random_number_2'], callbacks = ['random_number_1_foo_8_lambda_cb', 'random_number_2_foo_8_lambda_cb']), 
+                               transitions={'succeeded':'FOO_9'})
+        
+        smach.StateMachine.add('FOO_9', Foo('FOO_9', input_keys = ['numbers', 'number'], output_keys = ['numbers'], callbacks = ['numbers_foo_9_lambda_cb']), 
+                               transitions={'succeeded':'FOO_10'})
+        
+        smach.StateMachine.add('FOO_10', Foo('FOO_10', input_keys = ['numbers', 'a_random_number_1', 'a_random_number_2'], output_keys = ['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], callbacks = ['a_random_number_1_foo_10_lambda_cb', 'a_random_number_2_foo_10_lambda_cb', 'b_random_number_sum_foo_10_lambda_cb', 'numbers_foo_10_lambda_cb']), 
                                transitions={'succeeded':'final_outcome'})
 
 

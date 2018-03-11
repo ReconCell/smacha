@@ -17,7 +17,7 @@ output_keys: []
 #
 {% macro render_userdata(namespace, userdata) %}
 {% for userdatum_key, userdatum_val in userdata.items() | sort %}
-{{ namespace | lower() }}.userdata.{{ userdatum_key | lower() }} = {% if userdatum_val is not_string %}{{ userdatum_val }}{% else %}'{{ userdatum_val }}'{% endif %}
+{{ namespace | lower() }}.userdata['{{ userdatum_key | lower() }}'] = {% if userdatum_val is not_string %}{{ userdatum_val }}{% else %}'{{ userdatum_val }}'{% endif %}
 {% endfor %}
 {% endmacro %}
 
