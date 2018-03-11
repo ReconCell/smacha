@@ -32,7 +32,7 @@ class CallbacksState(smach.State):
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
-        {{ '' | indent(23, true) }}CallbacksState({% if input_keys is defined %}{{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
+        {{ '' | indent(23, true) }}CallbacksState({% if input_keys is defined %}{{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}{% if input_keys is defined %}, {% endif %}{{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
 {{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}

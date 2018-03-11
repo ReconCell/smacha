@@ -289,7 +289,8 @@ def main():
         smach.StateMachine.add('FOO_5', Foo('FOO_5', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['animals_foo_5_lambda_cb', 'foo_numbers_cb']), 
                                transitions={'succeeded':'FOO_6'})
         
-        smach.StateMachine.add('FOO_6', Foo('FOO_6', output_keys = ['random_number'], callbacks = ['random_number_foo_6_lambda_cb']), 
+        smach.StateMachine.add('FOO_6',
+                                       CallbacksState(output_keys = ['random_number'], callbacks = ['random_number_foo_6_lambda_cb']),
                                transitions={'succeeded':'FOO_7'})
         
         smach.StateMachine.add('FOO_7', Foo('FOO_7', input_keys = ['numbers', 'random_number'], output_keys = ['numbers'], callbacks = ['numbers_foo_7_lambda_cb']), 
