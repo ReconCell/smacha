@@ -81,6 +81,7 @@ def {{ cb_name }}(userdata):
 #
 {% macro render_init_callbacks() %}
         self._cbs = []
+
         if callbacks:
           for cb in sorted(callbacks):
               if cb in globals():
