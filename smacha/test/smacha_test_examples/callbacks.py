@@ -150,9 +150,11 @@ class Foo(smach.State):
         
         
         self._cbs = []
-        for cb in sorted(callbacks):
-            if cb in globals():
-                self._cbs.append(globals()[cb])
+
+        if callbacks:
+            for cb in sorted(callbacks):
+                if cb in globals():
+                    self._cbs.append(globals()[cb])
 
         self._cb_input_keys = []
         self._cb_output_keys = []
@@ -194,9 +196,11 @@ class CallbacksState(smach.State):
 
         
         self._cbs = []
-        for cb in sorted(callbacks):
-            if cb in globals():
-                self._cbs.append(globals()[cb])
+
+        if callbacks:
+            for cb in sorted(callbacks):
+                if cb in globals():
+                    self._cbs.append(globals()[cb])
 
         self._cb_input_keys = []
         self._cb_output_keys = []
