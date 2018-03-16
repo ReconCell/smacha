@@ -205,7 +205,7 @@ class Templater():
         regex = re.compile(r'(^[^\.].*)\.tpl(\.\w+)?$')
         
         # Find templates matching the regex
-        template_list = self._template_env.list_templates(filter_func = lambda template_name: re.search(regex, template_name))
+        template_list = self._template_env.list_templates(filter_func = lambda template_name: re.match(regex, template_name))
 
         return template_list
 
@@ -226,7 +226,7 @@ class Templater():
             template_env = self._template_env
 
         # Find templates matching the regex
-        template_list = template_env.list_templates(filter_func = lambda template_name: re.search(regex, template_name))
+        template_list = template_env.list_templates(filter_func = lambda template_name: re.match(regex, template_name))
 
         # Select the first match
         if template_list:
