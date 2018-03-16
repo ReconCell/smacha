@@ -596,9 +596,17 @@ class Parser():
         for state in states_buffer:
             if 'remapping' in list(state.items())[0][1]:
                 for var, val in list(state.items())[0][1]['remapping'].items():
-                    # If val appears in the current state's userdata, it is neither an input nor an output key
+                    # If val appears in the current state's userdata, there are a few possibilities.
                     if 'userdata' in list(state.items())[0][1] and val in list(state.items())[0][1]['userdata'].keys():
-                        continue
+                        # It may be a user-declared output key and/or input_key.
+                        if 'output_keys' in list(state.items())[0][1] and val in list(state.items())[0][1]['output_keys']:
+                            output_keys.add(val)
+                        # It may only be a user-declared input key.
+                        elif 'input_keys' in list(state.items())[0][1] and val in list(state.items())[0][1]['input_keys']:
+                            input_keys.add(val)
+                        # It is neither an input nor an output key.
+                        else:
+                            continue
                     # Otherwise, if val appears in the preceding userdata, we assume it must be an input key
                     elif val in preceding_userdata.keys():
                         input_keys.add(val)
