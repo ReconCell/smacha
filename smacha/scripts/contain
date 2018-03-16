@@ -9,7 +9,7 @@ from smacha.exceptions import ParsingError
 
 if __name__ == '__main__':
     # Parse arguments
-    arg_parser = argparse.ArgumentParser(description='SMACHA Contain: Pack a series of states in a script into a' +
+    arg_parser = argparse.ArgumentParser(description='SMACHA Contain: Pack a series of states in a script into a ' +
                                                      'container state and save the resulting script.')
     
     arg_parser.add_argument('script_file',
@@ -39,8 +39,8 @@ if __name__ == '__main__':
     arg_parser.add_argument('-o', '--output',
                             dest='output_file',
                             action='store',
-                            default='./smacha_contain_output.py.',
-                            help='Generated SMACH output (python file).')
+                            default='./smacha_contain_output.yml.',
+                            help='Generated SMACH output (YAML file).')
     
     
     args = arg_parser.parse_args()
