@@ -610,6 +610,9 @@ class Parser():
                     # Otherwise, if val appears in the preceding userdata, we assume it must be an input key
                     elif val in preceding_userdata.keys():
                         input_keys.add(val)
+                    # Otherwise, if it's a user-declared input key, it may be coming in as an output key from another state
+                    elif 'input_keys' in list(state.items())[0][1] and val in list(state.items())[0][1]['input_keys']:
+                        input_keys.add(val)
                     # Otherwise, we assume it's an output key
                     else:
                         output_keys.add(val)
