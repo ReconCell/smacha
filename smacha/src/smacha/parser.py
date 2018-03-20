@@ -610,9 +610,15 @@ class Parser():
                     # Otherwise, if val appears in the preceding userdata, we assume it must be an input key
                     elif val in preceding_userdata.keys():
                         input_keys.add(val)
-                    # Otherwise, if var is a user-declared input key, it may be coming in as an output key from another state
+                    # Otherwise, if var is a user-declared input key...
                     elif 'input_keys' in list(state.items())[0][1] and var in list(state.items())[0][1]['input_keys']:
-                        input_keys.add(val)
+                        # ...it may be coming in as an output key from another state outside of the proposed container,
+                        # in which case, it should not appear in our previously gathered output keys for the container...
+                        if val not in output_keys:
+                            input_keys.add(val)
+                        # Otherwise, it is probably an output key from within the container, so we leave it alone.
+                        else:
+                            pass
                     # Otherwise, we assume it's an output key
                     else:
                         output_keys.add(val)
