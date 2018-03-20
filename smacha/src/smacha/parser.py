@@ -598,11 +598,11 @@ class Parser():
                 for var, val in list(state.items())[0][1]['remapping'].items():
                     # If val appears in the current state's userdata, there are a few possibilities.
                     if 'userdata' in list(state.items())[0][1] and val in list(state.items())[0][1]['userdata'].keys():
-                        # It may be a user-declared output key and/or input_key.
-                        if 'output_keys' in list(state.items())[0][1] and val in list(state.items())[0][1]['output_keys']:
+                        # var may be a user-declared output key and/or input_key.
+                        if 'output_keys' in list(state.items())[0][1] and var in list(state.items())[0][1]['output_keys']:
                             output_keys.add(val)
-                        # It may only be a user-declared input key.
-                        elif 'input_keys' in list(state.items())[0][1] and val in list(state.items())[0][1]['input_keys']:
+                        # var may only be a user-declared input key.
+                        elif 'input_keys' in list(state.items())[0][1] and var in list(state.items())[0][1]['input_keys']:
                             input_keys.add(val)
                         # It is neither an input nor an output key.
                         else:
@@ -610,8 +610,8 @@ class Parser():
                     # Otherwise, if val appears in the preceding userdata, we assume it must be an input key
                     elif val in preceding_userdata.keys():
                         input_keys.add(val)
-                    # Otherwise, if it's a user-declared input key, it may be coming in as an output key from another state
-                    elif 'input_keys' in list(state.items())[0][1] and val in list(state.items())[0][1]['input_keys']:
+                    # Otherwise, if var is a user-declared input key, it may be coming in as an output key from another state
+                    elif 'input_keys' in list(state.items())[0][1] and var in list(state.items())[0][1]['input_keys']:
                         input_keys.add(val)
                     # Otherwise, we assume it's an output key
                     else:
