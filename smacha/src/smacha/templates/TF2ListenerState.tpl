@@ -60,7 +60,7 @@ class TF2ListenerState(smach.State):
         
         # Get source from userdata
         if 'source' in userdata:
-          source = userdata.target
+          source = userdata.source
         else:
           raise ValueError('source should be in userdata!')
 

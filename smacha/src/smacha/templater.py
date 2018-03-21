@@ -87,8 +87,8 @@ def not_string(value):
     call or object instantiation (i.e. contains an expression followed by wrapping
     parentheses, it returns true, otherwise it returns false.
 
-    To force a string, the expression may be wrapped in backslash-escaped single quotes
-    (e.g. \'expression\') in the SMACHA YAML script and the above behaviour will
+    To force a string, the expression may be wrapped in single and double quotes
+    (e.g. "'expression'") in the SMACHA YAML script and the above behaviour will
     be overridden, i.e. this function will return false.
 
     INPUTS:
@@ -114,8 +114,6 @@ def not_string(value):
     elif isinstance(value, str):
         if is_number(value):
             return True
-        elif re.match('\'.*\'', value):
-            return False
         # This one could, and should, be improved:
         elif re.match(r'\D+[.]\D+', value):
             return True
