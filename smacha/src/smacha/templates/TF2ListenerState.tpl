@@ -28,6 +28,7 @@ outcomes:
 {% from "Utils.tpl" import import_module, render_transitions, render_remapping %}
 
 {% include "State.tpl" %}
+{% include "TF2ListenerSingleton.tpl" %}
 
 {% block base_header %}
 {% endblock base_header %}
@@ -48,8 +49,7 @@ class TF2ListenerState(smach.State):
                              input_keys=['target', 'source'],
                              output_keys=['output'])
 
-        self._tf2_buffer = tf2_ros.Buffer()
-        self._tf2_listener = tf2_ros.TransformListener(self._tf2_buffer)
+        self._tf2_buffer, self._tf2_listener = TF2ListenerSingleton.get()
         
     def execute(self, userdata):
         # Get target from userdata
