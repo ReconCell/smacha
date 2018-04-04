@@ -16,7 +16,7 @@ import random
 
 
 class RandomOutcomeState(smach.State):
-    def __init__(self, input_keys = [], output_keys = [], callbacks = [], outcomes=['succeeded']):
+    def __init__(self, input_keys = [], output_keys = ['outcome'], callbacks = [], outcomes=['succeeded']):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
 
         
@@ -52,10 +52,12 @@ class RandomOutcomeState(smach.State):
 
             # Call callback with limited userdata
             cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
-
-
+        
         # Select random outcome
         random_outcome = random.choice(list(self._outcomes))
+            
+        # Set the outcome output key
+        userdata.outcome = random_outcome
         
         return random_outcome
 
