@@ -614,10 +614,14 @@ class Parser():
                 # and update the set of preceding output keys based on the matches.
                 try:
                     assert sub_script_output_keys
-                    if 'remapping' in list(script['states'][i_state].items())[0][1]:
-                        for sub_script_output_key in sub_script_output_keys:
+                    for sub_script_output_key in sub_script_output_keys:
+                        try:
+                            preceding_output_keys.add(script['states'][i_state].items()[0][1]['remapping'][sub_script_output_key])
+                        except:
+                            # If the output key has not been remapped in the calling super-state,
+                            # fall back to the output key name specified by the sub-script.
                             try:
-                                preceding_output_keys.add(script['states'][i_state].items()[0][1]['remapping'][sub_script_output_key])
+                                preceding_output_keys.add(sub_script_output_key)
                             except:
                                 continue
                 except:
