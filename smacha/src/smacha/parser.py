@@ -579,6 +579,7 @@ class Parser():
         # Handle input_keys and output_keys by cross-checking between userdata and remappings
         #
         preceding_userdata = dict()
+        preceding_output_keys = set()
         input_keys = yaml.comments.CommentedSet()
         input_keys.fa.set_flow_style()
         output_keys = yaml.comments.CommentedSet()
@@ -592,6 +593,35 @@ class Parser():
         for i_state in range(0,i_script_container_state):
             if 'userdata' in list(script['states'][i_state].items())[0][1]:
                 preceding_userdata.update(script['states'][i_state].items()[0][1]['userdata'])
+
+        # Collate output keys from preceding states
+        for i_state in range(0,i_script_container_state):
+            # Check if the state has an output_keys field
+            if 'output_keys' in list(script['states'][i_state].items())[0][1]:
+                preceding_output_keys.update(script['states'][i_state].items()[0][1])
+
+            # Check if the state is a sub-script include
+            if 'script' in list(script['states'][i_state].items())[0][1]:
+                sub_script_output_keys = None
+                # If it is, parse the sub-script and look for output keys
+                try:
+                    sub_script = self.parse(script['states'][i_state].items()[0][1].items()[0][1])
+                    sub_script_output_keys = sub_script[0].items()[0][1]['output_keys']
+                except:
+                    pass
+
+                # Match the sub-script output keys to the super-script calling state remapping
+                # and update the set of preceding output keys based on the matches.
+                try:
+                    assert sub_script_output_keys
+                    if 'remapping' in list(script['states'][i_state].items())[0][1]:
+                        for sub_script_output_key in sub_script_output_keys:
+                            try:
+                                preceding_output_keys.add(script['states'][i_state].items()[0][1]['remapping'][sub_script_output_key])
+                            except:
+                                continue
+                except:
+                    pass
 
         for state in states_buffer:
             if 'remapping' in list(state.items())[0][1]:
@@ -629,6 +659,9 @@ class Parser():
                             pass
                     # Otherwise, if val appears in the preceding userdata, we assume it must be an input key
                     elif val in preceding_userdata.keys():
+                        input_keys.add(val)
+                    # Otherwise, if val appears in the preceding output keys, it must be an input key
+                    elif val in preceding_output_keys:
                         input_keys.add(val)
                     # Otherwise, we assume it's an output key
                     else:

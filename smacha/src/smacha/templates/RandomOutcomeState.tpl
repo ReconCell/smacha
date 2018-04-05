@@ -15,7 +15,7 @@
 {% block class_defs %}
 {% if 'class_RandomOutcomeState' not in defined_headers %}
 class RandomOutcomeState(smach.State):
-    def __init__(self, input_keys = [], output_keys = [], callbacks = [], outcomes=['succeeded']):
+    def __init__(self, input_keys = [], output_keys = ['outcome'], callbacks = [], outcomes=['succeeded']):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
 
         {{ render_init_callbacks() }}
@@ -26,6 +26,9 @@ class RandomOutcomeState(smach.State):
 
         # Select random outcome
         random_outcome = random.choice(list(self._outcomes))
+
+        # Set the outcome output key
+        userdata.outcome = random_outcome
         
         return random_outcome
 {% do defined_headers.append('class_RandomOutcomeState') %}{% endif %}
