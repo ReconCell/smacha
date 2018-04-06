@@ -1,4 +1,5 @@
 import smacha
+import uuid
 
 from smacha.util import bcolors
 from smacha.exceptions import ParsingError
@@ -13,25 +14,25 @@ class Generator():
     generating executable code by rendering from templates that they reference.
     """
     def __init__(self, parser, templater, verbose=False,
-                    base_vars =
-                        ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
-                    container_persistent_vars =
-                        ['params'],
-                    sub_script_persistent_vars =
-                        ['userdata', 'remapping', 'transitions'],
-                    buffer_names =
-                        ['base_header', 'imports', 'defs', 'class_defs', 'main_def',
-                         'header', 'body', 'footer', 'execute', 'base_footer', 'main'],
-                    buffer_types =
-                        ['list', 'list', 'list', 'list', 'list',
-                         'dict', 'list', 'list', 'list', 'list', 'list'],
-                    container_insertion_order = 
-                        ['prepend', 'prepend', 'prepend', 'prepend', 'prepend',
-                         'prepend', 'append', 'append', 'append', 'append', 'append'],
-                    buffer_insertion_order =
-                        ['append', 'append', 'append', 'append', 'append',
-                         'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
-                    local_var_lists = ['local_vars']):
+                       base_vars =
+                           ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
+                       container_persistent_vars =
+                           ['params'],
+                       sub_script_persistent_vars =
+                           ['userdata', 'remapping', 'transitions'],
+                       buffer_names =
+                           ['base_header', 'imports', 'defs', 'class_defs', 'main_def',
+                            'header', 'body', 'footer', 'execute', 'base_footer', 'main'],
+                       buffer_types =
+                           ['list', 'list', 'list', 'list', 'list',
+                            'dict', 'list', 'list', 'list', 'list', 'list'],
+                       container_insertion_order = 
+                           ['prepend', 'prepend', 'prepend', 'prepend', 'prepend',
+                            'prepend', 'append', 'append', 'append', 'append', 'append'],
+                       buffer_insertion_order =
+                           ['append', 'append', 'append', 'append', 'append',
+                            'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
+                       local_var_lists = ['local_vars']):
         """
         Constructor.
 
@@ -135,7 +136,7 @@ class Generator():
             else:
                 # Find the state name and variables in the state script
                 state_name, state_vars = list(script.items())[0]
-                        
+                
                 # Add persistent state_vars from parents passed via script_vars to state_vars
                 for persistent_var in self._container_persistent_vars:
                     if persistent_var in script_vars:
@@ -143,7 +144,7 @@ class Generator():
                             state_vars[persistent_var].update(script_vars[persistent_var])
                         else:
                             state_vars[persistent_var] = script_vars[persistent_var]
-
+                        
                 # Try to convert any state_vars lookups or string constructs that might be present.
                 for state_var, state_var_val in state_vars.items():
                     if isinstance(state_var_val, list):
@@ -182,8 +183,9 @@ class Generator():
                             print(bcolors.OKGREEN +
                                   'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
                         
-                        # Create a new dictionary for the state template variables
-                        template_vars = { 'name' : state_name } 
+                        # Create a new dictionary for the state template variables,
+                        # initialized with the state name and uuid.
+                        template_vars = { 'name' : state_name, 'uuid' : uuid.uuid4().hex }
                         
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
@@ -363,8 +365,9 @@ class Generator():
                         if self._verbose:
                             print(bcolors.OKBLUE + 'Processing state \'' + state_name + '\'' + bcolors.ENDC)
                         
-                        # Create a new dictionary for the state template variables
-                        template_vars = { 'name' : state_name } 
+                        # Create a new dictionary for the state template variables,
+                        # initialized with the state name and uuid.
+                        template_vars = { 'name' : state_name, 'uuid' : uuid.uuid4().hex } 
                         
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
