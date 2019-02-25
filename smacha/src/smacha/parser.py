@@ -4,60 +4,57 @@ from ruamel import yaml
 from smacha.exceptions import ScriptNotFoundError
 from smacha.exceptions import ParsingError
 
-
 __all__ = ['Parser']
 
+
 class Parser():
-    """
-    Main SMACHA YAML script parser class.
+    """Main SMACHA YAML script parser class.
 
     The parser uses ruamel.yaml as its main engine for reading, parsing and
     writing YAML files, while also providing methods for interpreting
     SMACHA-specific script constructs.
     """
 
-    def __init__(self, script_dirs=[],
-                 container_persistent_vars =
-                     ['params'],
-                 sub_script_persistent_vars =
-                     ['userdata', 'remapping', 'transitions']):
-        """
-        Constructor.
+    def __init__(self,
+                 script_dirs=[],
+                 container_persistent_vars=['params'],
+                 sub_script_persistent_vars=['userdata', 'remapping',
+                                             'transitions']):
+        """Parser constructor.
 
         Specifies roundtrip processing for ruamel.yaml by default so that
         comments and script structure can be retained.
 
-        INPUTS:
-            script_dirs: A list of directories in which to search for SMACHA scripts.
-            container_persistent_vars: Names of variables that should persist from
-                                       parent to child states (list).
-            sub_script_persistent_vars: Names of variables that should persist from
-                                        sub-script call to sub-script definition.
-
-        RETURNS:
-            N/A.
+        :param script_dirs: A list of directories in which to search for SMACHA
+        scripts.
+        :type script_dirs: :class:`list` of :class:`str`
+        :param container_persistent_vars: Names of variables that should
+        persist from parent to child states (list).
+        :type container_persistent_vars: :class:`list` of :class:`str`
+        :param sub_script_persistent_vars: Names of variables that should
+        persist from sub-script call to sub-script definition.
+        :type sub_script_persistent_vars: :class:`list` of :class:`str`
         """
         self._loader = yaml.RoundTripLoader
         self._dumper = yaml.RoundTripDumper
         self._script_dirs = script_dirs
-        
-        # Initialise a list of names of variables that should persist from parent to child states
+
+        # Initialise a list of names of variables that should persist from
+        # parent to child states
         self._container_persistent_vars = container_persistent_vars
-        
-        # Initialise a list of names of variables that should persist from sub-script call
-        # to sub-script definition.
+
+        # Initialise a list of names of variables that should persist from
+        # sub-script call to sub-script definition.
         self._sub_script_persistent_vars = sub_script_persistent_vars
 
     def load(self, script):
-        """
-        Search for the specified YAML script file and load it.
+        """Search for the specified YAML script file and load it.
 
-        INPUTS:
-            script: Either a file name (str) or a file handle to a SMACHA YAML script.
-
-        RETURNS:
-            contents: The file contents (str).
-            filename: The file name (str).
+        :param script: Either a file name or a file handle to a SMACHA
+        YAML script.
+        :type script: :class:`str` or :class:`file`
+        :return: 2-tuple of the file contents and the file name.
+        :rtype: :class:`tuple` of :class:`str`
         """
         def read_contents(filename):
             """Helper function for reading file content."""
@@ -73,9 +70,9 @@ class Parser():
                 contents = f.read()
             finally:
                 f.close()
-            
+
             return contents
-    
+
         def select_script(names):
             """Helper function that loads the first loadable file in a list."""
             if not names:
@@ -107,14 +104,12 @@ class Parser():
         raise ScriptNotFoundError(script)
 
     def parse(self, script):
-        """
-        Parse YAML script.
+        """Parse YAML script.
 
-        INPUTS:
-            script: Either a file name (str) or script string (bytes).
-
-        RETURNS:
-            parsed_script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap).
+        :param script: Either a script file name or script string.
+        :type script: :class:`str` or :class:`bytes`
+        :return: The parsed YAML script.
+        :rtype: :class:`dict` or :class:`ruamel.yaml.comments.CommentedMap`
         """
         try:
             script_buffer, _ = self.load([script, script + '.yml'])
@@ -128,49 +123,51 @@ class Parser():
         return parsed_script
 
     def dump(self, script, output_file=None):
-        """
-        Dump YAML script to string and (optionally) write to file.
+        """Dump YAML script to string and (optionally) write to file.
 
-        INPUTS:
-            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap).
-            output_file: Script filename (str).
-
-        RETURNS:
-            script_string: The rendered script (str).
+        :param script: The parsed YAML script.
+        :type script: :class:`dict` or
+        :class:`ruamel.yaml.comments.CommentedMap`
+        :return: The rendered script.
+        :rtype: :class:`str`
         """
         if output_file:
             with open(output_file, 'w') as output_file_handle:
                 script_string = yaml.dump(script, output_file_handle,
-                                          Dumper = self._dumper, default_flow_style=False, default_style='', width=1000)
+                                          Dumper=self._dumper,
+                                          default_flow_style=False,
+                                          default_style='', width=1000)
         else:
             script_string = yaml.dump(script, None,
-                                      Dumper = self._dumper, default_flow_style=False, default_style='', width=1000)
+                                      Dumper=self._dumper,
+                                      default_flow_style=False,
+                                      default_style='', width=1000)
 
         return script_string
 
-
     def contains_lookups(self, script, lookup_vars):
-        """
-        Check if a script variable contains variable lookups.
-        
-        Given a script and a list of possible lookup variables, e.g. ['params'],
-        recursively check to see if the script contains any lookups to those variables,
-        e.g. regular lookups like ['params', 'robot'] or string constructs like [['params', 'robot'], '/base'].
+        """Check if a script variable contains variable lookups.
 
-        INPUTS:
-            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
-            lookup_vars: A list of names of possible lookup variables, e.g. ['params'].
+        Given a script and a list of possible lookup variables, e.g.
+        ['params'], recursively check to see if the script contains any lookups
+        to those variables, e.g. regular lookups like ['params', 'robot'] or
+        string constructs like [['params', 'robot'], '/base'].
 
-        RETURNS:
-            True: If script contains lookups.
-            False: Otherwise.
+        :param script: The parsed YAML script.
+        :type script: :class:`dict` or
+        :class:`ruamel.yaml.comments.CommentedMap`
+        :param lookup_vars: A list of names of possible lookup variables, e.g.
+        ['params'].
+        :type lookup_vars: :class:`list` of :class:`str`
+        :return: True if script contains lookups, False otherwise.
+        :rtype: :class:`bool`
         """
         try:
             if isinstance(script, list):
                 try:
-                    if (len(script) == 2 and isinstance(script[0], str) and isinstance(script[1], str) and
-                        script[0] in lookup_vars):
-                            return True
+                    if (len(script) == 2 and isinstance(script[0], str) and
+                        isinstance(script[1], str) and script[0] in lookup_vars):
+                        return True
                     else:
                         raise Exception
                 except:
@@ -196,29 +193,34 @@ class Parser():
             return False
 
     def sub_lookups(self, script, old_key, old_val, new_key, new_val):
-        """
-        Substitute lookup key/value names throughout a script.
+        """Substitute lookup key/value names throughout a script.
 
         Given a script, recursively substitute [old_key, old_val] lookups
         with [new_key, new_val] lookups everywhere.
 
-        NOTE: This method, in its current form, will modify the input script object!
+        NOTE: This method, in its current form, will modify the input script
+        object!
 
-        INPUTS:
-            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
-            old_key: The old_key in [old_key, old_val] lookups (str).
-            old_val: The old_val in [old_key, old_val] lookups (str).
-            new_key: The new_key in [new_key, new_val] lookups (str).
-            new_val: The new_val in [new_key, new_val] lookups (str).
-
-        RETURNS:
-            script: The updated YAML script with substituted lookups.
+        :param script: The parsed YAML script.
+        :type script: :class:`dict` or
+        :class:`ruamel.yaml.comments.CommentedMap`
+        :param old_key: The old_key in [old_key, old_val] lookups.
+        :type old_key: :class:`str`
+        :param old_val: The old_val in [old_key, old_val] lookups.
+        :type old_val: :class:`str`
+        :param new_key: The new_key in [new_key, new_val] lookups.
+        :type new_key: :class:`str`
+        :param new_val: The new_val in [new_key, new_val] lookups.
+        :type new_val: :class:`str`
+        :return: The updated YAML script with substituted lookups.
+        :rtype: :class:`dict` or :class:`ruamel.yaml.comments.CommentedMap`
         """
         try:
             if isinstance(script, list):
                 try:
-                    if (len(script) == 2 and isinstance(script[0], str) and isinstance(script[1], str) and
-                        script[0] == old_key and script[1] == old_val):
+                    if (len(script) == 2 and isinstance(script[0], str) and
+                        isinstance(script[1], str) and script[0] == old_key and
+                        script[1] == old_val):
                         # Perform the substitution
                         script[0] = new_key
                         script[1] = new_val
@@ -227,14 +229,18 @@ class Parser():
                 except:
                     try:
                         for script_val in script:
-                            script_val = self.sub_lookups(script_val, old_key, old_val, new_key, new_val)
+                            script_val = self.sub_lookups(script_val,
+                                                          old_key, old_val,
+                                                          new_key, new_val)
                     except:
                         raise
                 return script
             elif isinstance(script, dict):
                 try:
                     for script_var, script_val in list(script.items()):
-                        script_val = self.sub_lookups(script_val, old_key, old_val, new_key, new_val)
+                        script_val = self.sub_lookups(script_val,
+                                                      old_key, old_val,
+                                                      new_key, new_val)
                         script[script_var] = script_val
                 except:
                     raise
@@ -243,22 +249,21 @@ class Parser():
                 return script
         except:
             raise
-    
+
     def lookup(self, script_vars, query):
-        """
-        Retrieve a variable from script_vars as specified by lookup query.
-    
+        """Retrieve a variable from script_vars as specified by lookup query.
+
         Query should be either a 1 or 2-element list, e.g. ['params', 'robot'],
         in which case a robot name would be retrieved from the 'params'
         entry in 'script_vars'.
 
-        INPUTS:
-            script_vars: Script variables (dict).
-            query: A 1-element or 2-element list of strings.
-        
-        RETURNS:
-            script_vars[query[0]] if query is a 1-element list or
-            script_vars[query[0]][query[1]] if querty is a 2-element list.
+        :param script_vars: Script variables.
+        :type script_vars: :class:`dict`
+        :param query: A 1-element or 2-element list of strings.
+        :type query: :class:`list` of :class:`str`
+        :return: script_vars[query[0]] if query is a 1-element list or
+        script_vars[query[0]][query[1]] if querty is a 2-element list.
+        :rtype: Unknown
         """
         if not isinstance(query, list):
             raise ValueError('Query should be a list!')
@@ -280,37 +285,41 @@ class Parser():
                 return script_vars[query[0]][query[1]]
         else:
             raise ValueError('script_vars query should be a list of length 1 or 2!')
-    
-    
+
     def construct_string(self, script_vars, string_construct):
-        """
-        Construct a string given a list of script_vars lookups (specified as 1 or 2-element lists- see
-        lookup() method) and/or strings.
-        
-        E.g. the string_construct ['/', ['params', 'robot'], '/joint_states']
-        would return an output string '/robot_1/joint_states' if script_vars['params']['robot'] == 'robot_1'
-        and '/robot_2/joint_states' if script_vars['params']['robot'] == 'robot_2'.
-        
-        INPUTS:
-            script_vars: A dictionary of script/state variables.
-            string_construct: A list of either script_vars lookups or strings describing how a string should
-                              be constructed, as demonstrated in the above example.
-        RETURNS:
-            output_string: The constructed string is returned, as long as the string_construct can be parsed
-                           successfully and as long as it contains at least one script_vars lookup.
-            string_construct: If the string_construct can be parsed, but does not contain a lookup,
-                              the original string_construct list is returned as-is. This is done
-                              to avoid confusion with a genuine list.
+        """Construct a string given a list of script_vars lookups.
+
+        List of script_vars lookups is specified as 1 or 2-element lists- see
+        lookup() method) and/or strings, e.g. the string_construct
+        ['/', ['params', 'robot'], '/joint_states'] would return the string
+        '/robot_1/joint_states' if script_vars['params']['robot'] == 'robot_1'
+        and
+        '/robot_2/joint_states' if script_vars['params']['robot'] = 'robot_2'.
+
+        :param script_vars: Script variables.
+        :type script_vars: :class:`dict`
+        :param string_construct: A list of either script_vars lookups or
+        strings describing how a string should be constructed, as demonstrated
+        in the above example.
+        :type string_construct: :class:`list` of :class:`list` or :class:`str`
+        :return: The constructed string is returned, as long as the
+        string_construct can be parsed successfully and as long as it contains
+        at least one script_vars lookup. If the string_construct can be parsed,
+        but does not contain a lookup, the original string_construct list is
+        returned as-is. This is done to avoid confusion with a genuine list.
+        :rtype: :class:`str` or; :class:`list` of :class:`list` or :class:`str`
         """
         output_string = ''
         contains_lookup = False
         if not isinstance(string_construct, list):
             raise ParsingError(error='String construct should be a list!')
-        
+
         for string_part in string_construct:
             if isinstance(string_part, list):
                 try:
-                    output_string = output_string + str(self.lookup(script_vars, string_part))
+                    output_string = (
+                        output_string +
+                        str(self.lookup(script_vars, string_part)))
                     contains_lookup = True
                 except:
                     raise ParsingError(error='Could not parse script_vars lookup in string construct!')
@@ -322,31 +331,37 @@ class Parser():
                 except:
                     raise ParsingError(error='Could not convert string construct part to string!')
 
-        if contains_lookup:    
+        if contains_lookup:
             return output_string
         else:
             return string_construct
-    
-    def contain(self, script, container_name, container_type, states, default_outcome_transition=None):
-        """
-        Convert a sequence of states in a script to a container state.
 
-        INPUTS:
-            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
-            container_name: A name for the container (str).
-            container_type: The container type (str, e.g. 'StateMachine' or 'Concurrence') 
-            states: The sequence of states to be contained (list of str's).
-            default_outcome_transition: The transition for the default_outcome associated with Concurrence containers.
-                                        Set to container_name if None.
+    def contain(self, script, container_name, container_type, states,
+                default_outcome_transition=None):
+        """Convert a sequence of states in a script to a container state.
 
-        RETURNS:
-            script: Parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap) with
-                    the specified states now contained in the container state.
+        :param script: The parsed YAML script.
+        :type script: :class:`dict` or
+        :class:`ruamel.yaml.comments.CommentedMap`
+        :param container_name: A name for the container.
+        :type container_name: :class:`str`
+        :param container_type: The container type (e.g. 'StateMachine' or
+        'Concurrence').
+        :type container_type: :class:`str`
+        :param states: The sequence of states to be contained.
+        :type states: :class:`list` of :class:`str`
+        :param default_outcome_transition: The transition for the
+        default_outcome associated with Concurrence containers. Set to
+        container_name if None.
+        :type default_outcome_transition: :class:`str` or :class:`NoneType`
+        :return: Parsed YAML script with the specified states now contained in
+        the container state.
+        :rtype: :class:`dict`or :class:`ruamel.yaml.comments.CommentedMap`
         """
         #
         # Set defaults
         #
-        default_outcome_transition = container_name 
+        default_outcome_transition = container_name
 
         #
         # Find the list of states to be contained
