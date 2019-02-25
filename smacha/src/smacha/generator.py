@@ -1,64 +1,76 @@
-import smacha
-
 from smacha.util import bcolors
 from smacha.exceptions import ParsingError
 
 __all__ = ['Generator']
 
-class Generator():
-    """
-    Main SMACHA code generator class.
 
-    This class recursively processes the state machines described in SMACHA YAML scripts while
-    generating executable code by rendering from templates that they reference.
+class Generator():
+    """Main SMACHA code generator class.
+
+    This class recursively processes the state machines described in SMACHA
+    YAML scripts while generating executable code by rendering from templates
+    that they reference.
     """
     def __init__(self, parser, templater, verbose=False,
-                    base_vars =
-                        ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
-                    container_persistent_vars =
-                        ['params'],
-                    sub_script_persistent_vars =
-                        ['userdata', 'remapping', 'transitions'],
-                    buffer_names =
-                        ['base_header', 'imports', 'defs', 'class_defs', 'main_def',
-                         'header', 'body', 'footer', 'execute', 'base_footer', 'main'],
-                    buffer_types =
-                        ['list', 'list', 'list', 'list', 'list',
-                         'dict', 'list', 'list', 'list', 'list', 'list'],
-                    container_insertion_order = 
-                        ['prepend', 'prepend', 'prepend', 'prepend', 'prepend',
-                         'prepend', 'append', 'append', 'append', 'append', 'append'],
-                    buffer_insertion_order =
-                        ['append', 'append', 'append', 'append', 'append',
-                         'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
-                    local_var_lists = ['local_vars']):
-        """
-        Constructor.
+                 base_vars=['name', 'manifest', 'function_name',
+                            'node_name', 'outcomes', 'userdata'],
+                 container_persistent_vars=['params'],
+                 sub_script_persistent_vars=['userdata', 'remapping',
+                                             'transitions'],
+                 buffer_names=[
+                     'base_header', 'imports', 'defs', 'class_defs',
+                     'main_def', 'header', 'body', 'footer',
+                     'execute', 'base_footer', 'main'],
+                 buffer_types=[
+                     'list', 'list', 'list', 'list',
+                     'list', 'dict', 'list', 'list',
+                     'list', 'list', 'list'],
+                 container_insertion_order=[
+                     'prepend', 'prepend', 'prepend', 'prepend',
+                     'prepend', 'prepend', 'append', 'append',
+                     'append', 'append', 'append'],
+                 buffer_insertion_order=[
+                     'append', 'append', 'append', 'append',
+                     'append', 'append', 'append', 'prepend',
+                     'prepend', 'prepend', 'prepend'],
+                 local_var_lists=['local_vars']):
+        # TODO: Refactor this parameter mess!
+        """Constructor.
 
-        INPUTS:
-            parser: SMACHA script parser object (smacha.parser).
-            templater: SMACHA templater object (smacha.templater).
-            verbose: A flag to enable verbose output to terminal (bool).
-            base_vars: Names of expected base template variables (list).
-            container_persistent_vars: Names of variables that should persist from
-                                       parent to child states (list).
-            sub_script_persistent_vars: Names of variables that should persist from
-                                        sub-script call to sub-script definition.
-            buffer_names: Names of code buffers (with respective template blocks) to be processed
-                          (n-dim list of strings).
-            buffer_types: Types of code buffers to be processed
-                          (n-dim list of strings ('list' or 'dict')).
-            container_insertion_order: Container buffer insertion order rules
-                                       (n-dim list of strings ('append' or 'prepend')).
-            buffer_insertion_order: Buffer insertion order rules
-                                    (n-dim list of strings ('append' or 'prepend')).
-            local_var_lists: Local variable list names that are intended to contain variable names in templates
-                             that should be non-persistent between states (i.e. local).
-                    
-        RETURNS:
-            N/A.
+        :param parser: SMACHA script parser object.
+        :type parser: :class:`smacha.parser`
+        :param templater: SMACHA templater object.
+        :type templater: :class:`smacha.templater`
+        :param verbose: A flag to enable verbose output to terminal.
+        :type verbose: bool
+        :param base_vars: Names of expected base template variables.
+        :type base_vars: list of str
+        :param container_persistent_vars:
+            Names of variables that should persist from parent to child states.
+        :type container_persistent_vars: list of str
+        :param sub_script_persistent_vars:
+            Names of variables that should persist from sub-script call to
+            sub-script definition.
+        :type sub_script_persistent_vars: list of str
+        :param buffer_names:
+            Names of code buffers (with respective template blocks) to be
+            processed (n-dim list of strings).
+        :param buffer_types:
+            Types of code buffers to be processed ('list' or 'dict').
+        :type buffer_types: list of str
+        :param container_insertion_order:
+            Container buffer insertion order rules ('append' or 'prepend').
+        :type container_insertion_order: list of str
+        :param buffer_insertion_order:
+            Buffer insertion order rules ('append' or 'prepend').
+        :type buffer_insertion_order: list of str
+        :param local_var_lists:
+            Local variable list names that are intended to contain variable
+            names in templates that should be non-persistent between states
+            (i.e. local).
+        :type local_var_lists: list of str
         """
-        # Flag to enable verbose output to terminal 
+        # Flag to enable verbose output to terminal
         self._verbose = verbose
 
         # Handle to the YAML script parser
@@ -69,17 +81,18 @@ class Generator():
 
         # Initialise a list of names of expected base template variables
         self._base_vars = base_vars
-        
-        # Initialise a list of names of variables that should persist from parent to child states
+
+        # Initialise a list of names of variables that should persist from
+        # parent to child states
         self._container_persistent_vars = container_persistent_vars
-        
-        # Initialise a list of names of variables that should persist from sub-script call
-        # to sub-script definition.
+
+        # Initialise a list of names of variables that should persist from
+        # sub-script call to sub-script definition.
         self._sub_script_persistent_vars = sub_script_persistent_vars
 
         # Initialise a list of names of code buffers to be processed
         self._buffer_names = buffer_names
-        
+
         # Initialise a list of types of code buffers to be processed
         self._buffer_types = buffer_types
 
@@ -93,31 +106,33 @@ class Generator():
         # Initialise a dict of container buffer insertion order rules
         self._container_insertion_order = dict()
         for i_buffer, buffer_name in enumerate(self._buffer_names):
-            self._container_insertion_order[buffer_name] = container_insertion_order[i_buffer]
-        
+            self._container_insertion_order[buffer_name] = (
+                container_insertion_order[i_buffer])
+
         # Initialise a dict of buffer insertion order rules
         self._buffer_insertion_order = dict()
         for i_buffer, buffer_name in enumerate(self._buffer_names):
-            self._buffer_insertion_order[buffer_name] = buffer_insertion_order[i_buffer]
+            self._buffer_insertion_order[buffer_name] = (
+                buffer_insertion_order[i_buffer])
 
-        # Initialise a list of local variable list names (a singleton of of ['local_vars'] by default)
-        # that are intended to contain variable names in templates that should be
-        # non-persistent between states (i.e. local).
-        # Variables that are set in templates that are not contained in these lists are assumed
-        # to be persistent between states (i.e. global) by default.
-        self._local_var_lists = local_var_lists 
-    
+        # Initialise a list of local variable list names (a singleton of
+        # ['local_vars'] by default) that are intended to contain variable
+        # names in templates that should be non-persistent between states (i.e.
+        # local). Variables that are set in templates that are not contained in
+        # these lists are assumed to be persistent between states (i.e. global)
+        # by default.
+        self._local_var_lists = local_var_lists
+
     def _process_script(self, script, script_vars):
-        """
-        Recursively process parsed SMACHA YAML script while updating script variables via
-        template rendering.
+        """Recursively process parsed SMACHA YAML script while updating script
+        variables via template rendering.
 
-        INPUTS:
-            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
-            script_vars: Script variables (dict).
-
-        RETURNS:
-            script_vars: Updated script variables (dict). 
+        :param script: The parsed YAML script.
+        :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        :param script_vars: Script variables.
+        :type script_vars: dict
+        :return: Updated script variables.
+        :rtype: dict
         """
         # Inspect script for list of states
         if isinstance(script, list):
@@ -130,69 +145,86 @@ class Generator():
         elif isinstance(script, dict):
             # Check if the state script dict is well-formed
             if len(list(script.items())) > 1:
-                raise ParsingError(error='Badly formed state script!', line_number=script.lc.line)
-            
+                raise ParsingError(error='Badly formed state script!',
+                                   line_number=script.lc.line)
+
             else:
                 # Find the state name and variables in the state script
                 state_name, state_vars = list(script.items())[0]
-                        
-                # Add persistent state_vars from parents passed via script_vars to state_vars
+
+                # Add persistent state_vars from parents passed via script_vars
+                # to state_vars
                 for persistent_var in self._container_persistent_vars:
                     if persistent_var in script_vars:
                         if persistent_var in state_vars:
-                            state_vars[persistent_var].update(script_vars[persistent_var])
+                            state_vars[persistent_var].update(
+                                script_vars[persistent_var])
                         else:
-                            state_vars[persistent_var] = script_vars[persistent_var]
+                            state_vars[persistent_var] = (
+                                script_vars[persistent_var])
 
-                # Try to convert any state_vars lookups or string constructs that might be present.
+                # Try to convert any state_vars lookups or string constructs
+                # that might be present.
                 for state_var, state_var_val in state_vars.items():
                     if isinstance(state_var_val, list):
                         try:
-                            state_vars[state_var] = self._parser.lookup(state_vars, state_var_val)
+                            state_vars[state_var] = (
+                                self._parser.lookup(state_vars, state_var_val))
                         except:
                             try:
-                                state_vars[state_var] = self._parser.construct_string(state_vars, state_var_val)
+                                state_vars[state_var] = (
+                                    self._parser.construct_string(
+                                        state_vars, state_var_val))
                             except:
-                                # If no state_vars lookups or string constructs can be parsed from state_var,
-                                # leave it as it is and continue.
+                                # If no state_vars lookups or string constructs
+                                # can be parsed from state_var, leave it as it
+                                # is and continue.
                                 continue
                     elif isinstance(state_var_val, dict):
-                        for state_var_val_item, state_var_val_item_val in state_var_val.items():
+                        for state_var_val_item, state_var_val_item_val in (
+                                state_var_val.items()):
                             if isinstance(state_var_val_item_val, list):
                                 try:
-                                    state_vars[state_var][state_var_val_item] = self._parser.lookup(state_vars, state_var_val_item_val)
+                                    state_vars[state_var][state_var_val_item] = (
+                                        self._parser.lookup(state_vars,
+                                                            state_var_val_item_val))
                                 except:
                                     try:
-                                        state_vars[state_var][state_var_val_item] = self._parser.construct_string(state_vars, state_var_val_item_val)
+                                        state_vars[state_var][state_var_val_item] = (
+                                            self._parser.construct_string(state_vars,
+                                                                          state_var_val_item_val))
                                     except:
-                                        # If no state_vars lookups or string constructs can be parsed from
-                                        # the state_var dict item, leave it as it is and continue.
+                                        # If no state_vars lookups or string
+                                        # constructs can be parsed from the
+                                        # state_var dict item, leave it as it
+                                        # is and continue.
                                         continue
                             else:
                                 continue
                     else:
                         continue
-                
+
                 # If state_vars contains a 'states' key,
                 # we're dealing with a nested SMACH container.
                 if 'states' in state_vars:
-                    # Process and render state code from nested container template
+                    # Process and render state code from nested container
+                    # template
                     try:
                         if self._verbose:
                             print(bcolors.OKGREEN +
                                   'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
-                        
+
                         # Create a new dictionary for the state template variables
                         template_vars = { 'name' : state_name } 
-                        
+
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
                             if state_var != 'states' and state_var != 'template':
                                 template_vars[state_var] = state_var_val
-                        
+
                         # Initialise dict of container script vars
                         container_script_vars = dict()
-                        
+
                         # Add list buffers for smach code generated from nested container states
                         for buffer_name, buffer_type in zip(self._buffer_names, self._buffer_types):
                             if buffer_type == 'dict':
@@ -203,7 +235,7 @@ class Generator():
                         # Add appropriate script_vars to container_script_vars so that child templates
                         # have access to variables defined in base templates
                         container_script_vars.update({x: script_vars[x] for x in script_vars if x not in self._buffer_names})
-                        
+
                         # Add parent container template name, state machine name, template and type
                         # NOTE: For now, parent template will be the same as parent type
                         # unless we're dealing with the base template. This may have to be accounted
@@ -215,9 +247,10 @@ class Generator():
                             container_script_vars['parent_sm_name'] = 'sm_' + state_name.lower()
                         container_script_vars['parent_template'] = state_vars['template']
                         container_script_vars['parent_type'] = state_vars['template']
-                        
+
                         # Add persistent state_vars to container_script_vars.
-                        # E.g. parameters that need to be passed between parent and child states.
+                        # E.g. parameters that need to be passed between parent
+                        # and child states.
                         container_script_vars.update({x: state_vars[x] for x in state_vars if x in self._container_persistent_vars})
 
                         # Recursively process nested child states
@@ -231,15 +264,17 @@ class Generator():
                                     template_vars[buffer_name][parent_key] = self._gen_code_string(buffer_val)
                             else:
                                 template_vars[buffer_name] = self._gen_code_string(container_script_vars[buffer_name])
-                        
-                        # Add appropriate script_vars to template_vars so that child templates
-                        # have access to variables defined in base templates
+
+                        # Add appropriate script_vars to template_vars so that
+                        # child templates have access to variables defined in
+                        # base templates
                         template_vars.update({x: script_vars[x] for x in script_vars if x not in self._buffer_names})
-                        
+
                         # Call the templater object to render all blocks in the container template
                         container_code = self._templater.render_all_blocks(state_vars['template'], template_vars)
 
-                        # Update script_vars based on the container state template
+                        # Update script_vars based on the container state
+                        # template
                         template_vars_update = self._templater.get_template_vars(state_vars['template'], template_vars)
                         # Delete local variables
                         for local_var_list in self._local_var_lists:
@@ -249,7 +284,8 @@ class Generator():
                                         del template_vars_update[local_var]
                         script_vars.update(template_vars_update)
 
-                        # Add generated container code to respective container code buffers
+                        # Add generated container code to respective container
+                        # code buffers
                         for buffer_name, insertion_order in self._container_insertion_order.items():
                             if buffer_name in container_script_vars and buffer_name in container_code:
                                 if isinstance(container_script_vars[buffer_name], dict):
@@ -264,8 +300,9 @@ class Generator():
                                         container_script_vars[buffer_name].insert(0, container_code[buffer_name])
                                     else:
                                         container_script_vars[buffer_name].append(container_code[buffer_name])
-                        
-                        # Generate code strings from container code buffers and add to respective parent code buffers
+
+                        # Generate code strings from container code buffers and
+                        # add to respective parent code buffers
                         for buffer_name, insertion_order in self._buffer_insertion_order.items():
                             if buffer_name in script_vars and buffer_name in container_code:
                                 buffer_code = container_code[buffer_name]
@@ -293,8 +330,7 @@ class Generator():
                                         script_vars[buffer_name].insert(0, buffer_code)
                                     else:
                                         script_vars[buffer_name].append(buffer_code)
-                                        
-                    
+
                     except Exception as e:
                         print(bcolors.WARNING +
                               'WARNING: Error processing template for nested container state \'' + state_name + '\': ' + bcolors.ENDC +
@@ -312,7 +348,7 @@ class Generator():
                             print(bcolors.OKBLUE + bcolors.BOLD + bcolors.UNDERLINE +
                                   'Processing state \'' + state_name + '\'' +
                                   ' with incluced sub-script \'' + state_vars['script'] + '\'' + bcolors.ENDC)
-                        
+
                         # Parse the included sub-script
                         sub_script = self._parser.parse(state_vars['script'])
 
@@ -340,7 +376,7 @@ class Generator():
                                     sub_script[state_name][state_var].update(state_var_val)
                                 else:
                                     sub_script[state_name][state_var] = state_var_val
-                        
+
                         # Add persistent state_vars to script_vars.
                         # E.g. parameters that need to be passed between parent and child states.
                         script_vars.update({x: state_vars[x] for x in state_vars if x in self._container_persistent_vars})
@@ -349,33 +385,32 @@ class Generator():
                         # for the current state with potentially re-defined state variables
                         # appropriately remapped.
                         script_vars = self._process_script(sub_script, script_vars)
-                    
+
                     except Exception as e:
                         print(bcolors.WARNING +
                               'WARNING: Error processing included script for state \'' + state_name + '\': ' + bcolors.ENDC +
                               str(e))
                         pass
-                
+
                 # Otherwise, assume we have hit a leaf state
                 else:
                     # Process and render state code from leaf template
                     try:
                         if self._verbose:
                             print(bcolors.OKBLUE + 'Processing state \'' + state_name + '\'' + bcolors.ENDC)
-                        
+
                         # Create a new dictionary for the state template variables
                         template_vars = { 'name' : state_name } 
-                        
+
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
                             if state_var != 'template':
                                 template_vars[state_var] = state_var_val
-                        
+
                         # Add appropriate script_vars to template_vars so that the current leaf state template
                         # has access to variables defined in base templates
                         template_vars.update({x: script_vars[x] for x in script_vars if x not in self._buffer_names})
-                        
-                        
+
                         # Call the templater object to render all blocks in the current leaf state template
                         state_code = self._templater.render_all_blocks(state_vars['template'], template_vars)
 
@@ -388,7 +423,7 @@ class Generator():
                                     if local_var in template_vars_update:
                                         del template_vars_update[local_var]
                         script_vars.update(template_vars_update)
-                        
+
                         # Add generated code from leaf state code buffers to respective parent code buffers
                         for buffer_name, insertion_order in self._buffer_insertion_order.items():
                             if buffer_name in script_vars and buffer_name in state_code and state_code[buffer_name] != '':
@@ -404,44 +439,39 @@ class Generator():
                                         script_vars[buffer_name].insert(0, state_code[buffer_name])
                                     else:
                                         script_vars[buffer_name].append(state_code[buffer_name])
-                    
+
                     except Exception as e:
                       print(bcolors.WARNING +
                             'WARNING: Error processing template for state \'' + state_name + '\': ' + bcolors.ENDC +
                             str(e))
                       pass
-        
+
         else:
             pass
-        
+
         return script_vars
 
     def _gen_code_string(self, code_buffer):
-        """
-        Generate code string from code list buffer.
-        
-        INPUTS:
-            code_buffer: A list buffer of code strings (list of str's).
+        """Generate code string from code list buffer.
 
-        RETURNS:
-            code_string: A concatenation of the strings in the list buffer (str).
+        :param code_buffer: A list buffer of code strings.
+        :type code_buffer: list of str
+        :return: A concatenation of the strings in the list buffer.
+        :rtype: str
         """
         code_string = ''
         for code_snippet in code_buffer:
             code_string = code_string + code_snippet + '\n'
         return code_string
-    
-    def run(self, script):
-        """
-        Generate SMACH code from a parsed SMACHA yaml script.
-        
-        INPUTS:
-            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
 
-        RETURNS:
-            base_code: The generated code (str).
+    def run(self, script):
+        """Generate SMACH code from a parsed SMACHA yaml script.
+
+        :param script: The parsed YAML script.
+        :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        :return: The generated code.
+        :rtype: str
         """
-        
         # TODO: Clean up this logic
         if not isinstance(script, dict):
             raise ParsingError(error='Invalid script formatting!')
@@ -450,14 +480,16 @@ class Generator():
         else:
             # Start processing states from the script
             if self._verbose:
-                print(bcolors.HEADER + bcolors.BOLD + bcolors.UNDERLINE + 'Processing state machine' + bcolors.ENDC)
+                print(bcolors.HEADER + bcolors.BOLD + bcolors.UNDERLINE +
+                      'Processing state machine' + bcolors.ENDC)
 
             # Initialise dict of variables needed for script processing
             script_vars = dict()
-            
-            # Add base parent template name, state machine name, template and type
-            # NOTE: For now, we explicitly state that the base is a parent of type
-            # 'StateMachine' here.  This may have to be handled in a neater way later.
+
+            # Add base parent template name, state machine name, template and
+            # type NOTE: For now, we explicitly state that the base is a parent
+            # of type 'StateMachine' here. This may have to be handled in a
+            # neater way later.
             script_vars['parent_name'] = script['name']
             if 'sm_name' in script_vars:
                 script_vars['parent_sm_name'] = script_vars['sm_name']
@@ -465,23 +497,26 @@ class Generator():
                 script_vars['parent_sm_name'] = script['name'].lower()
             script_vars['parent_template'] = script['template']
             script_vars['parent_type'] = 'StateMachine'
-            
+
             # Add list buffers in which to store generated smach code
             # script_vars.update({ x : list() for x in self._buffer_names })
-            for buffer_name, buffer_type in zip(self._buffer_names, self._buffer_types):
+            for buffer_name, buffer_type in (
+                    zip(self._buffer_names, self._buffer_types)):
                 if buffer_type == 'dict':
                     script_vars[buffer_name] = dict()
                 else:
                     script_vars[buffer_name] = list()
-            
+
             # Add any variables defined in the base template to script_vars
             #
-            # TODO: Throw exception here if any of these clash with the canononical variables.
-            # 
+            # TODO: Throw exception here if any of these clash with the
+            # canononical variables.
+            #
             # Create context
             context = dict()
             context['name'] = script['name']
-            for buffer_name, buffer_type in zip(self._buffer_names, self._buffer_types):
+            for buffer_name, buffer_type in (
+                    zip(self._buffer_names, self._buffer_types)):
                 if buffer_type == 'dict':
                     context[buffer_name] = dict()
                     context[buffer_name][script['name']] = ''
@@ -499,7 +534,7 @@ class Generator():
 
             # Process base template states script
             script_vars = self._process_script(script['states'], script_vars)
-            
+
             # Initialise a dict for the base template variables and code buffers
             base_template_vars = dict()
 
@@ -518,15 +553,15 @@ class Generator():
                             base_template_vars[script_var_name][parent_name] = self._gen_code_string(buffer_val).strip()
                     else:
                         base_template_vars[script_var_name] = self._gen_code_string(script_var_val).strip()
-                        
+
             # Add updated script_vars to base_template_vars
-            base_template_vars.update({ x : script_vars[x] for x in script_vars if x not in self._buffer_names })
+            base_template_vars.update({x: script_vars[x] for x in script_vars if x not in self._buffer_names})
 
             # Render the base state machine template
-            base_code = self._templater.render(script['template'], base_template_vars)
+            base_code = self._templater.render(script['template'],
+                                               base_template_vars)
 
             # Strip whitespace
             base_code = base_code.strip()
-            
-            return base_code
 
+            return base_code
