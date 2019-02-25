@@ -25,15 +25,16 @@ class Parser():
         Specifies roundtrip processing for ruamel.yaml by default so that
         comments and script structure can be retained.
 
-        :param script_dirs: A list of directories in which to search for SMACHA
-        scripts.
-        :type script_dirs: :class:`list` of :class:`str`
-        :param container_persistent_vars: Names of variables that should
-        persist from parent to child states (list).
-        :type container_persistent_vars: :class:`list` of :class:`str`
-        :param sub_script_persistent_vars: Names of variables that should
-        persist from sub-script call to sub-script definition.
-        :type sub_script_persistent_vars: :class:`list` of :class:`str`
+        :param script_dirs:
+            A list of directories in which to search for SMACHA scripts.
+        :type script_dirs: list of str
+        :param container_persistent_vars:
+            Names of variables that should persist from parent to child states.
+        :type container_persistent_vars: list of str
+        :param sub_script_persistent_vars:
+            Names of variables that should persist from sub-script call to
+            sub-script definition.
+        :type sub_script_persistent_vars: list of str
         """
         self._loader = yaml.RoundTripLoader
         self._dumper = yaml.RoundTripDumper
@@ -50,11 +51,11 @@ class Parser():
     def load(self, script):
         """Search for the specified YAML script file and load it.
 
-        :param script: Either a file name or a file handle to a SMACHA
-        YAML script.
-        :type script: :class:`str` or :class:`file`
+        :param script:
+            Either a file name or a file handle to a SMACHA YAML script.
+        :type script: str or file
         :return: 2-tuple of the file contents and the file name.
-        :rtype: :class:`tuple` of :class:`str`
+        :rtype: tuple of str
         """
         def read_contents(filename):
             """Helper function for reading file content."""
@@ -107,9 +108,9 @@ class Parser():
         """Parse YAML script.
 
         :param script: Either a script file name or script string.
-        :type script: :class:`str` or :class:`bytes`
+        :type script: str or bytes
         :return: The parsed YAML script.
-        :rtype: :class:`dict` or :class:`ruamel.yaml.comments.CommentedMap`
+        :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
         """
         try:
             script_buffer, _ = self.load([script, script + '.yml'])
@@ -126,10 +127,9 @@ class Parser():
         """Dump YAML script to string and (optionally) write to file.
 
         :param script: The parsed YAML script.
-        :type script: :class:`dict` or
-        :class:`ruamel.yaml.comments.CommentedMap`
+        :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
         :return: The rendered script.
-        :rtype: :class:`str`
+        :rtype: str
         """
         if output_file:
             with open(output_file, 'w') as output_file_handle:
@@ -149,18 +149,17 @@ class Parser():
         """Check if a script variable contains variable lookups.
 
         Given a script and a list of possible lookup variables, e.g.
-        ['params'], recursively check to see if the script contains any lookups
-        to those variables, e.g. regular lookups like ['params', 'robot'] or
-        string constructs like [['params', 'robot'], '/base'].
+        ``['params']``, recursively check to see if the script contains any lookups
+        to those variables, e.g. regular lookups like ``['params', 'robot']`` or
+        string constructs like ``[['params', 'robot'], '/base']``.
 
         :param script: The parsed YAML script.
-        :type script: :class:`dict` or
-        :class:`ruamel.yaml.comments.CommentedMap`
-        :param lookup_vars: A list of names of possible lookup variables, e.g.
-        ['params'].
-        :type lookup_vars: :class:`list` of :class:`str`
+        :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        :param lookup_vars:
+            A list of names of possible lookup variables, e.g. ``['params']``.
+        :type lookup_vars: list of str
         :return: True if script contains lookups, False otherwise.
-        :rtype: :class:`bool`
+        :rtype: bool
         """
         try:
             if isinstance(script, list):
@@ -195,25 +194,24 @@ class Parser():
     def sub_lookups(self, script, old_key, old_val, new_key, new_val):
         """Substitute lookup key/value names throughout a script.
 
-        Given a script, recursively substitute [old_key, old_val] lookups
+        Given a script, recursively substitute ``[old_key, old_val]`` lookups
         with [new_key, new_val] lookups everywhere.
 
         NOTE: This method, in its current form, will modify the input script
         object!
 
         :param script: The parsed YAML script.
-        :type script: :class:`dict` or
-        :class:`ruamel.yaml.comments.CommentedMap`
-        :param old_key: The old_key in [old_key, old_val] lookups.
-        :type old_key: :class:`str`
-        :param old_val: The old_val in [old_key, old_val] lookups.
-        :type old_val: :class:`str`
-        :param new_key: The new_key in [new_key, new_val] lookups.
-        :type new_key: :class:`str`
-        :param new_val: The new_val in [new_key, new_val] lookups.
-        :type new_val: :class:`str`
+        :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        :param old_key: The old_key in ``[old_key, old_val]`` lookups.
+        :type old_key: str
+        :param old_val: The old_val in ``[old_key, old_val]`` lookups.
+        :type old_val: str
+        :param new_key: The new_key in ``[new_key, new_val]`` lookups.
+        :type new_key: str
+        :param new_val: The new_val in ``[new_key, new_val]`` lookups.
+        :type new_val: str
         :return: The updated YAML script with substituted lookups.
-        :rtype: :class:`dict` or :class:`ruamel.yaml.comments.CommentedMap`
+        :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
         """
         try:
             if isinstance(script, list):
@@ -253,16 +251,17 @@ class Parser():
     def lookup(self, script_vars, query):
         """Retrieve a variable from script_vars as specified by lookup query.
 
-        Query should be either a 1 or 2-element list, e.g. ['params', 'robot'],
-        in which case a robot name would be retrieved from the 'params'
-        entry in 'script_vars'.
+        ``query`` should be either a 1 or 2-element list, e.g. ``['params', 'robot']``,
+        in which case a robot name would be retrieved from the ``params``
+        entry in ``script_vars``.
 
         :param script_vars: Script variables.
-        :type script_vars: :class:`dict`
+        :type script_vars: dict
         :param query: A 1-element or 2-element list of strings.
-        :type query: :class:`list` of :class:`str`
-        :return: script_vars[query[0]] if query is a 1-element list or
-        script_vars[query[0]][query[1]] if querty is a 2-element list.
+        :type query: list of str
+        :return:
+            ``script_vars[query[0]]`` if ``query`` is a 1-element list or
+            ``script_vars[query[0]][query[1]]`` if ``query`` is a 2-element list.
         :rtype: Unknown
         """
         if not isinstance(query, list):
@@ -290,24 +289,28 @@ class Parser():
         """Construct a string given a list of script_vars lookups.
 
         List of script_vars lookups is specified as 1 or 2-element lists- see
-        lookup() method) and/or strings, e.g. the string_construct
-        ['/', ['params', 'robot'], '/joint_states'] would return the string
-        '/robot_1/joint_states' if script_vars['params']['robot'] == 'robot_1'
+        :func:lookup method) and/or strings, e.g. the ``string_construct``
+        ``['/', ['params', 'robot'], '/joint_states']`` would return the string
+        ``'/robot_1/joint_states'`` if
+        ``script_vars['params']['robot'] == 'robot_1'``
         and
-        '/robot_2/joint_states' if script_vars['params']['robot'] = 'robot_2'.
+        ``'/robot_2/joint_states'`` if
+        ``script_vars['params']['robot'] = 'robot_2'``.
 
         :param script_vars: Script variables.
-        :type script_vars: :class:`dict`
-        :param string_construct: A list of either script_vars lookups or
-        strings describing how a string should be constructed, as demonstrated
-        in the above example.
-        :type string_construct: :class:`list` of :class:`list` or :class:`str`
-        :return: The constructed string is returned, as long as the
-        string_construct can be parsed successfully and as long as it contains
-        at least one script_vars lookup. If the string_construct can be parsed,
-        but does not contain a lookup, the original string_construct list is
-        returned as-is. This is done to avoid confusion with a genuine list.
-        :rtype: :class:`str` or; :class:`list` of :class:`list` or :class:`str`
+        :type script_vars: dict
+        :param string_construct:
+            A list of either ``script_vars`` lookups or strings describing how a
+            string should be constructed, as demonstrated in the above example.
+        :type string_construct: list of lists or strings
+        :return:
+            The constructed string is returned, as long as the string_construct
+            can be parsed successfully and as long as it contains at least one
+            script_vars lookup. If the string_construct can be parsed, but does
+            not contain a lookup, the original string_construct list is
+            returned as-is. This is done to avoid confusion with a genuine
+            list.
+        :rtype: str or; list of lists or strings
         """
         output_string = ''
         contains_lookup = False
@@ -341,22 +344,22 @@ class Parser():
         """Convert a sequence of states in a script to a container state.
 
         :param script: The parsed YAML script.
-        :type script: :class:`dict` or
-        :class:`ruamel.yaml.comments.CommentedMap`
+        :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
         :param container_name: A name for the container.
-        :type container_name: :class:`str`
-        :param container_type: The container type (e.g. 'StateMachine' or
-        'Concurrence').
-        :type container_type: :class:`str`
+        :type container_name: str
+        :param container_type:
+            The container type (e.g. 'StateMachine' or 'Concurrence').
+        :type container_type: str
         :param states: The sequence of states to be contained.
-        :type states: :class:`list` of :class:`str`
-        :param default_outcome_transition: The transition for the
-        default_outcome associated with Concurrence containers. Set to
-        container_name if None.
-        :type default_outcome_transition: :class:`str` or :class:`NoneType`
-        :return: Parsed YAML script with the specified states now contained in
-        the container state.
-        :rtype: :class:`dict`or :class:`ruamel.yaml.comments.CommentedMap`
+        :type states: list of str
+        :param default_outcome_transition:
+            The transition for the default_outcome associated with Concurrence
+            containers. Set to container_name if None.
+        :type default_outcome_transition: str or None
+        :return:
+            Parsed YAML script with the specified states now contained in the
+            container state.
+        :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
         """
         #
         # Set defaults
@@ -392,14 +395,15 @@ class Parser():
                 continue
 
         #
-        # Construct skeleton of container state entry 
+        # Construct skeleton of container state entry
         #
         container_state_name = container_name
         container_state_vars = dict()
         container_state_vars['template'] = container_type
-   
-        # 
-        # Generate new container state outcomes as appropriate and remap transitions
+
+        #
+        # Generate new container state outcomes as appropriate and remap
+        # transitions
         #
         container_state_vars['outcomes'] = yaml.comments.CommentedSet()
         container_state_vars['outcomes'].fa.set_flow_style()
@@ -419,7 +423,7 @@ class Parser():
                         container_state_vars['transitions'][new_container_outcome] = transition
                     # Update the state transition
                     list(state.items())[0][1]['transitions'][outcome] = container_outcome_map[transition]
-        
+
         #
         # Generate an outcome_map for Concurrence containers
         #
@@ -462,7 +466,6 @@ class Parser():
                                 new_outcome_map[state_name] = find_state_outcome(outcome, state_outcome, state_transition)
                             except:
                                 continue
-                            
 
                 container_state_vars['outcome_map'][outcome] = new_outcome_map
 
@@ -472,7 +475,6 @@ class Parser():
         if container_type == 'Concurrence':
             for state in states_buffer:
                 list(state.items())[0][1].pop('transitions', 0)
-
 
         #
         # Generate a default outcome for Concurrence containers
@@ -485,7 +487,7 @@ class Parser():
             container_state_vars['default_outcome'] = new_container_outcome
             # Update the container transition
             container_state_vars['transitions'][new_container_outcome] = default_outcome_transition
-        
+
         #
         # Convert outcomes from a set to a sequence
         #
@@ -493,7 +495,8 @@ class Parser():
         container_state_vars['outcomes'].fa.set_flow_style()
 
         #
-        # Adjust transitions of all other states in script to point to container state as appropriate.
+        # Adjust transitions of all other states in script to point to
+        # container state as appropriate.
         #
         for state in script['states']:
             if list(state.items())[0][0] not in states:
@@ -502,10 +505,12 @@ class Parser():
                         list(state.items())[0][1]['transitions'][outcome] = container_state_name
 
         #
-        # Handle container persistent variables by moving them outside of the container as appropriate.
+        # Handle container persistent variables by moving them outside of the
+        # container as appropriate.
         #
         for persistent_var in self._container_persistent_vars:
-            # Create a dict for the persistent variable in container_state_vars if it doesn't exist yet.
+            # Create a dict for the persistent variable in container_state_vars
+            # if it doesn't exist yet.
             if persistent_var not in container_state_vars:
                 container_state_vars[persistent_var] = yaml.comments.CommentedMap()
                 container_state_vars[persistent_var].fa.set_flow_style()
@@ -534,12 +539,14 @@ class Parser():
                     # Delete persistent variable from the state
                     list(state.items())[0][1].pop(persistent_var, 0)
 
-            # Delete the persistent variable from container_state_vars if it's still empty
+            # Delete the persistent variable from container_state_vars if it's
+            # still empty
             if not container_state_vars[persistent_var]:
                 container_state_vars.pop(persistent_var, 0)
 
         #
-        # Handle userdata and remapping by moving certain userdata entries outside of the container as appropriate.
+        # Handle userdata and remapping by moving certain userdata entries
+        # outside of the container as appropriate.
         #
         container_state_vars['remapping'] = yaml.comments.CommentedMap()
         container_state_vars['remapping'].fa.set_flow_style()
@@ -581,7 +588,7 @@ class Parser():
                 # If the state userdata is now empty, delete it
                 if not list(state.items())[0][1]['userdata']:
                     list(state.items())[0][1].pop('userdata', 0)
-        
+
         # Delete the remapping variable from the container_state_vars if it's still empty
         if not container_state_vars['remapping']:
             container_state_vars.pop('remapping', 0)
@@ -589,9 +596,10 @@ class Parser():
         # Delete the userdata variable from the script if it's still empty
         if not script['userdata']:
             script.pop('userdata', 0)
-        
+
         #
-        # Handle input_keys and output_keys by cross-checking between userdata and remappings
+        # Handle input_keys and output_keys by cross-checking between userdata
+        # and remappings
         #
         preceding_userdata = dict()
         preceding_output_keys = set()
@@ -625,8 +633,9 @@ class Parser():
                 except:
                     pass
 
-                # Match the sub-script output keys to the super-script calling state remapping
-                # and update the set of preceding output keys based on the matches.
+                # Match the sub-script output keys to the super-script calling
+                # state remapping and update the set of preceding output keys
+                # based on the matches.
                 try:
                     assert sub_script_output_keys
                     if 'remapping' in list(script['states'][i_state].items())[0][1]:
@@ -731,17 +740,20 @@ class Parser():
         return script
 
     def extract(self, script, container_state, sub_script_filename=None):
-        """
-        Extract a container state from a script and export to sub-script and super-script
+        """Extract a container state from a script and export to sub-script and
+        super-script.
 
-        INPUTS:
-            script: The parsed YAML script (dict or a ruamel type, e.g., ruamel.yaml.comments.CommentedMap)
-            state: Name of container state to be extracted (str).
-            sub_script_filename = Desired name for prospective sub-script file (str).
-
-        RETURNS:
-            sub_script: Generated SMACHA YAML sub-script for container state.
-            super_script: Generated SMACHA YAML super-script that calls the sub-script.
+        :param script: The parsed YAML script.
+        :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        :param state: Name of container state to be extracted.
+        :type state: str
+        :param sub_script_filename:
+            Desired name for prospective sub-script file.
+        :type sub_script_filename: str
+        :return:
+            2-tuple of generated SMACHA YAML sub-script for container state
+            and SMACHA YAML super-script that calls the sub-script.
+        :type sub_script: tuple of :class:`ruamel.yaml.comments.CommentedMap`
         """
         # Find the container state
         for i_state, state in enumerate(script['states']):
@@ -760,7 +772,7 @@ class Parser():
             super_script_state_vars['script'] = os.path.splitext(os.path.basename(sub_script_filename))[0]
         else:
             super_script_state_vars['script'] = state_name.lower()
-        
+
         # Construct skeleton of sub-script
         sub_script_name = state_name
         sub_script_state_vars = state_vars
@@ -781,7 +793,7 @@ class Parser():
         # Copy the script and transform to super-script
         super_script = copy.copy(script)
         super_script['states'][i_state] = super_script_state
-        
+
         # Create the sub-script
         sub_script = yaml.comments.CommentedMap()
         sub_script.fa.set_block_style()
