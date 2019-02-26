@@ -1,8 +1,8 @@
 - builder: sphinx
-  name: SMACHA API
+  name: smacha package API
   sphinx_root_dir: doc
 # - builder: doxygen
 #   name: reconcell_dummy_package C++ API
 #   output_dir: c++
 #   file_patterns: '*.c *.cpp *.h *.cc *.hh *.dox'
-  homepage: https://repo.ijs.si/reconcell/smacha
+  homepage: https://reconcell.gitlab.io/reconcell_docs/
