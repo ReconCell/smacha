@@ -156,7 +156,7 @@ To run the original file script, use the following command:
 
    rosrun smacha state_machine_nesting2.py
 
-smacha package API
+``smacha`` Package API
 ==================
 
 .. toctree::
