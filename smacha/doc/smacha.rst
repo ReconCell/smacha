@@ -1,5 +1,6 @@
+********************
 SMACHA Documentation
-====================
+********************
 
 SMACHA is a `YAML <http://yaml.org/>`__ and
 `Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__-based meta-scripting,
@@ -19,58 +20,59 @@ SMACHA (short for “State Machine Assembler”, pronounced “smasha”) aims
 at distilling the task-level simplicity of SMACH into compact YAML-based
 scripts in the foreground, while retaining all of its power and
 flexibility in Jinja2-based templates and a custom code generation
-eng
+engine in the background.
 
 Overview
---------
+========
 
 .. figure:: _static/smacha_overview.png
    :alt: SMACHA API Overview
 
-   SMACHA API Overview
-
 Scripting
-^^^^^^^^^
+=========
 
 .. toctree::
    :hidden:
 
-   smacha_scripts
+   SMACHA Scripts<Scripting/smacha_scripts>
+   Container States<Scripting/container_states>
+   Userdata<Scripting/userdata>
+   Sub-Scripts and Super-Scripts<Scripting/sub_scripts_and_super_scripts>
 
-:doc:`smacha_scripts` are YAML files that describe how SMACHA should generate
-SMACH code. They are parsed by :doc:`smacha.parser` and direct
-:doc:`smacha.generator` on how to combine :doc:`smacha_templates` using the
-:doc:`smacha.templater`.
+:doc:`Scripting/smacha_scripts` are YAML files that describe how SMACHA should generate
+SMACH code. They are parsed by :doc:`API/smacha.parser` and direct
+:doc:`API/smacha.generator` on how to combine :doc:`Templating/smacha_templates` using the
+:doc:`API/smacha.templater`.
 
 Templating
-^^^^^^^^^^
+==========
 
 .. toctree::
    :hidden:
 
-   smacha_templates
+   SMACHA Templates<Templating/smacha_templates>
 
-:doc:`smacha_templates` are Jinja2-based Python SMACH code templates
-containing variables that are filled out by :doc:`smacha.templater`
-as directed by :doc:`smacha.generator` and as determined by
-the structure of the :doc:`smacha_scripts` parsed by :doc:`smacha.parser`.
+:doc:`Templating/smacha_templates` are Jinja2-based Python SMACH code templates
+containing variables that are filled out by :doc:`API/smacha.templater`
+as directed by :doc:`API/smacha.generator` and as determined by
+the structure of the :doc:`Scripting/smacha_scripts` parsed by :doc:`API/smacha.parser`.
 
 
 Code Generation
-^^^^^^^^^^^^^^^
+===============
 
 .. toctree::
    :hidden:
 
-   smacha_code_generator
+   SMACHA Code Generator<CodeGeneration/smacha_code_generator>
 
-The :doc:`smacha_code_generator` recursively processes :doc:`smacha_scripts`
-parsed by :doc:`smacha.parser`, manages the use of :doc:`smacha_templates` that
-are filled out by :doc:`smacha.templater`, and renders the final result to
+The :doc:`CodeGeneration/smacha_code_generator` recursively processes :doc:`Scripting/smacha_scripts`
+parsed by :doc:`API/smacha.parser`, manages the use of :doc:`Templating/smacha_templates` that
+are filled out by :doc:`API/smacha.templater`, and renders the final result to
 executable Python SMACH code.
 
 Installation
-------------
+============
 
 Simply clone into the ``src`` directory of your catkin workspace and run
 ``catkin_make`` or ``catkin build`` from the root of the workspace. It
@@ -82,7 +84,10 @@ may be necessary to update dependencies using ``rosdep`` as follows:
    rosdep install smacha
 
 Usage
------
+=====
+
+Generate
+--------
 
 In the simplest case, using default core templates, SMACHA can be
 invoked on a ``my_script.yml`` SMACHA script file as follows:
@@ -114,8 +119,30 @@ the terminal.
 Further arguments and options may be explored by running
 ``rosrun smacha generate -h`` or ``rosrun smacha generate --help``.
 
-Testing
+Execute
 -------
+
+SMACHA scripts may be directly executed from the command-line
+(after being implicitly generated) as follows:
+
+::
+
+   rosrun smacha execute my_script.yml
+
+Example usage for the “Nesting State Machines” tutorial:
+
+::
+
+   roscd smacha/test
+   rosrun smacha execute smacha_scripts/executive_smach_tutorials/state_machine_nesting2.yml -t smacha_templates/executive_smach_tutorials -v
+
+Note that the above command requires that ``roscore`` be running.
+
+Again, further arguments and options may be explored by running
+``rosrun smacha execute -h`` or ``rosrun smacha execute --help``.
+
+Testing
+=======
 
 Tests may be performed by running:
 
@@ -156,28 +183,30 @@ To run the original file script, use the following command:
 
    rosrun smacha state_machine_nesting2.py
 
-``smacha`` Package API
-==================
+**********
+SMACHA API
+**********
 
 .. toctree::
    :hidden:
 
-   smacha.parser
-   smacha.templater
-   smacha.generator
-   smacha.util
-   smacha.exceptions
+   The Parser Module<API/smacha.parser>
+   The Templater Module<API/smacha.templater>
+   The Generator Module<API/smacha.generator>
+   The Utilties Module<API/smacha.util>
+   The Exceptions Module<API/smacha.exceptions>
 
 These are the main smacha package submodules:
 
-- :doc:`smacha.parser`: provides the :class:`smacha.parser.Parser` class for parsing :doc:`smacha_scripts`.
-- :doc:`smacha.templater`: provides the :class:`smacha.templater.Templater` class as well as other functions for processing :doc:`smacha_templates`.
-- :doc:`smacha.generator`: provides the :class:`smacha.generator.Generator` class for generating executable Python SMACH code.
-- :doc:`smacha.util`: provides various utilities.
-- :doc:`smacha.exceptions`: provides exception definitions.
+- :doc:`API/smacha.parser`: provides the :class:`smacha.parser.Parser` class for parsing :doc:`Scripting/smacha_scripts`.
+- :doc:`API/smacha.templater`: provides the :class:`smacha.templater.Templater` class as well as other functions for processing :doc:`Templating/smacha_templates`.
+- :doc:`API/smacha.generator`: provides the :class:`smacha.generator.Generator` class for generating executable Python SMACH code.
+- :doc:`API/smacha.util`: provides various utilities.
+- :doc:`API/smacha.exceptions`: provides exception definitions.
 
+******************
 Indices and tables
-==================
+******************
 
 * :ref:`genindex`
 * :ref:`modindex`

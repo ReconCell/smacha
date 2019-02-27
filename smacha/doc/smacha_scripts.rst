@@ -1,5 +1,6 @@
+**************
 SMACHA Scripts
---------------
+**************
 
 SMACHA scripts are YAML files that describe how SMACHA should generate
 SMACH code. Here is the `“Nesting State Machines”
@@ -34,8 +35,9 @@ described in a SMACHA script:
 This demonstrates a reduction from 80 lines of raw SMACH code to 20
 lines of SMACHA script. Nice.
 
+==============
 Base Variables
-~~~~~~~~~~~~~~
+==============
 
 The base of the script specifies the following variables:
 
@@ -49,8 +51,9 @@ The base of the script specifies the following variables:
 Each of the states in the base script may, in turn, specify similar
 variables of their own, as discussed in the following sub-sections.
 
+======
 States
-~~~~~~
+======
 
 Each state, including the base, must specify a template from which its
 respective code should be generated. States may be specified as lists
