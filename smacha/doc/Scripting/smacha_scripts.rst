@@ -5,10 +5,10 @@ SMACHA Scripts
 .. toctree::
 
 **NOTE**: Before reading the following documentation, it is highly recommended
-that you read the `SMACH Tutorials <http://wiki.ros.org/smach/Tutorials>`__
+that you consult the `"Getting Started with smach" SMACH Tutorial <https://wiki.ros.org/smach/Tutorials/Getting%20Started>`__
 first!
 
-SMACHA scripts are YAML files that describe how SMACHA should generate
+**SMACHA scripts** are YAML files that describe how SMACHA should generate
 SMACH code.
 
 =============================
@@ -292,6 +292,9 @@ the template, effectively resulting in ``name_param: FOO_0`` as before.
 Similarly, the line ``outcome_param: [params, outcome]`` means that ``[params,
 outcome]`` will be substitute with the ``outcome`` parameter value, i.e.
 ``outcome_a``.
+We refer to this functionality as a `parameter lookup` and the associated
+API method in the :doc:`Parser Module <../API/smacha.parser>`
+is documented :func:`here <smacha.parser.Parser.lookup>`.
 
 **NOTE**: both of the above state definitions result in precisely the same
 outcome `at the template level`!  The utility of this script parameter
@@ -303,3 +306,33 @@ functionality will become more clear later when we discuss the use of
 String Constructs
 =================
 
+It can sometimes be useful combine script parameters with other
+script parameters or strings in order to form more complex
+expressions via concatenation.
+For example, if the script parameters ``subject``, ``verb``
+and ``object`` contained the values ``I``, ``having`` and ``day``
+respectively, then we can form the construction
+``[[params, subject], 'am', [params, verb], 'a bad', [params, object]]``,
+which would be parsed as ``I am having a bad day``.
+In SMACHA, we refer to these as `string constructs`.
+Here is a simple example of how they are used:
+
+.. code-block:: yaml
+
+  - FOO_1:
+      template: ParamFoo
+      params: {name: FOO, outcome: outcome}
+      name_param: [[params, name], '_1']
+      outcome_param: [[params, outcome], '_b']
+      transitions: {outcome_a: FOO_1, outcome_b: final_outcome}
+
+Here, the line ``name_param: [[params, name], '_1']`` uses a string construct
+containing the script parameter ``name`` to fill out the state template variable
+``name_param``.  Since the ``name`` parameter contains the value ``FOO``,
+this string construct is parsed as ``FOO_1``.
+Similarly, the string construct in ``outcome_param: [[params, outcome], '_b']``
+resolves to ``outcome_b``.
+
+The associated API method for parsing string constructs
+in the :doc:`Parser Module <../API/smacha.parser>`
+is documented :func:`here <smacha.parser.Parser.construct_string>`.
