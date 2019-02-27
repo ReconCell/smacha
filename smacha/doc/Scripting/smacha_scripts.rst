@@ -11,7 +11,6 @@ first!
 **SMACHA scripts** are YAML files that describe how SMACHA should generate
 SMACH code.
 
-=============================
 Linear State Sequence Example
 =============================
 
@@ -67,7 +66,6 @@ we get the following visualization of the resulting state machine:
 
 We will now take a look at the different parts of the script in more detail below.
 
-==============
 Base Variables
 ==============
 
@@ -169,7 +167,6 @@ SMACH Python code file. All we need to understand at this point is that the
 remainder of our SMACHA script is used alongside other templates in order to
 populate this template and produce the final executable result.
 
-======
 States
 ======
 
@@ -246,7 +243,6 @@ written state sequences or hierarchies.
 In both of these cases `script parameters`, which are present in the above
 example, provide important functionality, which we discuss next.
 
-=================
 Script Parameters
 =================
 
@@ -302,7 +298,6 @@ functionality will become more clear later when we discuss the use of
 :doc:`container states <container_states>` and
 :doc:`sub-scripts <sub_scripts_and_super_scripts>`.
 
-=================
 String Constructs
 =================
 
@@ -327,7 +322,7 @@ Here is a simple example of how they are used:
       transitions: {outcome_a: FOO_1, outcome_b: final_outcome}
 
 Here, the line ``name_param: [[params, name], '_1']`` uses a string construct
-containing the script parameter ``name`` to fill out the state template variable
+
 ``name_param``.  Since the ``name`` parameter contains the value ``FOO``,
 this string construct is parsed as ``FOO_1``.
 Similarly, the string construct in ``outcome_param: [[params, outcome], '_b']``
