@@ -1,5 +1,6 @@
+****************
 SMACHA Templates
-----------------
+****************
 
 `Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__ is a powerful template
 engine for Python. Jinja2 templates are used to specify how code should
@@ -80,15 +81,15 @@ example is specified in a ``Base.tpl`` file and looks like this:
    {% endblock main %}
 
 Core Templates
-~~~~~~~~~~~~~~
+==============
 
 SMACHA provides default core templates for many of the SMACH states and
 containers, as well as for other useful constructs.
 
 So far, the following core templates are present and functional:
 
--  ``Base.tpl``: the core base template used for specifying the bare
-   bones of a a Python SMACH state machine script.
+-  ``Base.tpl.py``: the core base template used for specifying the bare
+   (bones) of a a Python SMACH state machine script.
 
 -  ``State.tpl``: contains functionality common to all states,
    e.g. userdata specification.
@@ -110,7 +111,7 @@ So far, the following core templates are present and functional:
 -  ``TF2ListenerState.tpl``: used for reading TF2 transforms.
 
 Core Code Generation Variables and Code Blocks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==============================================
 
 There are a number of core code generation variables and code blocks
 present in the core templates that enable the code generation engine to
@@ -158,7 +159,7 @@ within the API, i.e. code may be either prepended or appended to a
 variable.
 
 Overriding Core Templates, Variables and Blocks via Template Inheritance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+========================================================================
 
 Jinja2 provides powerful template functionality, including the ability
 to extend templates via `template

@@ -41,9 +41,9 @@ variables:
       type: dict
 {% endblock meta %}
 
-{% from "Utils.tpl" import render_request_slots, render_input_keys, render_response_slots, render_output_keys, render_transitions, render_remapping %}
+{% from "Utils.tpl.py" import render_request_slots, render_input_keys, render_response_slots, render_output_keys, render_transitions, render_remapping %}
 
-{% include "State.tpl" %}
+{% include "State.tpl.py" %}
 
 {% block base_header %}
 {% endblock base_header %}

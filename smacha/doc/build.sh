@@ -49,6 +49,9 @@ pip install --upgrade recommonmark
 # Install sphinx_rtd_theme
 pip install --upgrade sphinx_rtd_theme
 
+# Install sphinxcontrib-programoutput
+pip install --upgrade sphinxcontrib-programoutput
+
 # Install newer version of ruby
 # apt-get -qq install software-properties-common
 # apt-add-repository -y ppa:brightbox/ruby-ng

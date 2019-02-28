@@ -1,6 +1,6 @@
-{% extends "ServiceState.tpl" %}
+{% extends "ServiceState.tpl.py" %}
 
-{% from "Utils.tpl" import from_import %}
+{% from "Utils.tpl.py" import from_import %}
 
 {% block imports %}
 {{ from_import(defined_headers, 'smacha.srv', 'GripperSrvRequest') }}

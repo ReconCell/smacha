@@ -1,4 +1,4 @@
-{% from "Utils.tpl" import render_transitions, render_remapping %}
+{% from "Utils.tpl.py" import render_transitions, render_remapping %}
 
 {% block class_defs %}
 # define state Bar
@@ -7,7 +7,7 @@ class Bar(smach.State):
         smach.State.__init__(self, 
                              outcomes=['outcome1']{% if remapping is defined %},
                              input_keys=['bar_counter_in']{% endif %})
-        
+
     def execute(self, userdata):
         rospy.loginfo('Executing state {{ name }}'){% if remapping is defined %}
         rospy.loginfo('Counter = %f'%userdata.bar_counter_in){% endif %} 

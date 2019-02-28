@@ -1,4 +1,4 @@
-{% from "Utils.tpl" import render_transitions, render_remapping %}
+{% from "Utils.tpl.py" import render_transitions, render_remapping %}
 
 {% block class_defs %}
 # define state Foo

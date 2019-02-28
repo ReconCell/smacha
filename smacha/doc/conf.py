@@ -13,6 +13,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
+
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -25,7 +26,7 @@ catkin_package = catkin_pkg.package.parse_package(os.path.join(catkin_dir, catki
 
 # -- Project information -----------------------------------------------------
 
-project = 'smacha'
+project = 'SMACHA'
 copyright = '2019, Barry Ridge'
 author = 'Barry Ridge'
 
@@ -54,6 +55,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
+    'sphinxcontrib.programoutput'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -151,7 +153,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'smacha.tex', 'smacha package API',
+    (master_doc, 'smacha.tex', 'SMACHA Documentation',
      'Barry Ridge', 'manual'),
 ]
 

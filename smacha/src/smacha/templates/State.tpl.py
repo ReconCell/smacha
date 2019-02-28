@@ -12,7 +12,7 @@ input_keys: []
 output_keys: []
 {% endblock meta %}
 
-{% from "Utils.tpl" import render_userdata %}
+{% from "Utils.tpl.py" import render_userdata %}
 
 {% set local_vars = [] %}
 

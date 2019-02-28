@@ -1,6 +1,6 @@
-{% extends "Base.tpl" %}
+{% extends "Base.tpl.py" %}
 
-{% from "Utils.tpl" import from_import %}
+{% from "Utils.tpl.py" import from_import %}
 
 {% block imports %}
 {{ super() }}

@@ -27,7 +27,7 @@ input_keys: []
 output_keys: []
 {% endblock meta %}
 
-{% from "Utils.tpl" import render_outcomes, render_userdata %}
+{% from "Utils.tpl.py" import render_outcomes, render_userdata %}
 
 {% set defined_headers = [] %}
 {% set local_vars = [] %}
@@ -61,7 +61,7 @@ def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main
 
     {{ main_def | indent(4) }}
 {% endblock main_def %}
-   
+
 {% block body %}
     {{ sm_name }} = smach.StateMachine({{ render_outcomes(outcomes) }})
 
@@ -86,9 +86,9 @@ def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main
     {{ execute | indent(4) }}
 
     outcome = {{ sm_name }}.execute()
-{% endblock execute %}    
+{% endblock execute %}
 
-{% block spin %}   
+{% block spin %}
     rospy.spin()
 {% endblock spin %}
 

@@ -1,6 +1,6 @@
-{% from "Utils.tpl" import render_transitions %}
+{% from "Utils.tpl.py" import render_transitions %}
 
-{% include "State.tpl" %}
+{% include "State.tpl.py" %}
 
 {% block imports %}
 {% endblock imports %}
@@ -15,11 +15,11 @@ class SleepState(smach.State):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
 
         self._time = time
-    
+
     def execute(self, userdata):
-        
+
         rospy.sleep(self._time)
-        
+
         return 'succeeded'
 {% do defined_headers.append('class_SleepState') %}{% endif %}
 {% endblock class_defs %}

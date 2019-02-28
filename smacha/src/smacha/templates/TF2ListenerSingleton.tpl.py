@@ -1,9 +1,23 @@
-# 
+{% block meta %}
+name: Utils
+description: SMACH template that provides a TF2ListenerSingleton helper class for TF2ListenerState.
+language: Python
+framework: SMACH
+type: None
+tags: [core]
+includes: []
+extends: []
+variables: []
+input_keys: []
+output_keys: []
+{% endblock meta %}
+
+#
 # Based on the original code described here:
 # http://wiki.ros.org/executive_smach/AdditionalStateTypes
 # https://github.com/felix-kolbe/uashh-rvl-ros-pkg/blob/master/uashh_smach/src/uashh_smach/util.py
 #
-{% from "Utils.tpl" import import_module %}
+{% from "Utils.tpl.py" import import_module %}
 
 {% block imports %}
 {{ import_module(defined_headers, 'tf2_ros') }}

@@ -1,4 +1,4 @@
-{% from "Utils.tpl" import render_transitions %}
+{% from "Utils.tpl.py" import render_transitions %}
 
 {% block class_defs %}
 # define state Bas

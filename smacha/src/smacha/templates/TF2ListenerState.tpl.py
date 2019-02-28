@@ -7,6 +7,7 @@ type: State
 tags: [core]
 includes:
   - State
+  - TF2ListenerSingleton
 extends: []
 variables: []
 input_keys:
@@ -25,10 +26,10 @@ outcomes:
 - aborted
 {% endblock meta %}
 
-{% from "Utils.tpl" import import_module, render_transitions, render_remapping %}
+{% from "Utils.tpl.py" import import_module, render_transitions, render_remapping %}
 
-{% include "State.tpl" %}
-{% include "TF2ListenerSingleton.tpl" %}
+{% include "State.tpl.py" %}
+{% include "TF2ListenerSingleton.tpl.py" %}
 
 {% block base_header %}
 {% endblock base_header %}
@@ -50,14 +51,14 @@ class TF2ListenerState(smach.State):
                              output_keys=['output'])
 
         self._tf2_buffer, self._tf2_listener = TF2ListenerSingleton.get()
-        
+
     def execute(self, userdata):
         # Get target from userdata
         if 'target' in userdata:
           target = userdata.target
         else:
           raise ValueError('target should be in userdata!')
-        
+
         # Get source from userdata
         if 'source' in userdata:
           source = userdata.source

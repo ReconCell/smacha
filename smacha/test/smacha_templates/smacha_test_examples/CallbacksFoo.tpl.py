@@ -1,6 +1,6 @@
-{% from "Utils.tpl" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks %}
+{% from "Utils.tpl.py" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks %}
 
-{% include "State.tpl" %}
+{% include "State.tpl.py" %}
 
 {% block imports %}
 {{ import_module(defined_headers, 'random') }}
@@ -39,9 +39,9 @@ class Foo(smach.State):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
 
         self._name = name
-        
+
         {{ render_init_callbacks() }}
-        
+
     def execute(self, userdata):
         for input_key in self._input_keys:
             rospy.loginfo('Userdata input key \'{}\' BEFORE callback execution: {}'.format(input_key, userdata[input_key]))

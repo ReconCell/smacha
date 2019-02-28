@@ -1,6 +1,23 @@
-{% from "Utils.tpl" import render_input_keys, render_transitions, render_remapping %}
+{% block meta %}
+name: PrintUserdataState
+description: SMACH state that prints the values of userdata input_keys to standard output.
+language: Python
+framework: SMACH
+type: State
+tags: [core]
+includes:
+  - State
+extends: []
+variables: []
+input_keys: []
+output_keys: []
+outcomes:
+- succeeded
+{% endblock meta %}
 
-{% include "State.tpl" %}
+{% from "Utils.tpl.py" import render_input_keys, render_transitions, render_remapping %}
+
+{% include "State.tpl.py" %}
 
 {% block imports %}
 {% endblock imports %}
@@ -19,7 +36,7 @@ class PrintUserdataState(smach.State):
         # Print input keys to terminal
         for input_key in self._input_keys:
             rospy.loginfo('userdata.{}: {}'.format(input_key, userdata[input_key]))
-        
+
         return 'succeeded'
 {% do defined_headers.append('class_PrintUserdataState') %}{% endif %}
 {% endblock class_defs %}

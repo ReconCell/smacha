@@ -45,9 +45,9 @@ outcomes:
   - preempted
 {% endblock meta %}
 
-{% from "Utils.tpl" import from_import, render_goal_slots, render_input_keys, render_result_slots, render_output_keys, render_transitions, render_remapping %}
+{% from "Utils.tpl.py" import from_import, render_goal_slots, render_input_keys, render_result_slots, render_output_keys, render_transitions, render_remapping %}
 
-{% include "State.tpl" %}
+{% include "State.tpl.py" %}
 
 {% block base_header %}
 {% endblock base_header %}

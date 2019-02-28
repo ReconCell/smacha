@@ -51,6 +51,7 @@ Templating
    :hidden:
 
    SMACHA Templates<Templating/smacha_templates>
+   Core API Templates<Templating/core_api_templates>
 
 :doc:`Templating/smacha_templates` are Jinja2-based Python SMACH code templates
 containing variables that are filled out by :doc:`API/smacha.templater`
@@ -187,6 +188,9 @@ To run the original file script, use the following command:
 SMACHA API
 **********
 
+Modules
+=======
+
 .. toctree::
    :hidden:
 
@@ -203,6 +207,72 @@ These are the main smacha package submodules:
 - :doc:`API/smacha.generator`: provides the :class:`smacha.generator.Generator` class for generating executable Python SMACH code.
 - :doc:`API/smacha.util`: provides various utilities.
 - :doc:`API/smacha.exceptions`: provides exception definitions.
+
+Templates
+=========
+
+.. toctree::
+   :hidden:
+
+These are the core smacha package templates:
+
+Base Templates
+--------------
+
+.. toctree::
+   :hidden:
+
+   The Base Template<API/Templates/Base.tpl.py>
+
+- :doc:`API/Templates/Base.tpl.py`: used for specifying the bare bones of a Python SMACH state machine script.
+
+Container Templates
+-------------------
+
+.. toctree::
+   :hidden:
+
+   The StateMachine Template<API/Templates/StateMachine.tpl.py>
+   The Concurrence Template<API/Templates/Concurrence.tpl.py>
+
+- :doc:`API/Templates/StateMachine.tpl.py`: used for inserting a `StateMachine container <http://wiki.ros.org/smach/Tutorials/StateMachine%20container>`__.
+- :doc:`API/Templates/Concurrence.tpl.py`: used for inserting a `Concurrence container <http://wiki.ros.org/smach/Tutorials/Concurrence%20container>`__.
+
+
+State Templates
+---------------
+
+.. toctree::
+   :hidden:
+
+   The CallbacksState Template<API/Templates/CallbacksState.tpl.py>
+   The PrintUserdataState Template<API/Templates/PrintUserdataState.tpl.py>
+   The RandomOutcomeState Template<API/Templates/RandomOutcomeState.tpl.py>
+   The ServiceState Template<API/Templates/ServiceState.tpl.py>
+   The SimpleActionState Template<API/Templates/SimpleActionState.tpl.py>
+   The SleepState Template<API/Templates/SleepState.tpl.py>
+   The TF2ListenerState Template<API/Templates/TF2ListenerState.tpl.py>
+
+- :doc:`API/Templates/CallbacksState.tpl.py`: used for creating lambda function callbacks.
+- :doc:`API/Templates/PrintUserdataState.tpl.py`: used for printing userdata entries to standard output.
+- :doc:`API/Templates/RandomOutcomeState.tpl.py`: used for selecting a random outcome from a specified list of outcomes.
+- :doc:`API/Templates/ServiceState.tpl.py`: used for inserting a `ServiceState <http://wiki.ros.org/smach/Tutorials/ServiceState>`__.
+- :doc:`API/Templates/SimpleActionState.tpl.py`: used for inserting a `SimpleActionState <http://wiki.ros.org/smach/Tutorials/SimpleActionState>`__.
+- :doc:`API/Templates/TF2ListenerState.tpl.py`: used for reading TF2 transforms.
+
+Other Templates
+---------------
+
+.. toctree::
+   :hidden:
+
+   The State Template<API/Templates/State.tpl.py>
+   The Utilities Template<API/Templates/Utils.tpl.py>
+   The TF2ListenerSingleton Template<API/Templates/TF2ListenerSingleton.tpl.py>
+
+- :doc:`API/Templates/State.tpl.py`: contains code common to all state templates.
+- :doc:`API/Templates/Utils.tpl.py`: contains template macros and other utilities.
+- :doc:`API/Templates/TF2ListenerSingleton.tpl.py`: provides a helper class for :doc:`API/Templates/TF2ListenerState.tpl.py`.
 
 ******************
 Indices and tables
