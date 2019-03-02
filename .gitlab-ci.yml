@@ -8,7 +8,7 @@ before_script:
   - apk add --update bash coreutils tar # install travis depedencies
   - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .ci_config
 # Build config for gitlab.com
-kinetic-gitlab-com:
+kinetic:
   only:
     variables:
       - $CI_PROJECT_URL == "https://gitlab.com/reconcell/smacha"
@@ -18,7 +18,7 @@ kinetic-gitlab-com:
     ROS_DISTRO: "kinetic"
     CI_DEBUG_TRACE: "true"
 # Build config for repo.ijs.si
-kinetic-repo-ijs-si:
+kinetic:
   only:
     variables:
       - $CI_PROJECT_URL == "https://repo.ijs.si/reconcell/smacha"
