@@ -10,15 +10,14 @@ before_script:
 # Build config for gitlab.com
 kinetic-gitlab-com:
   only:
-    variables:
-      - $CI_SERVER_NAME == "Gitlab CI"
+    - $CI_SERVER_NAME == "Gitlab CI"
   script: 
     - .ci_config/gitlab.sh
   variables:
     ROS_DISTRO: "kinetic"
     CI_DEBUG_TRACE: "true"
 # Build config for repo.ijs.si
-kinetic-reconcell:
+kinetic-repo-ijs-si:
   only:
     variables:
       - $CI_SERVER_NAME == "repo.ijs.si"
