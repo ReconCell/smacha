@@ -7,17 +7,25 @@ services:
 before_script:
   - apk add --update bash coreutils tar # install travis depedencies
   - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .ci_config
-# Build config for gitlab.com shared runners
+# Build config for gitlab.com
 kinetic-gitlab-com:
+  only:
+    variables:
+      $CI_SERVER_NAME == "Gitlab CI"
   script: 
     - .ci_config/gitlab.sh
   variables:
     ROS_DISTRO: "kinetic"
-# Build config for jsi-reconcell-rosmaster-privileged runner
+    CI_DEBUG_TRACE: "true"
+# Build config for repo.ijs.si
 kinetic-reconcell:
+  only:
+    variables:
+      $CI_SERVER_NAME == "repo.ijs.si"
   tags:
     - reconcell
   script: 
     - .ci_config/gitlab.sh
   variables:
     ROS_DISTRO: "kinetic"
+    CI_DEBUG_TRACE: "true"
