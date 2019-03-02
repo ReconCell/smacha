@@ -9,9 +9,9 @@ before_script:
   - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .ci_config
 # Build config for gitlab.com
 kinetic-gitlab-com:
-  # only:
-  #   variables:
-  #     - $CI_SERVER_NAME == "Gitlab CI"
+  only:
+    variables:
+      - $CI_PROJECT_URL == "https://gitlab.com/$CI_PROJECT_PATH"
   script: 
     - .ci_config/gitlab.sh
   variables:
@@ -19,9 +19,9 @@ kinetic-gitlab-com:
     CI_DEBUG_TRACE: "true"
 # Build config for repo.ijs.si
 kinetic-repo-ijs-si:
-  # only:
-  #   variables:
-  #     - $CI_SERVER_NAME == "repo.ijs.si"
+  only:
+    variables:
+      - $CI_PROJECT_URL == "https://repo.ijs.si/$CI_PROJECT_PATH"
   tags:
     - reconcell
   script: 
