@@ -5,12 +5,42 @@ variables:
 services:
   - docker:dind # enable docker-in-docker
 before_script:
-  - apk add --update bash coreutils # install travis depedencies
-  - git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
-kinetic:
+  - apk add --update bash coreutils tar # install travis depedencies
+  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .ci_config
+# Build config for gitlab.com
+kinetic-gitlab-com:
+  only:
+    variables:
+      - $CI_PROJECT_URL =~ /^https:\/\/gitlab.com.*/
   script: 
     - .ci_config/gitlab.sh
   variables:
     ROS_DISTRO: "kinetic"
+    CI_DEBUG_TRACE: "true"
+# Build config for repo.ijs.si
+kinetic-repo-ijs-si:
+  only:
+    variables:
+      - $CI_PROJECT_URL =~ /^https:\/\/repo.ijs.si.*/
   tags:
     - reconcell
+  script: 
+    - .ci_config/gitlab.sh
+  variables:
+    ROS_DISTRO: "kinetic"
+    CI_DEBUG_TRACE: "true"
+# Pages config for gitlab.com
+pages:
+  only:
+    variables:
+      - $CI_PROJECT_URL =~ /^https:\/\/gitlab.com.*/
+  variables:
+    MOUNT_POINT: /builds/$CI_PROJECT_PATH
+  script:
+    - echo "Building documentation for branch $CI_COMMIT_REF_NAME of $CI_PROJECT_NAME"
+    - docker run --rm -v "$MOUNT_POINT:/$CI_PROJECT_NAME" -e CI_PROJECT_NAME=$CI_PROJECT_NAME -e CI_REPOSITORY_URL=/$CI_PROJECT_NAME ros:kinetic-ros-base /$CI_PROJECT_NAME/smacha/doc/build.sh
+  artifacts:
+    paths:
+      - public
+  only:
+    - master

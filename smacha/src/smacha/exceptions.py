@@ -1,5 +1,6 @@
 from smacha.util import bcolors
 
+
 class ScriptNotFoundError(Exception):
     """The requested SMACHA YAML script was not found."""
 
@@ -17,5 +18,5 @@ class ParsingError(BaseException):
             message = bcolors.FAIL + 'Parsing error: {0}'.format(error) + bcolors.ENDC
         else:
             message = bcolors.FAIL + 'Parsing error!' + bcolors.ENDC
-        
+
         super(ParsingError, self).__init__(message)
