@@ -11,7 +11,7 @@ before_script:
 kinetic-gitlab-com:
   only:
     variables:
-      - $CI_PROJECT_URL == /^https://gitlab.com.*
+      - $CI_PROJECT_URL == /^https:\/\/gitlab.com.*/
   script: 
     - .ci_config/gitlab.sh
   variables:
@@ -21,7 +21,7 @@ kinetic-gitlab-com:
 kinetic-repo-ijs-si:
   only:
     variables:
-      - $CI_PROJECT_URL == /^https://repo.ijs.si.*
+      - $CI_PROJECT_URL == /^https:\/\/repo.ijs.si.*/
   tags:
     - reconcell
   script: 
