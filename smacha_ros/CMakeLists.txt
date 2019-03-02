@@ -9,9 +9,6 @@ project(smacha_ros)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  smach
-  smach_ros
-  smacha
   std_msgs
 )
 

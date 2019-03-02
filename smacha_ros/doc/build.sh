@@ -97,6 +97,13 @@ cd ..
 # Source catkin workspace
 source ./catkin_ws/devel/setup.bash
 
+# DEBUG:
+echo CI_PROJECT_NAME=$CI_PROJECT_NAME
+echo CI_REPOSITORY_URL=$CI_REPOSITORY_URL
+echo PACKAGE_DOC_DIR=$PACKAGE_DOC_DIR
+echo PACKAGE_DIR=$PACKAGE_DIR
+echo PACKAGE_NAME=$PACKAGE_NAME
+
 # Test build with non-ROS wrapped Sphinx command to allow warnings and errors to be caught
 sphinx-build -W -b html /$CI_PROJECT_NAME/$PACKAGE_NAME /$CI_PROJECT_NAME/$PACKAGE_NAME/public_native_build
 
