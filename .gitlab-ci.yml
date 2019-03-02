@@ -11,7 +11,7 @@ before_script:
 kinetic-gitlab-com:
   only:
     variables:
-      $CI_SERVER_NAME == "Gitlab CI"
+      - $CI_SERVER_NAME == "Gitlab CI"
   script: 
     - .ci_config/gitlab.sh
   variables:
@@ -21,7 +21,7 @@ kinetic-gitlab-com:
 kinetic-reconcell:
   only:
     variables:
-      $CI_SERVER_NAME == "repo.ijs.si"
+      - $CI_SERVER_NAME == "repo.ijs.si"
   tags:
     - reconcell
   script: 
