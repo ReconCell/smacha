@@ -10,7 +10,8 @@ before_script:
 # Build config for gitlab.com
 kinetic-gitlab-com:
   only:
-    - $CI_SERVER_NAME == "Gitlab CI"
+    variables:
+      - $CI_SERVER_NAME == "Gitlab CI"
   script: 
     - .ci_config/gitlab.sh
   variables:
