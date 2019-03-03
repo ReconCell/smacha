@@ -81,8 +81,6 @@ source /opt/ros/kinetic/setup.bash
 # Initialize catkin workspace
 mkdir -p catkin_ws/src
 cd catkin_ws
-catkin build
-source ./devel/setup.bash
 
 # Clone repo
 git clone $CI_REPOSITORY_URL src
@@ -94,15 +92,8 @@ rosdep install --from-paths src --ignore-src --rosdistro kinetic -y
 catkin build
 cd ..
 
-# Source catkin workspace
+# (Source) catkin workspace
 source ./catkin_ws/devel/setup.bash
-
-# DEBUG:
-echo CI_PROJECT_NAME=$CI_PROJECT_NAME
-echo CI_REPOSITORY_URL=$CI_REPOSITORY_URL
-echo PACKAGE_DOC_DIR=$PACKAGE_DOC_DIR
-echo PACKAGE_DIR=$PACKAGE_DIR
-echo PACKAGE_NAME=$PACKAGE_NAME
 
 # Test build with non-ROS wrapped Sphinx command to allow warnings and errors to be caught
 sphinx-build -W -b html /$CI_PROJECT_NAME/$PACKAGE_NAME /$CI_PROJECT_NAME/$PACKAGE_NAME/public_native_build
@@ -111,8 +102,9 @@ sphinx-build -W -b html /$CI_PROJECT_NAME/$PACKAGE_NAME /$CI_PROJECT_NAME/$PACKA
 rosdoc_lite -o /$CI_PROJECT_NAME/$PACKAGE_NAME/public_build /$CI_PROJECT_NAME/$PACKAGE_NAME
 
 # Copy the html to the public folder
-mkdir -p /$CI_PROJECT_NAME/$PACKAGE_NAME/public
-cp -r /$CI_PROJECT_NAME/$PACKAGE_NAME/public_build/html/* /$CI_PROJECT_NAME/$PACKAGE_NAME/public/
+mkdir -p /$CI_PROJECT_NAME/public/$PACKAGE_NAME/
+cp -r /$CI_PROJECT_NAME/$PACKAGE_NAME/public_build/html/* /$CI_PROJECT_NAME/public/$PACKAGE_NAME/
 
 # Run HTML tests on generated build output to check for 404 errors, etc
-# htmlproofer /$CI_PROJECT_NAME/$PACKAGE_NAME/public --only-4xx --check-html --file-ignore /$CI_PROJECT_NAME/$PACKAGE_NAME/public/genindex.html,/$CI_PROJECT_NAME/$PACKAGE_NAME/public/search.html,/$CI_PROJECT_NAME/$PACKAGE_NAME/public/index-msg.html --alt-ignore '/.*/' --url-ignore '#'
+# htmlproofer /$CI_PROJECT_NAME/public/$PACKAGE_NAME --only-4xx --check-html --file-ignore /$CI_PROJECT_NAME/public/$PACKAGE_NAME/genindex.html,/$CI_PROJECT_NAME/public/$PACKAGE_NAME/search.html,/$CI_PROJECT_NAME/public/$PACKAGE_NAME/index-msg.html --alt-ignore '/.*/' --url-ignore '#'
+

@@ -24,13 +24,16 @@
 # Date: 16th April 2018
 #===============================================================================
 
+
 # Check if we're in a package root that is also a repo root,
 # or we're in a package root that is not a repo root (i.e. we're
 # actually in a repo stack of packages).
 if [ -d $PWD/.git ] && [ -f $PWD/package.xml ]; then
     export MOUNT_POINT=`realpath $PWD`
+    export PACKAGE_NAME=
 elif [ -d $PWD/../.git ] && [ -f $PWD/package.xml ]; then
     export MOUNT_POINT=`realpath $PWD/..`
+    export PACKAGE_NAME=${PWD/*\//}
 else
     echo "ERROR: this tool must be run from a git-managed ROS package root directory!"
     exit 1
@@ -39,12 +42,12 @@ fi
 # Remove previous folders
 # NOTE: This may require sudo if these folders were previously
 # built by the docker build script.
-rm -rf ./public_build
-rm -rf ./public
+rm -rf $MOUNT_POINT/$PACKAGE_NAME/public_build
+rm -rf $MOUNT_POINT/public/$PACKAGE_NAME
 
 # Build the documentation using rosdoc_lite
-rosdoc_lite -o ./public_build .
+rosdoc_lite -o $MOUNT_POINT/$PACKAGE_NAME/public_build .
 
 # Copy the html to the public folder
-mkdir ./public
-cp -r ./public_build/html/* ./public/
+mkdir -p $MOUNT_POINT/public/$PACKAGE_NAME/
+cp -r $MOUNT_POINT/$PACKAGE_NAME/public_build/html/* $MOUNT_POINT/public/$PACKAGE_NAME/
