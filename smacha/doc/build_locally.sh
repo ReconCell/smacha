@@ -5,13 +5,13 @@
 # This script will build the current package documentation locally assuming
 # build dependencies have been installed. It should be quite a bit faster than
 # running a full docker build.
-# 
+#
 # This method assumes that the following dependencies have been installed:
 #   sphinx
 #   doxygen (for C++ APIs)
 #   sphinx_rtd_theme
 #   rosdoc_lite
-# 
+#
 # It also assumes that the current package has been built as part of a catkin
 # workspace and that the catkin workspace has been appropriately sourced.
 #

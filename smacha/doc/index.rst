@@ -1,8 +1,7 @@
-######
-SMACHA
-######
+##############
+SMACHA Package
+##############
 
 .. toctree::
-   :hidden:
 
    smacha

@@ -4,7 +4,6 @@ SMACHA Documentation
 
 SMACHA is a `YAML <http://yaml.org/>`__ and
 `Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__-based meta-scripting,
-
 templating, and code generation engine for
 `SMACH <http://wiki.ros.org/smach>`__.
 
