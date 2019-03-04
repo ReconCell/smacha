@@ -20,17 +20,17 @@
 # actually in a repo stack of packages).
 if [ -d $PWD/.git ] && [ -f $PWD/package.xml ]; then
     export MOUNT_POINT=`realpath $PWD`
+    export PACKAGE_NAME=
 elif [ -d $PWD/../.git ] && [ -f $PWD/package.xml ]; then
     export MOUNT_POINT=`realpath $PWD/..`
+    export PACKAGE_NAME=${PWD/*\//}
 else
     echo "ERROR: this tool must be run from a git-managed ROS package root directory!"
     exit 1
 fi
 
 # Spoof environment variables so it looks like a regular GitLab CI build
-export PACKAGE_NAME=${PWD/*\//}
 export CI_PROJECT_NAME=${MOUNT_POINT/*\//}
-export CI_REPOSITORY_URL=/$CI_PROJECT_NAME
 
 # Run the documentation build script in a ROS Kinetic docker image
-docker run --rm -v "$MOUNT_POINT:/$CI_PROJECT_NAME" -e CI_PROJECT_NAME=$CI_PROJECT_NAME -e CI_REPOSITORY_URL=$CI_REPOSITORY_URL ros:kinetic-ros-base /$CI_PROJECT_NAME/$PACKAGE_NAME/doc/build.sh
+docker run --rm -v "$MOUNT_POINT:/$CI_PROJECT_NAME" -e CI_PROJECT_NAME=$CI_PROJECT_NAME -e CI_REPOSITORY_URL=/$CI_PROJECT_NAME ros:kinetic-ros-base /$CI_PROJECT_NAME/$PACKAGE_NAME/doc/build.sh
