@@ -1,0 +1,3 @@
+- builder: sphinx
+  name: smacha package API
+  sphinx_root_dir: doc

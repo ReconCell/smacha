@@ -1,0 +1,7 @@
+##############
+SMACHA Package
+##############
+
+.. toctree::
+
+   smacha
