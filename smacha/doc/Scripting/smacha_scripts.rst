@@ -4,46 +4,24 @@ SMACHA Scripts
 
 .. toctree::
 
-**NOTE**: Before reading the following documentation, it is highly recommended
-that you consult the `"Getting Started with smach" SMACH Tutorial <https://wiki.ros.org/smach/Tutorials/Getting%20Started>`__
-first!
+.. note:: Before reading the following documentation, it is highly recommended
+          that you consult the `"Getting Started with smach" SMACH Tutorial
+          <https://wiki.ros.org/smach/Tutorials/Getting%20Started>`__ first!
 
-**SMACHA scripts** are YAML files that describe how SMACHA should generate
-SMACH code.
+**SMACHA scripts** are `YAML <http://yaml.org/>`__ files that describe
+how SMACHA should generate `SMACH <http://wiki.ros.org/smach>`__ code.
 
 Linear State Sequence Example
 =============================
 
-Here is a simple SMACHA script from the ``test/smacha_scripts/smacha_test_examples``
-folder in the ``smacha`` package that defines a linear sequence of states:
+Here is a simple SMACHA script :download:`seq.yml
+</../test/smacha_scripts/smacha_test_examples/seq.yml>` from the
+`test/smacha_scripts/smacha_test_examples <https://gitlab.com/reconcell/smacha/tree/master/smacha/test/smacha_scripts/smacha_test_examples>`__
+folder in the `smacha <https://gitlab.com/reconcell/smacha/tree/master/smacha>`__ package
+that defines a linear sequence of states:
 
-.. code-block:: yaml
-
-  --- # SMACHA state sequence example
-  name: sm_top
-  template: Base
-  manifest: smacha
-  node_name: smacha_params_test
-  outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
-  states:
-    - FOO_0:
-        template: ParamFoo
-        params: {name: FOO_0, outcome: outcome_a}
-        name_param: [params, name]
-        outcome_param: [params, outcome]
-        transitions: {outcome_a: FOO_1, outcome_b: final_outcome_b}
-    - FOO_1:
-        template: ParamFoo
-        params: {name: FOO_1, outcome: outcome_a}
-        name_param: [params, name]
-        outcome_param: [params, outcome]
-        transitions: {outcome_a: FOO_2, outcome_b: final_outcome_b}
-    - FOO_2:
-        template: ParamFoo
-        params: {name: FOO_2, outcome: outcome_a}
-        name_param: [params, name]
-        outcome_param: [params, outcome]
-        transitions: {outcome_a: final_outcome_a, outcome_b: final_outcome_c}
+.. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq.yml
+   :language: yaml
 
 If we execute this script by running the following command in one terminal:
 
@@ -80,92 +58,13 @@ The base of the script specifies the following variables:
 
 Each of the states in the base script may, in turn, specify similar
 variables of their own, as discussed in the following sub-sections.
-
-These variables are used to fill out the ``Base`` template (as selected
-by the ``template`` variable) which looks like this:
-
-.. code-block:: python
-
-  {% from "Utils.tpl" import render_outcomes, render_userdata %}
-
-  {% set defined_headers = [] %}
-  {% set local_vars = [] %}
-
-  {% block base_header %}
-  #!/usr/bin/env python
-  {{ base_header }}
-  {% endblock base_header %}
-
-  {% block imports %}
-  import roslib; {% if manifest is defined %}roslib.load_manifest('{{ manifest }}'){% endif %}
-  import rospy
-  import smach
-  import smach_ros
-  {{ imports }}
-  {% endblock imports %}
-
-  {% block defs %}
-  {{ defs }}
-  {% endblock defs %}
-
-  {% block class_defs %}
-  {{ class_defs }}
-  {% endblock class_defs %}
-
-  {% if name is defined %}{% set sm_name = name | lower() %}{% else %}{% set sm_name = 'sm' %}{% endif %}
-
-
-  {% block main_def %}
-  def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}():
-      rospy.init_node('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}')
-
-      {{ main_def | indent(4) }}
-  {% endblock main_def %}
-
-  {% block body %}
-      {{ sm_name }} = smach.StateMachine({{ render_outcomes(outcomes) }})
-
-      {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) | indent(4) }}{% endif %}
-      {% if name in header %}{{ header[name] | indent(4, true) }}{% endif %}
-
-      with {{ sm_name }}:
-
-          {{ body | indent(8) }}
-  {% endblock body %}
-
-  {% block footer %}
-          {{ footer | indent(8) }}
-  {% endblock footer %}
-
-  {% block introspection_server %}
-      sis = smach_ros.IntrospectionServer('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}', {{ name | lower() }}, '/{{ name }}')
-      sis.start()
-  {% endblock introspection_server %}
-
-  {% block execute %}
-      {{ execute | indent(4) }}
-
-      outcome = {{ sm_name }}.execute()
-  {% endblock execute %}    
-
-  {% block spin %}   
-      rospy.spin()
-  {% endblock spin %}
-
-  {% block base_footer %}
-      {{ base_footer | indent(4) }}
-  {% endblock base_footer %}
-
-  {% block main %}
-  if __name__ == '__main__':
-  {{ '' | indent(4, true) }}{% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}()
-  {% endblock main %}
-
-Without getting bogged down in :doc:`templating
-<../Templating/smacha_templates>` details, this just defines the skeleton of a
-SMACH Python code file. All we need to understand at this point is that the
-remainder of our SMACHA script is used alongside other templates in order to
-populate this template and produce the final executable result.
+These variables are used to fill out the :doc:`Base template
+<../API/Templates/Base.tpl.py>` (as selected by the ``template`` variable). Without
+getting bogged down in :doc:`templating <../Templating/smacha_templates>`
+details, the :doc:`Base template <../API/Templates/Base.tpl.py>` just defines the
+skeleton of a SMACH Python code file. All we need to understand at this point is
+that the remainder of our SMACHA script is used alongside other templates in
+order to populate this template and produce the final executable result.
 
 States
 ======
@@ -199,33 +98,8 @@ In this case, the template is the ``ParamFoo`` template located in
 the ``test/smacha_templates/smacha_test_examples`` folder of the ``smacha`` package,
 and it looks like this:
 
-.. code-block:: python
-
-  {% from "Utils.tpl" import render_transitions, render_remapping %}
-
-  {% block class_defs %}
-  {% if 'class_foo' not in defined_headers %}
-  # define state Foo
-  class Foo(smach.State):
-      def __init__(self, name, outcome):
-          smach.State.__init__(self, outcomes=['outcome_a','outcome_b'])
-
-          self._name = name
-          self._outcome = outcome
-
-      def execute(self, userdata):
-          rospy.loginfo('Executing state {}'.format(self._name))
-          rospy.loginfo('Returning {}'.format(self._outcome))
-
-          return self._outcome
-  {% do defined_headers.append('class_foo') %}{% endif %}
-  {% endblock class_defs %}
-
-  {% block body %}
-  smach.{{ parent_type }}.add('{{ name }}', Foo('{{ name_param }}', '{{ outcome_param }}'){% if transitions is defined %}, 
-  {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
-  {{ render_remapping(remapping) }}{% endif %})
-  {% endblock body %}
+.. literalinclude:: /../test/smacha_templates/smacha_test_examples/ParamFoo.tpl.py
+   :language: python
 
 While all of the template variables are important for filling out the template,
 the ``transitions`` variable is one of the most important ones and it should be
@@ -242,6 +116,8 @@ using :doc:`container states <container_states>` or can import
 written state sequences or hierarchies.
 In both of these cases `script parameters`, which are present in the above
 example, provide important functionality, which we discuss next.
+
+.. _script-params:
 
 Script Parameters
 =================
@@ -292,11 +168,13 @@ We refer to this functionality as a `parameter lookup` and the associated
 API method in the :doc:`Parser Module <../API/smacha.parser>`
 is documented :func:`here <smacha.parser.Parser.lookup>`.
 
-**NOTE**: both of the above state definitions result in precisely the same
-outcome `at the template level`!  The utility of this script parameter
-functionality will become more clear later when we discuss the use of
-:doc:`container states <container_states>` and
-:doc:`sub-scripts <sub_scripts_and_super_scripts>`.
+.. note:: Both of the above state definitions result in precisely the same
+          outcome `at the template level`! The utility of this script parameter
+          functionality will become more clear later when we discuss the use of
+          :doc:`container states <container_states>` and :doc:`sub-scripts
+          <sub_scripts_and_super_scripts>`.
+
+.. _string-constructs:
 
 String Constructs
 =================
