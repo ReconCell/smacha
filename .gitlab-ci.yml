@@ -33,8 +33,8 @@ kinetic-repo-ijs-si:
 # Pages config for gitlab.com
 pages:
   only:
-    refs:
-      - master
+    - master
+  only:
     variables:
       - $CI_PROJECT_URL =~ /^https:\/\/gitlab.com.*/
   variables:
