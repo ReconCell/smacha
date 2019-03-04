@@ -11,6 +11,8 @@ SMACHA Scripts
 **SMACHA scripts** are `YAML <http://yaml.org/>`__ files that describe
 how SMACHA should generate `SMACH <http://wiki.ros.org/smach>`__ code.
 
+.. _linear-state-seq-example:
+
 Linear State Sequence Example
 =============================
 
@@ -44,8 +46,15 @@ we get the following visualization of the resulting state machine:
 
 We will now take a look at the different parts of the script in more detail below.
 
-Base Variables
-==============
+Variables
+=========
+
+Script variables are `key: value` pairs where the key usually
+corresponds to the name of a template variable to be filled and
+the value is usually either a string or a numeric value,
+or a list of values or a dictionary of further `key: value`
+pairs, following the usual YAML conventions, describing how
+the template variable should be filled.
 
 The base of the script specifies the following variables:
 
