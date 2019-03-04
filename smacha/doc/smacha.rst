@@ -2,10 +2,9 @@
 SMACHA Documentation
 ********************
 
-SMACHA is a `YAML <http://yaml.org/>`__ and
-`Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__-based meta-scripting,
-templating, and code generation engine for
-`SMACH <http://wiki.ros.org/smach>`__.
+**SMACHA** is a meta-scripting, templating, and code generation engine for rapid
+prototyping of `ROS <http://www.ros.org>`__ `SMACH
+<http://wiki.ros.org/smach>`__ state machines.
 
 `SMACH <http://wiki.ros.org/smach>`__ is an exceptionally useful and
 comprehensive task-level architecture for state machine construction in
@@ -15,17 +14,35 @@ task-level simplicity can often be obfuscated at the script-level by
 boilerplate code, intricate structure and lack of code reuse between
 state machine prototypes.
 
-SMACHA (short for “State Machine Assembler”, pronounced “smasha”) aims
-at distilling the task-level simplicity of SMACH into compact YAML-based
-scripts in the foreground, while retaining all of its power and
-flexibility in Jinja2-based templates and a custom code generation
-engine in the background.
+SMACHA (short for `“State Machine Assembler”`, pronounced `“smasha”`) aims at
+distilling the task-level simplicity of SMACH into compact `YAML <http://yaml.org/>`__
+scripts in the foreground, while retaining all of its
+power and flexibility in `Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__-based
+templates and a custom code generation engine in the background.
+Thus SMACHA does not aim to replace SMACH, but to augment it.
 
 Overview
 ========
 
 .. figure:: _static/smacha_overview.png
    :alt: SMACHA API Overview
+
+Why SMACHA?
+===========
+
+SMACHA allows for arbitrarily complex SMACH state machine programs to be written
+as compact YAML scripts that can be directly executed with ROS. Here is the
+`"Nesting State Machines" example <http://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines>`__
+from the `SMACH Tutorials <http://wiki.ros.org/smach/Tutorials>`__ described in a SMACHA
+script:
+
+.. literalinclude:: /../test/smacha_scripts/executive_smach_tutorials/state_machine_nesting2.yml
+   :language: yaml
+
+This demonstrates a reduction from 80 lines of raw SMACH Python code to 15 lines
+of SMACHA script. Not bad.
+SMACHA provides many other benefits and tools to
+help rapidly prototype complex state machines for robot control.
 
 Scripting
 =========
@@ -34,14 +51,27 @@ Scripting
    :hidden:
 
    SMACHA Scripts<Scripting/smacha_scripts>
-   Container States<Scripting/container_states>
    Userdata<Scripting/userdata>
+   Container States<Scripting/container_states>
    Sub-Scripts and Super-Scripts<Scripting/sub_scripts_and_super_scripts>
 
-:doc:`Scripting/smacha_scripts` are YAML files that describe how SMACHA should generate
-SMACH code. They are parsed by :doc:`API/smacha.parser` and direct
+:doc:`Scripting/smacha_scripts` are `YAML <http://yaml.org/>`__ files that describe
+how SMACHA should generate SMACH code. They are parsed by :doc:`API/smacha.parser` and direct
 :doc:`API/smacha.generator` on how to combine :doc:`Templating/smacha_templates` using the
 :doc:`API/smacha.templater`.
+
+Some of the benefits of `meta-scripting <https://en.wikipedia.org/wiki/Metaprogramming>`__
+in this way include:
+
+* **quick, at-a-glance overviews** of state machine program intent,
+* **easy script manipulation, reuse and restructuring**,
+* **streamlined ROS integration**, e.g. loading of scripts onto the parameter server.
+
+SMACHA provides various utilities to automate some common state machine script manipulation tasks,
+such as the :ref:`Contain Tool <contain-tool>` for
+**automatic containerization of state sequences**, and
+the :ref:`Extract Tool <extract-tool>` for
+**automatic conversion of commonly used container states to reusable sub-scripts**.
 
 Templating
 ==========
