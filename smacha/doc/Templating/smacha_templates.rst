@@ -2,113 +2,48 @@
 SMACHA Templates
 ****************
 
-`Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__ is a powerful template
-engine for Python. Jinja2 templates are used to specify how code should
-be generated from SMACHA scripts. The ``Base`` template from the above
-example is specified in a ``Base.tpl`` file and looks like this:
+.. toctree::
 
-.. code:: python
+.. note:: Before reading the following documentation, particularly if you are
+          unfamiliar with templating, it is highly recommended that you consult
+          the `"Jinja2 documentation <http://jinja.pocoo.org/>`__ first!
 
-   {% from "Utils.tpl" import render_userdata %}
-   {% set defined_headers = [] %}
-   {% block base_header %}
-   #!/usr/bin/env python
-   {{ base_header }}
-   {% endblock base_header %}
+**SMACHA templates** are used to specify how SMACH Python code should be
+generated from SMACHA scripts. They are effectively code skeletons with
+placeholder variables that are fleshed out with the contents of the scripts via
+the recursive code generation process. The SMACHA API renders these templates
+using the `Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__ library, a powerful
+template engine for Python, coupled with some custom modifications to its usual
+rendering behaviour in order to suit this particular use case.
 
-   {% block imports %}
-   import roslib; {% if manifest is defined %}roslib.load_manifest('{{ manifest }}'){% endif %}
-   import rospy
-   import smach
-   import smach_ros
-   {{ imports }}
-   {% endblock imports %}
-
-   {% block defs %}
-   {{ defs }}
-   {% endblock defs %}
-
-   {% block class_defs %}
-   {{ class_defs }}
-   {% endblock class_defs %}
-
-   {% if name is defined %}{% set sm_name = name | lower() %}{% else %}{% set sm_name = 'sm' %}{% endif %}
-
-   {% block main_def %}
-   def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}():
-       rospy.init_node('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}')
-
-       {{ main_def | indent(4) }}
-   {% endblock main_def %}
-      
-   {% block body %}
-       {{ sm_name }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
-
-       {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) | indent(4) }}{% endif %}
-       {% if name in header %}{{ header[name] | indent(4, true) }}{% endif %}
-
-       with {{ sm_name }}:
-
-           {{ body | indent(8) }}
-   {% endblock body %}
-
-   {% block footer %}
-           {{ footer | indent(8) }}
-   {% endblock footer %}
-
-   {% block introspection_server %}
-       sis = smach_ros.IntrospectionServer('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}', {{ name | lower() }}, '/{{ name }}')
-       sis.start()
-   {% endblock introspection_server %}
-
-   {% block execute %}
-       {{ execute | indent(4) }}
-
-       outcome = {{ sm_name }}.execute()
-   {% endblock execute %}    
-
-   {% block spin %}   
-       rospy.spin()
-   {% endblock spin %}
-
-   {% block base_footer %}
-       {{ base_footer | indent(4) }}
-   {% endblock base_footer %}
-
-   {% block main %}
-   if __name__ == '__main__':
-   {{ '' | indent(4, true) }}{% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}()
-   {% endblock main %}
-
-Core Templates
+Base Templates
 ==============
 
-SMACHA provides default core templates for many of the SMACH states and
-containers, as well as for other useful constructs.
+All SMACHA scripts start by specifying a ``base template``,
+which is like the spine of the code skeleton that serves as a
+starting point from which the code generation process can start
+to fill in the meat of the code.
 
-So far, the following core templates are present and functional:
+Looking again at :download:`seq.yml
+</../test/smacha_scripts/smacha_test_examples/seq.yml>` script from the
+:ref:`Linear State Sequence Example <linear-state-seq-example>` in the
+:doc:`Scripting Tutorial <../Scripting/smacha_scripts>`,
+we see that the base template ``Base`` is specified at the top of the script:
 
--  ``Base.tpl.py``: the core base template used for specifying the bare
-   (bones) of a a Python SMACH state machine script.
+.. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq.yml
+   :language: yaml
+   :lines: 1-3
 
--  ``State.tpl``: contains functionality common to all states,
-   e.g. userdata specification.
+This ``Base`` template is the :doc:`core SMACHA Base template <../API/Templates/Base.tpl.py>`
+defined in the :download:`Base.tpl.py </../src/smacha/templates/Base.tpl.py>` file.
 
--  ``StateMachine.tpl``: the core template used for inserting a
-   `StateMachine
-   container <http://wiki.ros.org/smach/Tutorials/StateMachine%20container>`__.
+.. note:: The `.tpl.py` extension indicates that it is a template, while still
+          allowing text editors to invoke their Python syntax highlighters.
 
--  ``Concurrence.tpl``: the core template used for inserting a
-   `Concurrence
-   container <http://wiki.ros.org/smach/Tutorials/Concurrence%20container>`__.
+The :download:`Base.tpl.py </../src/smacha/templates/Base.tpl.py>` file looks like this:
 
--  ``ServiceState.tpl``: the core template used for inserting a
-   `ServiceState <http://wiki.ros.org/smach/Tutorials/ServiceState>`__.
-
--  ``SimpleActionState.tpl``: the core template used for inserting a
-   `SimpleActionState <http://wiki.ros.org/smach/Tutorials/SimpleActionState>`__.
-
--  ``TF2ListenerState.tpl``: used for reading TF2 transforms.
+.. literalinclude:: /../src/smacha/templates/Base.tpl.py
+   :language: python
 
 Core Code Generation Variables and Code Blocks
 ==============================================
