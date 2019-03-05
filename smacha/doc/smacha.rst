@@ -80,6 +80,9 @@ Templating
    :hidden:
 
    SMACHA Templates<Templating/smacha_templates>
+   Anatomy<Templating/anatomy>
+   Inheritance<Templating/inheritance>
+   Metadata<Templating/metadata>
    Core API Templates<Templating/core_api_templates>
 
 :doc:`Templating/smacha_templates` are Jinja2-based Python SMACH code templates

@@ -17,6 +17,8 @@ SMACHA uses two types of container states: **StateMachine**
 containers and **Concurrence** containers, for producing
 nested state machine hierarchies and parallel state machines respectively.
 
+.. _nested-state-machine-example:
+
 Nested State Machine Example
 ============================
 
