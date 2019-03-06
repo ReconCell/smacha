@@ -2,203 +2,176 @@
 SMACHA Templates
 ****************
 
-`Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__ is a powerful template
-engine for Python. Jinja2 templates are used to specify how code should
-be generated from SMACHA scripts. The ``Base`` template from the above
-example is specified in a ``Base.tpl`` file and looks like this:
+.. toctree::
 
-.. code:: python
+.. note:: Before reading the following documentation, particularly if you are
+          unfamiliar with templating, it is highly recommended that you consult
+          the `"Jinja2 documentation <http://jinja.pocoo.org/>`__ first!
 
-   {% from "Utils.tpl" import render_userdata %}
-   {% set defined_headers = [] %}
-   {% block base_header %}
-   #!/usr/bin/env python
-   {{ base_header }}
-   {% endblock base_header %}
+**SMACHA templates** are used to specify how SMACH Python code should be
+generated from SMACHA scripts. They are effectively code skeletons with
+placeholder variables that are fleshed out with the contents of the scripts via
+the recursive code generation process. The SMACHA API renders these templates
+using the `Jinja2 <http://jinja.pocoo.org/docs/2.9/>`__ library, a powerful
+template engine for Python, coupled with some custom modifications to its usual
+rendering behaviour in order to suit this particular use case.
 
-   {% block imports %}
-   import roslib; {% if manifest is defined %}roslib.load_manifest('{{ manifest }}'){% endif %}
-   import rospy
-   import smach
-   import smach_ros
-   {{ imports }}
-   {% endblock imports %}
+There are several different template types in SMACHA:
 
-   {% block defs %}
-   {{ defs }}
-   {% endblock defs %}
+- **Base templates**: these form the base of the final output SMACH Python
+  script (the `"spine"`),
+- **Container templates**: these render SMACH container states (the `"bones"`),
+- **State templates**: these render regular SMACH states (the `"meat"`),
+- **Other templates**: these usually provide useful utilities to help with
+  rendering the other states (the `"nerves"`).
 
-   {% block class_defs %}
-   {{ class_defs }}
-   {% endblock class_defs %}
+It will be illustrative to get a quick overview of the base, container
+and state templates before describing their contents, interrelationships and
+the rendering process in more detail.
 
-   {% if name is defined %}{% set sm_name = name | lower() %}{% else %}{% set sm_name = 'sm' %}{% endif %}
-
-   {% block main_def %}
-   def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}():
-       rospy.init_node('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}')
-
-       {{ main_def | indent(4) }}
-   {% endblock main_def %}
-      
-   {% block body %}
-       {{ sm_name }} = smach.StateMachine(outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
-
-       {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) | indent(4) }}{% endif %}
-       {% if name in header %}{{ header[name] | indent(4, true) }}{% endif %}
-
-       with {{ sm_name }}:
-
-           {{ body | indent(8) }}
-   {% endblock body %}
-
-   {% block footer %}
-           {{ footer | indent(8) }}
-   {% endblock footer %}
-
-   {% block introspection_server %}
-       sis = smach_ros.IntrospectionServer('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}', {{ name | lower() }}, '/{{ name }}')
-       sis.start()
-   {% endblock introspection_server %}
-
-   {% block execute %}
-       {{ execute | indent(4) }}
-
-       outcome = {{ sm_name }}.execute()
-   {% endblock execute %}    
-
-   {% block spin %}   
-       rospy.spin()
-   {% endblock spin %}
-
-   {% block base_footer %}
-       {{ base_footer | indent(4) }}
-   {% endblock base_footer %}
-
-   {% block main %}
-   if __name__ == '__main__':
-   {{ '' | indent(4, true) }}{% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}()
-   {% endblock main %}
-
-Core Templates
+Base Templates
 ==============
 
-SMACHA provides default core templates for many of the SMACH states and
-containers, as well as for other useful constructs.
+All SMACHA scripts start by specifying a **base template**,
+which is like the `"spine"` of the code skeleton that serves as a
+starting point from which the code generation process can start
+to fill in the meat of the code.
 
-So far, the following core templates are present and functional:
+Looking again at the :download:`seq_nesting_1.yml
+</../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml>` script from the
+:ref:`Nested State Machine Example <nested-state-machine-example>` in the
+:doc:`Container States Scripting Tutorial <../Scripting/container_states>`,
+we see that the base template ``Base`` is specified at the top of the script:
 
--  ``Base.tpl.py``: the core base template used for specifying the bare
-   (bones) of a a Python SMACH state machine script.
+.. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml
+   :language: yaml
+   :lines: 1-7
 
--  ``State.tpl``: contains functionality common to all states,
-   e.g. userdata specification.
+This ``Base`` template is the :doc:`core SMACHA Base template <../API/Templates/Base.tpl.py>`
+defined in the :download:`Base.tpl.py </../src/smacha/templates/Base.tpl.py>` file.
 
--  ``StateMachine.tpl``: the core template used for inserting a
-   `StateMachine
-   container <http://wiki.ros.org/smach/Tutorials/StateMachine%20container>`__.
+.. note:: The `.tpl.py` extension indicates that it is a template, while still
+          allowing text editors to invoke their Python syntax highlighters.
 
--  ``Concurrence.tpl``: the core template used for inserting a
-   `Concurrence
-   container <http://wiki.ros.org/smach/Tutorials/Concurrence%20container>`__.
+As shall be described in more detail in the :doc:`template anatomy <anatomy>`
+section, SMACHA templates contain many **blocks** and **code insertion
+variables**. The blocks are wrapped in ``{% block my_block %}`` and ``{%
+endblock my_block %}`` tags, while the code insertion variable for the
+corresponding block carries the same name as the block and is placed in a ``{{
+my_block }}`` tag. For the purposes of this introduction, if we imagine for a
+moment that the :doc:`core Base template <../API/Templates/Base.tpl.py>` only
+contains the ``body`` block and corresponding ``{{ body }}`` code insertion variable,
+then it might look like this:
 
--  ``ServiceState.tpl``: the core template used for inserting a
-   `ServiceState <http://wiki.ros.org/smach/Tutorials/ServiceState>`__.
+.. figure:: ../_static/seq_nesting_1_rendering_pipeline_base_template.svg
+   :alt: The Base template with the code from the ``SUB`` and ``FOO_2`` state
+         renderings appended beneath its ``{{ body }}`` variable.
 
--  ``SimpleActionState.tpl``: the core template used for inserting a
-   `SimpleActionState <http://wiki.ros.org/smach/Tutorials/SimpleActionState>`__.
+with the following code for the block definition:
 
--  ``TF2ListenerState.tpl``: used for reading TF2 transforms.
+.. literalinclude:: /../src/smacha/templates/Base.tpl.py
+   :language: python
+   :lines: 65-74
 
-Core Code Generation Variables and Code Blocks
-==============================================
+The core idea behind SMACHA :doc:`code generation
+<../CodeGeneration/smacha_code_generator>` and :ref:`template rendering
+<recursive-rendering>` is that as SMACHA scripts are traversed,
+the various blocks in the templates associated with the states therein are
+rendered into their corresponding code insertion variables in the corresponding
+blocks in their parent state templates (which could be either base templates
+or container templates).
 
-There are a number of core code generation variables and code blocks
-present in the core templates that enable the code generation engine to
-produce code in the appropriate places.
+Container Templates
+===================
 
--  ``base_header`` block: used to specify any code that must appear near
-   the top of the program script.
+SMACHA scripts can make use of :doc:`Container States <../Scripting/container_states>`
+by employing **container templates**,
+which are a bit like the `"bones"` that connect to the `"spine"` of the ``Base`` template
+forming the structural support for ``State`` template renderings that form the `"meat"`
+of the final rendered code.
 
--  ``defs`` block: used to position function definitions.
+In the :download:`seq_nesting_1.yml
+</../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml>` script,
+we can see a ``StateMachine`` container template being specified in order to
+render the ``SUB`` state:
 
--  ``class_defs`` block: used to position class definitions.
+.. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml
+   :language: yaml
+   :lines: 8-13
 
--  ``main_def`` block: used to position the main function definition.
+This is the :doc:`core SMACHA StateMachine container template
+<../API/Templates/StateMachine.tpl.py>` defined in the
+:download:`StateMachine.tpl.py </../src/smacha/templates/StateMachine.tpl.py>`
+file. Again, if we imagine that it just contains the ``body`` block and
+corresponding ``{{ body }}`` code insertion variable, then it might look like
+this:
 
--  ``header`` block: the ``header`` block in a state template is
-   rendered into the ``header`` variable of either its parent template
-   or the base template depending on its nesting depth.
+.. figure:: ../_static/seq_nesting_1_rendering_pipeline_statemachine_template.svg
+   :alt: The StateMachine template rendered for the ``SUB`` state with the code
+         from the ``FOO_0`` and ``FOO_1`` state renderings appended beneath its
+         ``{{ body }}`` variable.
 
--  ``body`` block: The ``body`` block in a state template is rendered
-   into the ``body`` variable of either its parent state or the base
-   template depending on its nesting depth.
+with the following code for the block definition:
 
--  ``footer`` block: The ``footer`` block in a state template is
-   rendered into the ``footer`` variable of either its parent template
-   or the base template depending on its nesting depth.
+.. literalinclude:: /../src/smacha/templates/StateMachine.tpl.py
+   :language: python
+   :lines: 36-51
 
--  ``execute`` block: used to position the code necessary for executing
-   the state machine.
+Container templates play a dual role as both the parents of child states,
+where the contents of the child state ``body`` blocks get rendered into their
+``{{ body }}`` code insertion variable, and as the children of parent states,
+where the contents of their ``body`` blocks (including whatever gets rendered
+into their ``{{ body }}`` variable their children) gets rendered into the
+``{{ body }}`` variable of their parent.
 
--  ``base_footer`` block: used to specify any code that must appear near
-   the bottom of the program script.
+State Templates
+===============
 
--  ``main`` block: used to specify the code necessary to execute the
-   main function.
+Finally, the `"meat"` of the rendered output code is made up of regular
+``State`` templates.
 
-Some additional blocks may be optionally included, such as the
-*introspection_server* and ROS *spin* blocks, if an introspection server
-is required for use with the SMACH viewer, or *comment* blocks, used to
-decorate the generated source code.
+In the :download:`seq_nesting_1.yml
+</../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml>` script,
+we can see a ``ParamFoo`` state template being specified in order to
+render both the ``FOO_0`` and ``FOO_1`` states in the  ``SUB`` container state,
+as well as the ``FOO_2`` state that follows:
 
-Note that all of the above code generation variables and code blocks may
-be either removed, modified or arbitrarily customized within the API for
-particular use-cases. The code insertion order may also be specified
-within the API, i.e. code may be either prepended or appended to a
-variable.
+.. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml
+   :language: yaml
+   :lines: 24-29
 
-Overriding Core Templates, Variables and Blocks via Template Inheritance
-========================================================================
+This ``ParamFoo`` template is a simple example state from the 
+`test/smacha_scripts/smacha_test_examples <https://gitlab.com/reconcell/smacha/tree/master/smacha/test/smacha_scripts/smacha_test_examples>`__
+folder in the `smacha <https://gitlab.com/reconcell/smacha/tree/master/smacha>`__ package
+defined in the :download:`ParamFoo.tpl.py </../test/smacha_templates/smacha_test_examples/ParamFoo.tpl.py>` file.
 
-Jinja2 provides powerful template functionality, including the ability
-to extend templates via `template
-inheritance <http://wiki.ros.org/smach/Tutorials/SimpleActionState>`__,
-such that their constituent code blocks may be overridden or extended as
-required. SMACHA aims to incorporate as much of this functionality as
-possible, thus the core templates may be overridden or augmented by
-custom user-specified templates via the usual Jinja2 template
-inheritance mechanisms, with some caveats.
+.. figure:: ../_static/seq_nesting_1_rendering_pipeline_paramfoo_template.svg
+   :alt: The ParamFoo template.
 
-This works in the usual way using the following Jinja2 variables and
-expressions:
+Another way to imagine these state templates (other than as `"meat"`) is as
+the `"leaves"` of the overall state machine `"tree"`. Once we hit the leaf states,
+they can no longer be parent states themselves, so they no longer contain code
+insertion variables and the code generation process renders the contents of
+their blocks and starts recursing back up the tree, inserting those rendered
+blocks into their parent code insertion variables on the way up.
 
--  ``{% extends "<template_name>" %}``: When this expression appears at
-   the top of a template, the template will inherit code blocks from the
-   parent template specified by ``<template_name>``.
+.. _recursive-rendering:
 
--  ``{{ super() }}``: When this expression appears inside a block, the
-   code from the same block in the parent template as specified by
-   ``{% extends %}`` will be rendered at its position.
+Recursive Rendering
+===================
 
--  ``{% include "<template_name>" %}``: When this expression appears at
-   the top of a template, the template will include all code from the
-   template specified by ``<template_name>``.
+Putting all of the above together, we can finally see the how the overall
+recursive rendering process functions in SMACHA:
 
-Caveats: if a state template contains blocks, but does not contain an
-``{{ extends }}`` expression at the top of a template, it is implied
-that the code for the blocks will be rendered into variables and blocks
-with the same names as the blocks in the state template as dictated by
-the SMACHA script and as defined usually either by the base template or
-container templates. This behaviour is specific to SMACHA and is not
-present in Jinja2. In the current implementation, only base templates
-use the ``{% extends %}`` inheritance mechanism, whereas state and
-container templates use the ``{% include %}`` mechanism to inherit code
-from other templates. See the `Core Code Generation Variables and Code
-Blocks Section <#core-code-generation-variables-and-code-blocks>`__ for
-examples of how this behaviour works with core code generation variables
-and blocks.
+.. figure:: ../_static/seq_nesting_1_rendering_pipeline.svg
+   :alt: The overall template rendering hierarchy for the :ref:`Nested State
+         Machine Example <nested-state-machine-example>`.
 
-See the `Usage Section <#Usage>`__ below for an example of how such
-custom templates may be included when generating code via the
-command-line in practice.
+.. important:: The nature of this rendering process **differs significantly from
+   standard Jinja2 template rendering**, which does not use scripts to determine
+   the rendering order and thus does not contain the concept of "code insertion
+   variables". This particular behaviour is specific to SMACHA. Jinja2 does,
+   however, allow for `template inheritance
+   <http://jinja.pocoo.org/docs/2.10/templates/#template-inheritance>`__,
+   something that SMACHA also makes use of, as we shall see in :doc:`a later
+   section <inheritance>`.

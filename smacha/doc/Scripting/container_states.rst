@@ -4,12 +4,12 @@ Container States
 
 .. toctree::
 
-**NOTE**: Before reading the following documentation, it is highly recommended
-that you consult the
-`"Create a Hierarchical State Machine" <https://wiki.ros.org/smach/Tutorials/Create%20a%20hierarchical%20state%20machine>`__
-and
-`"Concurrent State Machine" <https://wiki.ros.org/smach/Tutorials/Concurrent%20States>`__
-SMACH tutorials first!
+.. note:: Before reading the following documentation, it is highly recommended
+          that you consult the `"Create a Hierarchical State Machine"
+          <https://wiki.ros.org/smach/Tutorials/Create%20a%20hierarchical%20state%20machine>`__
+          and `"Concurrent State Machine"
+          <https://wiki.ros.org/smach/Tutorials/Concurrent%20States>`__ SMACH
+          tutorials first!
 
 **Container states** are special types of states that
 allow for state constructions to extend beyond linear state sequences.
@@ -17,44 +17,19 @@ SMACHA uses two types of container states: **StateMachine**
 containers and **Concurrence** containers, for producing
 nested state machine hierarchies and parallel state machines respectively.
 
+.. _nested-state-machine-example:
+
 Nested State Machine Example
 ============================
 
-Here is a simple SMACHA script from the ``test/smacha_scripts/smacha_test_examples``
-folder in the ``smacha`` package that uses a `StateMachine` container to
-define a nested state hierarchy:
+Here is a simple SMACHA script :download:`seq_nesting_1.yml
+</../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml>` from the
+`test/smacha_scripts/smacha_test_examples <https://gitlab.com/reconcell/smacha/tree/master/smacha/test/smacha_scripts/smacha_test_examples>`__
+folder in the `smacha <https://gitlab.com/reconcell/smacha/tree/master/smacha>`__ package
+that uses a `StateMachine` container to define a nested state hierarchy:
 
-.. code-block:: yaml
-
-  # SMACHA state sequence example
-  name: sm_top
-  template: Base
-  manifest: smacha
-  node_name: smacha_params_test
-  outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
-  states:
-  - SUB:
-      template: StateMachine
-      params: {name: FOO_0, outcome: outcome_a, name_1: FOO_1}
-      outcomes: [sub_outcome_1, sub_outcome_2]
-      transitions: {sub_outcome_1: final_outcome_b, sub_outcome_2: FOO_2}
-      states:
-      - FOO_0:
-          template: ParamFoo
-          name_param: [params, name]
-          outcome_param: [params, outcome]
-          transitions: {outcome_a: FOO_1, outcome_b: sub_outcome_1}
-      - FOO_1:
-          template: ParamFoo
-          name_param: [params, name_1]
-          outcome_param: [params, outcome]
-          transitions: {outcome_a: sub_outcome_2, outcome_b: sub_outcome_1}
-  - FOO_2:
-      template: ParamFoo
-      params: {name: FOO_2, outcome: outcome_a}
-      name_param: [params, name]
-      outcome_param: [params, outcome]
-      transitions: {outcome_a: final_outcome_a, outcome_b: final_outcome_c}
+.. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml
+   :language: yaml
 
 If we execute this script by running the following command in one terminal:
 
@@ -88,41 +63,14 @@ we get the following visualization of the resulting state machine:
 Concurrent State Machines
 =========================
 
-Here is a simple SMACHA script from the ``test/smacha_scripts/smacha_test_examples``
-folder in the ``smacha`` package that uses a `Concurrence` container to
-define state machines that run in parallel:
+Here is a simple SMACHA script :download:`seq_concurrence_1.yml
+</../test/smacha_scripts/smacha_test_examples/seq_concurrence_1.yml>` from the
+`test/smacha_scripts/smacha_test_examples <https://gitlab.com/reconcell/smacha/tree/master/smacha/test/smacha_scripts/smacha_test_examples>`__
+folder in the `smacha <https://gitlab.com/reconcell/smacha/tree/master/smacha>`__ package
+that uses a `Concurrence` container to define state machines that run in parallel:
 
-.. code-block:: yaml
-
-  # SMACHA state sequence example
-  name: sm_top
-  template: Base
-  manifest: smacha
-  node_name: smacha_params_test
-  outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
-  states:
-  - CON:
-      template: Concurrence
-      params: {name: FOO_0, outcome: outcome_a, name_1: FOO_1}
-      outcomes: [con_outcome_1, con_outcome_2, con_default_outcome]
-      default_outcome: con_default_outcome
-      outcome_map: {con_outcome_1: {FOO_0: outcome_b, FOO_1: outcome_b}, con_outcome_2: {FOO_0: outcome_a, FOO_1: outcome_a}}
-      transitions: {con_outcome_1: final_outcome_b, con_outcome_2: FOO_2, con_default_outcome: CON}
-      states:
-      - FOO_0:
-          template: ParamFoo
-          name_param: [params, name]
-          outcome_param: [params, outcome]
-      - FOO_1:
-          template: ParamFoo
-          name_param: [params, name_1]
-          outcome_param: [params, outcome]
-  - FOO_2:
-      template: ParamFoo
-      params: {name: FOO_2, outcome: outcome_a}
-      name_param: [params, name]
-      outcome_param: [params, outcome]
-      transitions: {outcome_a: final_outcome_a, outcome_b: final_outcome_c}
+.. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq_concurrence_1.yml
+   :language: yaml
 
 If we execute this script by running the following command in one terminal:
 
@@ -152,6 +100,7 @@ we get the following visualization of the resulting state machine:
   | |pic3|  | |pic4|  |
   +---------+---------+
 
+.. _contain-tool:
 
 The Contain Tool
 ================
@@ -161,130 +110,54 @@ container states or parallel `Concurrence` container states, either in SMACHA YA
 script or, indeed, in raw SMACH Python code, SMACHA provides a utility
 called the **contain tool** in order to automate this process.
 
-In order to illustrate how it works, in the following, we will use the 
-``seq.yml`` script from the ``test/smacha_scripts/smacha_test_examples``
-folder in the ``smacha`` package familiar from the previous sections
-that defines a linear sequence of states:
+In order to illustrate how it works, in the following, we will use the
+:download:`seq.yml </../test/smacha_scripts/smacha_test_examples/seq.yml>` script from the
+`test/smacha_scripts/smacha_test_examples <https://gitlab.com/reconcell/smacha/tree/master/smacha/test/smacha_scripts/smacha_test_examples>`__
+folder in the `smacha <https://gitlab.com/reconcell/smacha/tree/master/smacha>`__ package
+familiar from the previous sections that defines a linear sequence of states:
 
-.. code-block:: yaml
-
-  --- # SMACHA state sequence example
-  name: sm_top
-  template: Base
-  manifest: smacha
-  node_name: smacha_params_test
-  outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
-  states:
-    - FOO_0:
-        template: ParamFoo
-        params: {name: FOO_0, outcome: outcome_a}
-        name_param: [params, name]
-        outcome_param: [params, outcome]
-        transitions: {outcome_a: FOO_1, outcome_b: final_outcome_b}
-    - FOO_1:
-        template: ParamFoo
-        params: {name: FOO_1, outcome: outcome_a}
-        name_param: [params, name]
-        outcome_param: [params, outcome]
-        transitions: {outcome_a: FOO_2, outcome_b: final_outcome_b}
-    - FOO_2:
-        template: ParamFoo
-        params: {name: FOO_2, outcome: outcome_a}
-        name_param: [params, name]
-        outcome_param: [params, outcome]
-        transitions: {outcome_a: final_outcome_a, outcome_b: final_outcome_c}
+.. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq.yml
+   :language: yaml
 
 StateMachine Containerization Example
 -------------------------------------
 
-In order to convert the ``FOO_0, FOO_1, FOO_2`` sequence in the above script into
-a script with a `StateMachine` state named ``SUB`` containing the sequence ``FOO_0, FOO_1`` followed by ``FOO_2``,
-we run the following command:
+In order to convert the ``FOO_0, FOO_1, FOO_2`` sequence in the above script
+into a script with a `StateMachine` state named ``SUB`` containing the sequence
+``FOO_0, FOO_1`` followed by ``FOO_2``, we run the following command:
 
 ::
 
-   rosrun smacha contain `rospack find smacha`/test/smacha_scripts/smacha_test_examples/seq.yml SUB StateMachine FOO_0 FOO_1 -o seq_nesting_1.yml
+   rosrun smacha contain `rospack find smacha`/test/smacha_scripts/smacha_test_examples/seq.yml SUB StateMachine FOO_0 FOO_1 -o seq_nesting_1_contain_output.yml
 
-that produces the following result in the `seq_nesting_1.yml` generated output file:
+that produces the following result in the
+:download:`seq_nesting_1_contain_output.yml
+</../test/smacha_generated_scripts/smacha_test_examples/seq_nesting_1_contain_output.yml>`
+generated output file:
 
-.. code-block:: yaml
-
-  # SMACHA state sequence example
-  name: sm_top
-  template: Base
-  manifest: smacha
-  node_name: smacha_params_test
-  outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
-  states:
-  - SUB:
-      template: StateMachine
-      params: {name: FOO_0, outcome: outcome_a, name_1: FOO_1}
-      outcomes: [sub_outcome_1, sub_outcome_2]
-      transitions: {sub_outcome_1: final_outcome_b, sub_outcome_2: FOO_2}
-      states:
-      - FOO_0:
-          template: ParamFoo
-          name_param: [params, name]
-          outcome_param: [params, outcome]
-          transitions: {outcome_a: FOO_1, outcome_b: sub_outcome_1}
-      - FOO_1:
-          template: ParamFoo
-          name_param: [params, name_1]
-          outcome_param: [params, outcome]
-          transitions: {outcome_a: sub_outcome_2, outcome_b: sub_outcome_1}
-  - FOO_2:
-      template: ParamFoo
-      params: {name: FOO_2, outcome: outcome_a}
-      name_param: [params, name]
-      outcome_param: [params, outcome]
-      transitions: {outcome_a: final_outcome_a, outcome_b: final_outcome_c}
+.. literalinclude:: /../test/smacha_generated_scripts/smacha_test_examples/seq_nesting_1_contain_output.yml
+   :language: yaml
 
 which should match the nested state machine example above.
 
 Concurrence Containerization Example
 ------------------------------------
 
-In order to convert the ``FOO_0, FOO_1, FOO_2`` sequence in the ``seq.yml`` script into
-a script with a `Concurrence` state named ``CON`` containing the parallel states ``FOO_0`` and  ``FOO_1`` followed by ``FOO_2``,
-we run the following command:
+In order to convert the ``FOO_0, FOO_1, FOO_2`` sequence in the ``seq.yml``
+script into a script with a `Concurrence` state named ``CON`` containing the
+parallel states ``FOO_0`` and ``FOO_1`` followed by ``FOO_2``, we run the
+following command:
 
 ::
 
-   rosrun smacha contain `rospack find smacha`/test/smacha_scripts/smacha_test_examples/seq.yml CON Concurrence FOO_0 FOO_1 -o seq_concurrence_1.yml
+   rosrun smacha contain `rospack find smacha`/test/smacha_scripts/smacha_test_examples/seq.yml CON Concurrence FOO_0 FOO_1 -o seq_concurrence_1_contain_output.yml
 
-that produces the following result in the `seq_concurrence_1.yml` generated output file:
+that produces the following result in the
+:download:`seq_concurrence_1_contain_output.yml
+</../test/smacha_generated_scripts/smacha_test_examples/seq_concurrence_1_contain_output.yml>`
+generated output file:
 
-
-.. code-block:: yaml
-
-  # SMACHA state sequence example
-  name: sm_top
-  template: Base
-  manifest: smacha
-  node_name: smacha_params_test
-  outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
-  states:
-  - CON:
-      template: Concurrence
-      params: {name: FOO_0, outcome: outcome_a, name_1: FOO_1}
-      outcomes: [con_outcome_1, con_outcome_2, con_default_outcome]
-      default_outcome: con_default_outcome
-      outcome_map: {con_outcome_1: {FOO_0: outcome_b, FOO_1: outcome_b}, con_outcome_2: {FOO_0: outcome_a, FOO_1: outcome_a}}
-      transitions: {con_outcome_1: final_outcome_b, con_outcome_2: FOO_2, con_default_outcome: CON}
-      states:
-      - FOO_0:
-          template: ParamFoo
-          name_param: [params, name]
-          outcome_param: [params, outcome]
-      - FOO_1:
-          template: ParamFoo
-          name_param: [params, name_1]
-          outcome_param: [params, outcome]
-  - FOO_2:
-      template: ParamFoo
-      params: {name: FOO_2, outcome: outcome_a}
-      name_param: [params, name]
-      outcome_param: [params, outcome]
-      transitions: {outcome_a: final_outcome_a, outcome_b: final_outcome_c}
+.. literalinclude:: /../test/smacha_generated_scripts/smacha_test_examples/seq_concurrence_1_contain_output.yml
+   :language: yaml
 
 which should match the concurrent state machines example above.

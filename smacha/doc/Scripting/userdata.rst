@@ -4,10 +4,10 @@ Userdata
 
 .. toctree::
 
-**NOTE**: Before reading the following documentation, it is highly recommended
-that you consult the
-`"Passing User Data between States" <https://wiki.ros.org/smach/Tutorials/User%20Data>`__
-SMACH tutorial first!
+.. note:: Before reading the following documentation, it is highly recommended
+          that you consult the `"Passing User Data between States"
+          <https://wiki.ros.org/smach/Tutorials/User%20Data>`__ SMACH tutorial
+          first!
 
 **Userdata** is a special type of data structure that is inherited from SMACH
 and is used to pass data between states as either **input_keys** or **output_keys**.
@@ -18,74 +18,21 @@ manipulate userdata within scripts.
 Userdata Hello World Example
 ============================
 
-Here is the ``print_userdata.yml`` SMACHA script from the ``test/smacha_scripts/smacha_test_examples``
-folder in the ``smacha`` package that develops a simple "Hello World" example for userdata manipulation:
+Here is the :download:`print_userdata.yml </../test/smacha_scripts/smacha_test_examples/print_userdata.yml>` script from the
+`test/smacha_scripts/smacha_test_examples <https://gitlab.com/reconcell/smacha/tree/master/smacha/test/smacha_scripts/smacha_test_examples>`__
+folder in the `smacha <https://gitlab.com/reconcell/smacha/tree/master/smacha>`__ package
+that develops a simple "Hello World" example for userdata manipulation:
 
-.. code-block:: yaml
+.. literalinclude:: /../test/smacha_scripts/smacha_test_examples/print_userdata.yml
+   :language: yaml
 
-  --- # SMACHA print userdata example
-  name: sm
-  template: Base
-  manifest: smacha
-  node_name: smacha_print_userdata_test
-  outcomes: [final_outcome]
-  userdata: {foo: 'Hello World!'}
-  states:
-    - FOO_0:
-        template: PrintUserdataState
-        input_keys: [foo]
-        transitions: {succeeded: FOO_1}
-    - FOO_1:
-        template: CallbacksState
-        userdata: {bar: 'Goodbye World!'}
-        transitions: {succeeded: FOO_2}
-    - FOO_2:
-        template: PrintUserdataState
-        input_keys: [foobar]
-        remapping: {foobar: bar}
-        transitions: {succeeded: final_outcome}
+In this example a variable ``foo`` with the value 'Hello World!' is added to the
+userdata at the beginning of the script and is passed as an `input_key` to the
+``FOO_0`` state which uses a :doc:`PrintUserdataState template
+<../API/Templates/PrintUserdataState.tpl.py>` which looks like this:
 
-In this example a variable ``foo`` with the value 'Hello World!' is added to the userdata
-at the beginning of the script and is passed as an `input_key` to the ``FOO_0`` state
-which uses a ``PrintUserdataState`` template which looks like this:
-
-.. code-block:: python
-
-  {% from "Utils.tpl" import render_input_keys, render_transitions, render_remapping %}
-
-  {% include "State.tpl" %}
-
-  {% block imports %}
-  {% endblock imports %}
-
-  {% block defs %}
-  {% endblock defs %}
-
-  {% block class_defs %}
-  {% if 'class_PrintUserdataState' not in defined_headers %}
-  class PrintUserdataState(smach.State):
-      def __init__(self, input_keys = [], output_keys = [], callbacks = [], outcomes=['succeeded']):
-          smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
-
-      def execute(self, userdata):
-
-          # Print input keys to terminal
-          for input_key in self._input_keys:
-              rospy.loginfo('userdata.{}: {}'.format(input_key, userdata[input_key]))
-
-          return 'succeeded'
-  {% do defined_headers.append('class_PrintUserdataState') %}{% endif %}
-  {% endblock class_defs %}
-
-  {% block header %}
-  {% endblock header %}
-
-  {% block body %}
-  smach.{{ parent_type }}.add('{{ name }}',
-          {{ '' | indent(23, true) }}PrintUserdataState({% if input_keys is defined %}{{ render_input_keys(input_keys, indent=0) }}{% endif %}){% if transitions is defined %},
-  {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
-  {{ render_remapping(remapping) }}{% endif %})
-  {% endblock body %}
+.. literalinclude:: /../src/smacha/templates/PrintUserdataState.tpl.py
+   :language: python
 
 This template defines a small class that simply prints out any `input_keys` that it is
 passed to standard output.
@@ -93,18 +40,21 @@ passed to standard output.
 Userdata Definitions
 ====================
 
-In the subsequent ``FOO_1`` state, which uses a ``CallbacksState`` template,
-another variable called ``bar`` is entered into the userdata with the value `Goodbye World!'.
-The ``CallbacksState`` template is interesting in its own right and can be quite powerful
-in other circumstances, but it is only used in this example as an intermediary state
-for illustrative purposes.
+In the subsequent ``FOO_1`` state, which uses a :doc:`CallbacksState template
+<../API/Templates/CallbacksState.tpl.py>`, another variable called ``bar`` is
+entered into the userdata with the value `Goodbye World!'. The
+:doc:`CallbacksState template <../API/Templates/CallbacksState.tpl.py>` is
+interesting in its own right and can be quite powerful in other circumstances,
+but it is only used in this example as an intermediary state for illustrative
+purposes.
 
-**NOTE**: all userdata that is defined within a script is entered into the userdata structure
-**at the beginning of run-time** when the state machine is first run.
-This is a carryover from the way in which SMACH state machines are designed.
-However, it can still be useful for a script designer to be able to define userdata at arbitrary points
-within a script, e.g. within a the state that is going to make use of it, as in the above
-example for the ``FOO_1`` state:
+.. note:: All userdata that is defined within a script is entered into the
+          userdata structure **at the beginning of run-time** when the state
+          machine is first run. This is a carryover from the way in which SMACH
+          state machines are designed. However, it can still be useful for a
+          script designer to be able to define userdata at arbitrary points
+          within a script, e.g. within a the state that is going to make use of
+          it, as in the above example for the ``FOO_1`` state:
 
 .. code-block:: yaml
 

@@ -1,5 +1,9 @@
-Base Templates
-==============
+******************
+Core API Templates
+******************
+
+Core Base Templates
+===================
 
 The Base Template
 -----------------
@@ -8,8 +12,8 @@ The Base Template
 
 .. program-output:: ../scripts/help Base -n
 
-Container Templates
-===================
+Core Container Templates
+========================
 
 The StateMachine Template
 -------------------------
@@ -25,8 +29,8 @@ The Concurrence Template
 
 .. program-output:: ../scripts/help Concurrence -n
 
-State Templates
-===============
+Core State Templates
+====================
 
 The CallbacksState Template
 ---------------------------
@@ -71,8 +75,8 @@ The TF2ListenerState Template
 .. program-output:: ../scripts/help TF2ListenerState -n
 
 
-Other Templates
-===============
+Other Core Templates
+====================
 
 The State Template
 ------------------
