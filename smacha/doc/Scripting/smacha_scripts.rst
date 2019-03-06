@@ -6,10 +6,10 @@ SMACHA Scripts
 
 .. note:: Before reading the following documentation, it is highly recommended
           that you consult the `"Getting Started with smach" SMACH Tutorial
-          <https://wiki.ros.org/smach/Tutorials/Getting%20Started>`__ first!
+          <https://wiki.ros.org/smach/Tutorials/Getting%20Started>`_ first!
 
-**SMACHA scripts** are `YAML <http://yaml.org/>`__ files that describe
-how SMACHA should generate `SMACH <http://wiki.ros.org/smach>`__ code.
+**SMACHA scripts** are `YAML <http://yaml.org/>`_ files that describe
+how SMACHA should generate `SMACH <http://wiki.ros.org/smach>`_ code.
 
 .. _linear-state-seq-example:
 
@@ -18,8 +18,8 @@ Linear State Sequence Example
 
 Here is a simple SMACHA script :download:`seq.yml
 </../test/smacha_scripts/smacha_test_examples/seq.yml>` from the
-`test/smacha_scripts/smacha_test_examples <https://gitlab.com/reconcell/smacha/tree/master/smacha/test/smacha_scripts/smacha_test_examples>`__
-folder in the `smacha <https://gitlab.com/reconcell/smacha/tree/master/smacha>`__ package
+`test/smacha_scripts/smacha_test_examples <https://gitlab.com/reconcell/smacha/tree/master/smacha/test/smacha_scripts/smacha_test_examples>`_
+folder in the `smacha <https://gitlab.com/reconcell/smacha/tree/master/smacha>`_ package
 that defines a linear sequence of states:
 
 .. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq.yml
@@ -32,7 +32,7 @@ If we execute this script by running the following command in one terminal:
    rosrun smacha execute -t `rospack find smacha`/test/smacha_templates/smacha_test_example -i -v `rospack find smacha`/test/smacha_scripts/smacha_test_examples/seq.yml
 
 and run `smach_viewer` from the `executive_smach_visualization
-<http://wiki.ros.org/executive_smach_visualization>`__ package in another
+<http://wiki.ros.org/executive_smach_visualization>`_ package in another
 terminal:
 
 ::
@@ -82,7 +82,10 @@ State sequences are specified as `lists` of `key: value` pairs
 in which the `key` represents the state name and the `value`
 specifies further `key:value` pairs that fill out state variables.
 For further information on YAML syntax see
-`here <https://en.wikipedia.org/wiki/YAML>`__ or `here <http://yaml.org/>`__.
+here__ or here__.
+
+__ https://en.wikipedia.org/wiki/YAML
+__ http://yaml.org/
 
 Looking at the first state in the above example:
 
@@ -119,7 +122,7 @@ it results in ``outcome_a``, then the state machine should transition to the
 should transition to ``final_outcome_b``.
 
 States can be constructed as 
-`nested state hierarchies <http://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines>`__
+`nested state hierarchies <http://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines>`_
 using :doc:`container states <container_states>` or can import
 :doc:`sub-scripts <sub_scripts_and_super_scripts>` containing previously
 written state sequences or hierarchies.

@@ -1,3 +1,23 @@
+{% block meta %}
+name: SleepState
+description: SMACH state that pauses state machine execution for a specified length of time.
+language: Python
+framework: SMACH
+type: State
+tags: [core]
+includes:
+  - State
+extends: []
+variables:
+- time:
+    description: The length of time to sleep for in milliseconds.
+    type: int
+input_keys: []
+output_keys: []
+outcomes:
+- succeeded
+{% endblock meta %}
+
 {% from "Utils.tpl.py" import render_transitions %}
 
 {% include "State.tpl.py" %}

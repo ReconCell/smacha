@@ -25,7 +25,7 @@ catkin_package = catkin_pkg.package.parse_package(os.path.join(catkin_dir, catki
 
 # -- Project information -----------------------------------------------------
 
-project = 'smacha_ros'
+project = 'SMACHA ROS'
 copyright = '2019, ReconCell'
 author = 'Barry Ridge'
 
