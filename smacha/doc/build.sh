@@ -37,7 +37,7 @@ apt-get -qq install wget
 apt-get -qq install apt-utils
 sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-latest.list'
 wget http://packages.ros.org/ros.key -O - | apt-key add -
-apt-get -qq install -y python-rosdep python-wstool python-catkin-tools
+apt-get -qq install -y python-rosdep python-wstool python-catkin-tools git ssh
 
 # Setup rosdep
 rosdep init
@@ -62,11 +62,11 @@ pip install --upgrade sphinx_rtd_theme
 pip install --upgrade sphinxcontrib-programoutput
 
 # Install sphinxcontrib-youtube
-pip install --upgrade sphinxcontrib-youtube
-# git clone git@github.com:sphinx-contrib/youtube.git
-# cd youtube
-# python setup.py install
-# cd ..
+# pip install --upgrade sphinxcontrib-youtube
+git clone https://github.com/sphinx-contrib/youtube.git
+cd youtube
+python setup.py install
+cd ..
 
 # Install newer version of ruby
 # apt-get -qq install software-properties-common
