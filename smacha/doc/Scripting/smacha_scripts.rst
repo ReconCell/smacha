@@ -82,7 +82,10 @@ State sequences are specified as `lists` of `key: value` pairs
 in which the `key` represents the state name and the `value`
 specifies further `key:value` pairs that fill out state variables.
 For further information on YAML syntax see
-`here <https://en.wikipedia.org/wiki/YAML>`_ or `here <http://yaml.org/>`_.
+here__ or here__.
+
+__ https://en.wikipedia.org/wiki/YAML
+__ http://yaml.org/
 
 Looking at the first state in the above example:
 

@@ -65,11 +65,11 @@ Scripting
    Container States<Scripting/container_states>
    Sub-Scripts and Super-Scripts<Scripting/sub_scripts_and_super_scripts>
 
-:doc:`Scripting/smacha_scripts` are parsed by :doc:`the Parser module
-:doc:<API/smacha.parser>` and direct `the Generator module
+:doc:`Scripting/smacha_scripts` are parsed by the :doc:`Parser module
+<API/smacha.parser>` and direct `the Generator module
 :doc:<API/smacha.generator>` on how to combine :doc:`SMACHA templates
-:doc:<Templating/smacha_templates>` using the `the Templater module
-:doc:<API/smacha.templater>`.
+<Templating/smacha_templates>` using the :doc:`Templater module
+<API/smacha.templater>`.
 
 Some of the benefits of `meta-scripting <https://en.wikipedia.org/wiki/Metaprogramming>`__
 in this way include:
@@ -324,6 +324,22 @@ Other Templates
 - :doc:`API/Templates/State.tpl.py`: contains code common to all state templates.
 - :doc:`API/Templates/Utils.tpl.py`: contains template macros and other utilities.
 - :doc:`API/Templates/TF2ListenerSingleton.tpl.py`: provides a helper class for :doc:`API/Templates/TF2ListenerState.tpl.py`.
+
+*********************
+Other SMACHA Packages
+*********************
+
+SMACHA ROS
+==========
+
+The `SMACHA ROS package <https://reconcell.gitlab.io/smacha/smacha_ros/smacha_ros.html>`_ contains a SMACHA server
+that provides ROS services, ROS parameter server integration, and other functions.
+
+SMACHA GUI
+==========
+
+The `SMACHA GUI package <https://reconcell.gitlab.io/reconcell_docs/DevManuals/smacha_gui/index.html>`_ provides a
+visual programming interface for SMACHA for use within the `ReconCell Project <https://reconcell.gitlab.io/reconcell_docs/#>`_.
 
 ******************
 Indices and tables
