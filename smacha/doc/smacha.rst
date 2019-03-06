@@ -24,14 +24,24 @@ Thus SMACHA does not aim to replace SMACH, but to augment it.
 Overview
 ========
 
+Here is a high-level illustration of the main components of the SMACHA API:
+
 .. figure:: _static/smacha_overview.png
    :alt: SMACHA API Overview
+
+Here is a video demonstrating the use of SMACHA with the `Baxter robot simulator
+<http://sdk.rethinkrobotics.com/wiki/Baxter_Simulator>`_ using the
+`baxter_smacha <https://github.com/abr-ijs/baxter_smacha>`_ package:
+
+.. youtube:: KRjY0bd4dLg
+
+| 
 
 Why SMACHA?
 ===========
 
 SMACHA allows for arbitrarily complex SMACH state machine programs to be written
-as compact YAML scripts that can be directly executed with ROS. Here is the
+as much shorter YAML scripts that can be directly executed with ROS. Here is the
 `"Nesting State Machines" example <http://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines>`__
 from the `SMACH Tutorials <http://wiki.ros.org/smach/Tutorials>`__ described in a SMACHA
 script:
@@ -41,7 +51,7 @@ script:
 
 This demonstrates a reduction from 80 lines of raw SMACH Python code to 15 lines
 of SMACHA script. Not bad.
-SMACHA provides many other benefits and tools to
+Outside of script brevity, SMACHA provides many other benefits and tools to
 help rapidly prototype complex state machines for robot control.
 
 Scripting
@@ -55,23 +65,29 @@ Scripting
    Container States<Scripting/container_states>
    Sub-Scripts and Super-Scripts<Scripting/sub_scripts_and_super_scripts>
 
-:doc:`Scripting/smacha_scripts` are `YAML <http://yaml.org/>`__ files that describe
-how SMACHA should generate SMACH code. They are parsed by :doc:`API/smacha.parser` and direct
-:doc:`API/smacha.generator` on how to combine :doc:`Templating/smacha_templates` using the
-:doc:`API/smacha.templater`.
+:doc:`Scripting/smacha_scripts` are parsed by :doc:`the Parser module
+:doc:<API/smacha.parser>` and direct `the Generator module
+:doc:<API/smacha.generator>` on how to combine :doc:`SMACHA templates
+:doc:<Templating/smacha_templates>` using the `the Templater module
+:doc:<API/smacha.templater>`.
 
 Some of the benefits of `meta-scripting <https://en.wikipedia.org/wiki/Metaprogramming>`__
 in this way include:
 
 * **quick, at-a-glance overviews** of state machine program intent,
-* **easy script manipulation, reuse and restructuring**,
-* **streamlined ROS integration**, e.g. loading of scripts onto the parameter server.
+* **easy script manipulation, reuse and restructuring** - SMACHA provides
+  various utilities to automate some common script manipulation tasks, e.g.
 
-SMACHA provides various utilities to automate some common state machine script manipulation tasks,
-such as the :ref:`Contain Tool <contain-tool>` for
-**automatic containerization of state sequences**, and
-the :ref:`Extract Tool <extract-tool>` for
-**automatic conversion of commonly used container states to reusable sub-scripts**.
+  - the :ref:`Contain Tool <contain-tool>` for automatic containerization of
+    state sequences,
+  - the :ref:`Extract Tool <extract-tool>` for automatic conversion of commonly
+    used container states to reusable sub-scripts,
+
+* **streamlined ROS integration**, e.g.
+
+  - loading of scripts onto the ROS parameter server and
+  - executing them with service calls.
+
 
 Templating
 ==========
@@ -80,16 +96,33 @@ Templating
    :hidden:
 
    SMACHA Templates<Templating/smacha_templates>
-   Anatomy<Templating/anatomy>
-   Inheritance<Templating/inheritance>
-   Metadata<Templating/metadata>
+   Template Anatomy<Templating/anatomy>
+   Template Inheritance<Templating/inheritance>
+   Template Metadata<Templating/metadata>
+   Template Macros<Templating/macros>
    Core API Templates<Templating/core_api_templates>
 
-:doc:`Templating/smacha_templates` are Jinja2-based Python SMACH code templates
-containing variables that are filled out by :doc:`API/smacha.templater`
-as directed by :doc:`API/smacha.generator` and as determined by
-the structure of the :doc:`Scripting/smacha_scripts` parsed by :doc:`API/smacha.parser`.
+:doc:`Templating/smacha_templates` are filled out by :doc:`the Templater module
+<API/smacha.templater>` as directed by :doc:`the Generator module
+<API/smacha.generator>` and as determined by the structure of the :doc:`SMACHA
+scripts <Scripting/smacha_scripts>` parsed by :doc:`the Parser module
+<API/smacha.parser>`.
 
+The use of templates comes with its own additional benefits:
+
+* **intricate boilerplate code can be automatically filled**,
+* **increased code reusability and modularity**, e.g.
+
+  - common design patterns can be easily turned into state templates,
+  - :doc:`template macros <Templating/macros>` make it easy to repeat common patterns between templates,
+  - :doc:`template inheritance <Templating/inheritance>` helps avoid repetitive code blocks,
+ 
+* **templates could be designed for use with frameworks other than SMACH and Python**
+
+  - although this has not yet been tested, in theory templates could be written for use
+    with other frameworks, e.g. `FlexBE <https://wiki.ros.org/flexbe>`_,
+    `CoSTAR <https://github.com/cpaxton/costar_stack>`_, and others.
+    
 
 Code Generation
 ===============
@@ -104,17 +137,22 @@ parsed by :doc:`API/smacha.parser`, manages the use of :doc:`Templating/smacha_t
 are filled out by :doc:`API/smacha.templater`, and renders the final result to
 executable Python SMACH code.
 
+
 Installation
 ============
 
-Simply clone into the ``src`` directory of your catkin workspace and run
-``catkin_make`` or ``catkin build`` from the root of the workspace. It
-may be necessary to update dependencies using ``rosdep`` as follows:
+Simply clone into the ``src`` directory of your catkin workspace,
+update dependencies, and run
+``catkin_make`` or ``catkin build`` from the root of the workspace.
 
-::
+.. code-block:: bash
 
-   rosdep update
-   rosdep install smacha
+   $ cd ~/catkin_ws/src
+   $ git clone git@github.com:ReconCell/smacha.git
+   $ cd ..
+   $ rosdep install --from-paths src --ignore-src --rosdistro kinetic -y
+   $ catkin build
+   $ source ~/catkin_ws/devel/setup.bash
 
 Usage
 =====
@@ -122,22 +160,15 @@ Usage
 Generate
 --------
 
-In the simplest case, using default core templates, SMACHA can be
-invoked on a ``my_script.yml`` SMACHA script file as follows:
+Given a SMACHA script (:download:`seq_nesting_1.yml
+</../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml>`) and a set of templates, e.g. to replicate the code from
+the `SMACH Nesting State Machines tutorial
+<https://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines>`_, SMACH
+Python code can be generated with the following command:
 
-::
+.. code-block:: bash
 
-   rosrun smacha generate my_script.yml
-
-where the generated code will be output to a file called
-``smacha_output.py``
-
-Example usage for the “Nesting State Machines” tutorial:
-
-::
-
-   roscd smacha/test
-   rosrun smacha generate smacha_scripts/executive_smach_tutorials/state_machine_nesting2.yml -t smacha_templates/executive_smach_tutorials -o state_machine_nesting2.py -v
+   $ rosrun smacha generate -t `rospack find smacha`/test/smacha_templates/executive_smach_tutorials -o state_machine_nesting2.py -v `rospack find smacha`/test/smacha_scripts/executive_smach_tutorials/state_machine_nesting2.yml
 
 Here, the ``-t`` argument specifies custom template directories for this
 particular tutorial, which may contain templates that override the core
@@ -155,66 +186,54 @@ Further arguments and options may be explored by running
 Execute
 -------
 
-SMACHA scripts may be directly executed from the command-line
-(after being implicitly generated) as follows:
+The script from the above example can also be directly executed provided that a `roscore <https://wiki.ros.org/roscore>`_ is running:
 
-::
+.. code-block:: bash
 
-   rosrun smacha execute my_script.yml
-
-Example usage for the “Nesting State Machines” tutorial:
-
-::
-
-   roscd smacha/test
-   rosrun smacha execute smacha_scripts/executive_smach_tutorials/state_machine_nesting2.yml -t smacha_templates/executive_smach_tutorials -v
-
-Note that the above command requires that ``roscore`` be running.
+   $ rosrun smacha execute -t `rospack find smacha`/test/smacha_templates/executive_smach_tutorials -v `rospack find smacha`/test/smacha_scripts/executive_smach_tutorials/state_machine_nesting2.yml
 
 Again, further arguments and options may be explored by running
 ``rosrun smacha execute -h`` or ``rosrun smacha execute --help``.
+
+.. important:: A `roscore <https://wiki.ros.org/roscore>`_ must be running in order to execute scripts in this way!
+
+Help
+----
+
+Help information may be printed for any template that contains
+a :doc:`metadata block <Templating/metadata>` by running, e.g.
+the following command for the :doc:`ServiceState template <API/Templates/ServiceState.tpl.py>`:
+
+.. code-block:: bash
+
+   $ rosrun smacha help ServiceState
 
 Testing
 =======
 
 Tests may be performed by running:
 
-::
+.. code-block:: bash
 
-   roscd smacha/test
-
-followed by
-
-::
-
-   nosetests executive_smach_tutorials.py
-
-or
-
-::
-
-   python executive_smach_tutorials.py
+   $ python `rospack find smacha`/test/executive_smach_tutorials_test.py
+   $ python `rospack find smacha`/test/smacha_test_examples.py
 
 Passing the ``-h`` argument as follows will bring up a list of some
-other options:
-
-::
-
-   python executive_smach_tutorials.py -h
+other options.
 
 Passing the ``-w`` argument will write the generated output files to
 disk, which can subsequently be run as follows, e.g. for the
 ``state_machine_nesting2.py`` example:
 
-::
+.. code-block:: bash
 
-   rosrun smacha state_machine_nesting2.yml.py
+   $ rosrun smacha state_machine_nesting2_generate_output.py
 
 To run the original file script, use the following command:
 
-::
+.. code-block:: bash
 
-   rosrun smacha state_machine_nesting2.py
+   $ rosrun smacha state_machine_nesting2.py
 
 **********
 SMACHA API

@@ -61,6 +61,13 @@ pip install --upgrade sphinx_rtd_theme
 # Install sphinxcontrib-programoutput
 pip install --upgrade sphinxcontrib-programoutput
 
+# Install sphinxcontrib-youtube
+# pip install --upgrade sphinxcontrib-youtube
+git clone git@github.com:sphinx-contrib/youtube.git
+cd youtube
+python setup.py install
+cd ..
+
 # Install newer version of ruby
 # apt-get -qq install software-properties-common
 # apt-add-repository -y ppa:brightbox/ruby-ng
