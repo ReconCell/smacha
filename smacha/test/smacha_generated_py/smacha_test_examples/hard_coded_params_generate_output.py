@@ -38,7 +38,7 @@ def main():
 
     
 
-   
+
 
     sm_top = smach.StateMachine(outcomes=['final_outcome'])
 
@@ -50,7 +50,7 @@ def main():
         smach.StateMachine.add('FOO_0', Foo('FOO_0', 'outcome_a'), 
                                transitions={'outcome_a':'FOO_1',
                                             'outcome_b':'final_outcome'})
-        
+
         smach.StateMachine.add('FOO_1', Foo('FOO_1', 'outcome_b'), 
                                transitions={'outcome_a':'FOO_1',
                                             'outcome_b':'final_outcome'})
@@ -66,7 +66,7 @@ def main():
     
 
     outcome = sm_top.execute()
-    
+
 
 
 

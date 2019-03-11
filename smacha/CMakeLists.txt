@@ -205,7 +205,7 @@ install(PROGRAMS
 install(DIRECTORY
   src/smacha/templates/
   DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}/templates
-  FILES_MATCHING PATTERN "*.tpl"
+  FILES_MATCHING PATTERN "*.tpl.py"
 )
 install(DIRECTORY
   test/smacha_test_examples/
@@ -215,7 +215,7 @@ install(DIRECTORY
 install(DIRECTORY
   test/smacha_templates/smacha_test_examples/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test/smacha_templates/smacha_test_examples
-  FILES_MATCHING PATTERN "*.tpl"
+  FILES_MATCHING PATTERN "*.tpl.py"
 )
 install(DIRECTORY
   test/smacha_scripts/smacha_test_examples/
