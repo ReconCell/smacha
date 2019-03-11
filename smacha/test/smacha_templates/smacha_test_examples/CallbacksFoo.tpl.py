@@ -28,7 +28,11 @@ def foo_numbers_cb(userdata):
 {% do defined_headers.append('foo_numbers_cb') %}{% endif %}
 
 {% if callbacks is defined %}
-{{ render_def_lambda_callbacks(defined_headers, name, input_keys, callbacks) }}
+{% if input_keys is defined %}
+{{ render_def_lambda_callbacks(defined_headers, name, uuid, input_keys, callbacks) }}
+{% else %}
+{{ render_def_lambda_callbacks(defined_headers, name, uuid, [], callbacks) }}
+{% endif %}
 {% endif %}
 {% endblock defs %}
 
@@ -59,7 +63,7 @@ class Foo(smach.State):
 {% endblock header %}
 
 {% block body %}
-smach.{{ parent_type }}.add('{{ name }}', Foo('{{ name }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, callbacks, indent=0) }}{% endif %}){% if transitions is defined %}, 
+smach.{{ parent_type }}.add('{{ name }}', Foo('{{ name }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %}, 
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
 {{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}

@@ -66,8 +66,8 @@ Scripting
    Sub-Scripts and Super-Scripts<Scripting/sub_scripts_and_super_scripts>
 
 :doc:`Scripting/smacha_scripts` are parsed by the :doc:`Parser module
-<API/smacha.parser>` and direct `the Generator module
-:doc:<API/smacha.generator>` on how to combine :doc:`SMACHA templates
+<API/smacha.parser>` and direct :doc:`the Generator module
+<API/smacha.generator>` on how to combine :doc:`SMACHA templates
 <Templating/smacha_templates>` using the :doc:`Templater module
 <API/smacha.templater>`.
 
@@ -338,7 +338,7 @@ that provides ROS services, ROS parameter server integration, and other function
 SMACHA GUI
 ==========
 
-The `SMACHA GUI package <https://reconcell.gitlab.io/reconcell_docs/DevManuals/smacha_gui/index.html>`_ provides a
+The `SMACHA GUI package <https://reconcell.gitlab.io/reconcell_docs/UserManuals/smacha_gui/index.html>`_ provides a
 visual programming interface for SMACHA for use within the `ReconCell Project <https://reconcell.gitlab.io/reconcell_docs/#>`_.
 
 ******************

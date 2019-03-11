@@ -59,10 +59,10 @@ output_keys: []
 #
 # Macro for rendering 'callbacks' lambda callback definitions.
 #
-{% macro render_def_lambda_callbacks(defined_headers, name, input_keys, callbacks) %}
+{% macro render_def_lambda_callbacks(defined_headers, state_name, state_uuid, input_keys, callbacks) %}
 {% for cb_output_key, cb in callbacks.iteritems() %}
 {% if cb is expression %}
-{% set cb_name = cb_output_key|lower + '_' + name|lower + '_lambda_cb' %}
+{% set cb_name = cb_output_key|lower + '_' + state_name|lower + '_' + state_uuid + '_lambda_cb' %}
 {% if cb_name not in defined_headers %}
 @smach.cb_interface(input_keys=[{% for input_key in input_keys %}'{{ input_key }}'{% if not loop.last %}, {% endif %}{% endfor %}], 
                     output_keys=['{{ cb_output_key }}'],
@@ -118,7 +118,7 @@ def {{ cb_name }}(userdata):
 #
 # Macro for rendering 'callbacks' dicts in state instantiations.
 #
-{% macro render_callbacks(name, callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}[{% for cb_key, cb_val in callbacks.items() %}{% if cb_val is expression %}'{{ cb_key|lower + '_' + name|lower + '_lambda_cb' }}'{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
+{% macro render_callbacks(state_name, state_uuid, callbacks, indent=51) %}{{ 'callbacks = ' | indent(indent, true) }}[{% for cb_key, cb_val in callbacks.items() %}{% if cb_val is expression %}'{{ cb_key|lower + '_' + state_name|lower + '_' + state_uuid + '_lambda_cb' }}'{% else %}'{{ cb_val }}'{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
 
 
 #

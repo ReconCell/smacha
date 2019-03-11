@@ -1,3 +1,6 @@
+import smacha
+import uuid
+
 from smacha.util import bcolors
 from smacha.exceptions import ParsingError
 
@@ -12,28 +15,25 @@ class Generator():
     that they reference.
     """
     def __init__(self, parser, templater, verbose=False,
-                 base_vars=['name', 'manifest', 'function_name',
-                            'node_name', 'outcomes', 'userdata'],
-                 container_persistent_vars=['params'],
-                 sub_script_persistent_vars=['userdata', 'remapping',
-                                             'transitions'],
-                 buffer_names=[
-                     'base_header', 'imports', 'defs', 'class_defs',
-                     'main_def', 'header', 'body', 'footer',
-                     'execute', 'base_footer', 'main'],
-                 buffer_types=[
-                     'list', 'list', 'list', 'list',
-                     'list', 'dict', 'list', 'list',
-                     'list', 'list', 'list'],
-                 container_insertion_order=[
-                     'prepend', 'prepend', 'prepend', 'prepend',
-                     'prepend', 'prepend', 'append', 'append',
-                     'append', 'append', 'append'],
-                 buffer_insertion_order=[
-                     'append', 'append', 'append', 'append',
-                     'append', 'append', 'append', 'prepend',
-                     'prepend', 'prepend', 'prepend'],
-                 local_var_lists=['local_vars']):
+                       base_vars =
+                           ['name', 'manifest', 'function_name', 'node_name', 'outcomes', 'userdata'],
+                       container_persistent_vars =
+                           ['params'],
+                       sub_script_persistent_vars =
+                           ['userdata', 'remapping', 'transitions'],
+                       buffer_names =
+                           ['base_header', 'imports', 'defs', 'class_defs', 'main_def',
+                            'header', 'body', 'footer', 'execute', 'base_footer', 'main'],
+                       buffer_types =
+                           ['list', 'list', 'list', 'list', 'list',
+                            'dict', 'list', 'list', 'list', 'list', 'list'],
+                       container_insertion_order = 
+                           ['prepend', 'prepend', 'prepend', 'prepend', 'prepend',
+                            'prepend', 'append', 'append', 'append', 'append', 'append'],
+                       buffer_insertion_order =
+                           ['append', 'append', 'append', 'append', 'append',
+                            'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
+                       local_var_lists = ['local_vars']):
         # TODO: Refactor this parameter mess!
         """Constructor.
 
@@ -152,13 +152,15 @@ class Generator():
                 # Find the state name and variables in the state script
                 state_name, state_vars = list(script.items())[0]
 
-                # Add persistent state_vars from parents passed via script_vars
-                # to state_vars
+                # Add persistent state_vars from parent containers passed via
+                # script_vars to state_vars.
                 for persistent_var in self._container_persistent_vars:
                     if persistent_var in script_vars:
                         if persistent_var in state_vars:
                             state_vars[persistent_var].update(
-                                script_vars[persistent_var])
+                                {x: script_vars[persistent_var][x]
+                                 for x in script_vars[persistent_var]
+                                 if x not in state_vars[persistent_var]})
                         else:
                             state_vars[persistent_var] = (
                                 script_vars[persistent_var])
@@ -214,8 +216,9 @@ class Generator():
                             print(bcolors.OKGREEN +
                                   'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
 
-                        # Create a new dictionary for the state template variables
-                        template_vars = { 'name' : state_name } 
+                        # Create a new dictionary for the state template variables,
+                        # initialized with the state name and uuid.
+                        template_vars = {'name': state_name, 'uuid': uuid.uuid4().hex}
 
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
@@ -254,7 +257,9 @@ class Generator():
                         container_script_vars.update({x: state_vars[x] for x in state_vars if x in self._container_persistent_vars})
 
                         # Recursively process nested child states
-                        container_script_vars = self._process_script(state_vars['states'], container_script_vars)
+                        container_script_vars = (
+                            self._process_script(state_vars['states'],
+                                                 container_script_vars))
 
                         # Convert nested state body code to string
                         for buffer_name in self._buffer_names:
@@ -384,7 +389,9 @@ class Generator():
                         # Continue processing with the included sub-script now substituted in
                         # for the current state with potentially re-defined state variables
                         # appropriately remapped.
-                        script_vars = self._process_script(sub_script, script_vars)
+                        script_vars = (
+                            self._process_script(sub_script,
+                                                 script_vars))
 
                     except Exception as e:
                         print(bcolors.WARNING +
@@ -399,8 +406,9 @@ class Generator():
                         if self._verbose:
                             print(bcolors.OKBLUE + 'Processing state \'' + state_name + '\'' + bcolors.ENDC)
 
-                        # Create a new dictionary for the state template variables
-                        template_vars = { 'name' : state_name } 
+                        # Create a new dictionary for the state template variables,
+                        # initialized with the state name and uuid.
+                        template_vars = {'name': state_name, 'uuid': uuid.uuid4().hex}
 
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
@@ -523,7 +531,7 @@ class Generator():
                 else:
                     context[buffer_name] = ''
             # Get template vars using context
-            template_vars_update = self._templater.get_template_vars(script['template'], context = context)
+            template_vars_update = self._templater.get_template_vars(script['template'], context=context)
             # Delete local variables
             for local_var_list in self._local_var_lists:
                 if local_var_list in template_vars_update:
@@ -533,18 +541,22 @@ class Generator():
             script_vars.update(template_vars_update)
 
             # Process base template states script
-            script_vars = self._process_script(script['states'], script_vars)
+            script_vars = self._process_script(script['states'],
+                                               script_vars)
 
-            # Initialise a dict for the base template variables and code buffers
+            # Initialise a dict for the base template variables and code
+            # buffers
             base_template_vars = dict()
 
             # Add base template variables from script
             #
-            # TODO: Add exception handling for cases where certain template vars are necessary.
+            # TODO: Add exception handling for cases where certain template
+            # vars are necessary.
             #
-            base_template_vars.update({ x : script[x] for x in script if x in self._base_vars })
+            base_template_vars.update({x : script[x] for x in script if x in self._base_vars})
 
-            # Generate code strings from the code buffers and add them to base_template_vars
+            # Generate code strings from the code buffers and add them to
+            # base_template_vars
             for script_var_name, script_var_val in script_vars.items():
                 if script_var_name in self._buffer_names:
                     if isinstance(script_var_val, dict):
