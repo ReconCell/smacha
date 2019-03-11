@@ -215,6 +215,20 @@ class Tester(unittest.TestCase):
 
         return extracted_sub_script_string, extracted_super_script_string
 
+    def _strip_uuids(self, code):
+        """Strip unique identifier strings (uuid's) from code string.
+
+        :param code: Code string.
+        :type code: str
+        :return: Code string stripped of uuid's.
+        :rtype: str
+        """
+        # Remove uuid's from lambda callback defs in generated code
+        # See: https://stackoverflow.com/questions/11384589/what-is-the-correct-regex-for-matching-values-generated-by-uuid-uuid4-hex
+        code = re.sub(r'_[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}_', r'_', code)
+
+        return code
+
     def _compare(self, code_a, code_b, file_a='code_a', file_b='code_b'):
         """Diff compare code_a with code_b.
 
@@ -231,6 +245,8 @@ class Tester(unittest.TestCase):
         :param file_b:
             Filename for second code string for reporting/debugging purposes.
         :type file_b: str
+        :return: True if code strings match, False if not.
+        :rtype: bool
         """
         # Strip single-line comments
         code_a = re.sub('\s*#.*\n', '\n', code_a)
