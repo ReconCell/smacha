@@ -21,5 +21,5 @@ s:
         # Parameters should only persist from parent to child state,
         # not from sibling state to sibling state.
         - FOO_1: {T: ParamFoo, p: {outcome: outcome_b},
-                  name_param: [params, name_1], outcome_param: [params, outcome],
+                  name_param: [[name_1]], outcome_param: [[outcome]],
                   t: {outcome_a: FOO_1, outcome_b: outcome_c}}

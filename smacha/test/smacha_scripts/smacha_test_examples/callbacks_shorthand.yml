@@ -55,5 +55,5 @@ s:
             t: {succeeded: FOO_10}}
   # Example of using a SMACHA script parameter to parameterize a lambda callback using a string construct.
   - FOO_10: {T: CallbacksState, p: {number: 42}, ik: [numbers], ok: [numbers],
-             cb: {numbers: ["`lambda ud: ud.numbers if ud.numbers.append(", [params, number], ") else ud.numbers`"]},
+             cb: {numbers: ["`lambda ud: ud.numbers if ud.numbers.append(", [[number]], ") else ud.numbers`"]},
              t: {succeeded: final_outcome}}

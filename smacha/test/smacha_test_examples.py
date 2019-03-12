@@ -303,6 +303,16 @@ class TestTools(Tester):
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
+    def test_generate_assigned_params_shorthand(self):
+        """Test generate assigned_params_shorthand.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(base_path, 'smacha_test_examples/params.py')) as original_file:
+            generated_code = self._generate(os.path.join(base_path, 'smacha_scripts/smacha_test_examples/assigned_params_shorthand.yml'),
+                                            [os.path.join(base_path, 'smacha_scripts/smacha_test_examples')],
+                                            [os.path.join(base_path, 'smacha_templates/smacha_test_examples')])
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+
     def test_generate_print_userdata_shorthand(self):
         """Test generate print_userdata_shorthand.yml"""
         base_path = os.path.dirname(os.path.abspath(__file__))

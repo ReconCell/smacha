@@ -305,6 +305,71 @@ class Parser():
         else:
             raise ValueError('script_vars query should be a list of length 1 or 2!')
 
+    def _sub_handedness(self, script, subs, sub_longhand_params):
+        """Substitute longhand script notation for shorthand or vice versa.
+
+        NOTE: This method, in its current form, will modify the input script
+        object!
+
+        :param script: The parsed YAML script.
+        :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        :param subs: A dict of key/val substitutions, where the keys are
+        substituted for the vals in the script.
+        :type subs: dict
+        :param sub_longhand_params: Flag indicating whether longhand to shorthand
+        script parameter substitution will be used.
+        :type sub_longhand: bool
+        :return: The updated YAML script with substituted lookups.
+        :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        """
+        try:
+            if isinstance(script, list):
+                try:
+                    # Substitute longhand script params for shorthand,
+                    # i.e. ['params', 'my_param'] -> [['my_param']]
+                    if sub_longhand_params:
+                        try:
+                            if (len(script) == 2 and isinstance(script[0], str) and
+                                isinstance(script[1], str) and script[0] == 'params'):
+                                script = [[script[1]]]
+                            else:
+                                raise Exception
+                        except:
+                            raise Exception
+                    # Substitute shorthand script params for longhand,
+                    # i.e. [['my_param']] -> ['params', 'my_param']
+                    else:
+                        try:
+                            if (len(script) == 1 and isinstance(script[0], list) and
+                                len(script[0]) == 1 and isinstance(script[0][0], str)):
+                                script = ['params', script[0][0]]
+                            else:
+                                raise Exception
+                        except:
+                            raise Exception
+                except:
+                    try:
+                        script[:] = [self._sub_handedness(script_val, subs, sub_longhand_params)
+                                     for script_val in script]
+                    except:
+                        raise
+                return script
+            elif isinstance(script, dict):
+                try:
+                    for script_var, script_val in list(script.items()):
+                        if script_var in subs.keys():
+                            script[subs[script_var]] = script.pop(script_var)
+                            script[subs[script_var]] = self._sub_handedness(script_val, subs, sub_longhand_params)
+                        else:
+                            script[script_var] = self._sub_handedness(script_val, subs, sub_longhand_params)
+                except:
+                    raise
+                return script
+            else:
+                return script
+        except:
+            raise
+
     def sub_longhand(self, script, subs=sub_longhand_defaults):
         """Substitute longhand script notation for shorthand.
 
@@ -319,29 +384,7 @@ class Parser():
         :return: The updated YAML script with substituted lookups.
         :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
         """
-        try:
-            if isinstance(script, list):
-                try:
-                    for script_val in script:
-                        script_val = self.sub_shorthand(script_val, subs)
-                except:
-                    raise
-                return script
-            elif isinstance(script, dict):
-                try:
-                    for script_var, script_val in list(script.items()):
-                        if script_var in subs.keys():
-                            script[subs[script_var]] = script.pop(script_var)
-                            script[subs[script_var]] = self.sub_shorthand(script_val, subs)
-                        else:
-                            script[script_var] = self.sub_shorthand(script_val, subs)
-                except:
-                    raise
-                return script
-            else:
-                return script
-        except:
-            raise
+        return self._sub_handedness(script, subs, True)
 
     def sub_shorthand(self, script, subs=sub_shorthand_defaults):
         """Substitute shorthand script notation for longhand.
@@ -357,7 +400,7 @@ class Parser():
         :return: The updated YAML script with substituted lookups.
         :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
         """
-        return self.sub_longhand(script, subs)
+        return self._sub_handedness(script, subs, False)
 
 
     def construct_string(self, script_vars, string_construct):
