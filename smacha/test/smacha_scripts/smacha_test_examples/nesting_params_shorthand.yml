@@ -1,0 +1,25 @@
+--- # SMACHA Nesting Parameter Passing Test
+n: sm_top
+T: Base
+m: smacha
+nn: smacha_nesting_params_test
+o: [final_outcome]
+s:
+  # This container state defines some parameter variables (name_0 and name_1)
+  # that persist to child states.
+  - SUB:
+      T: StateMachine
+      p: {name_0: FOO_0, name_1: FOO_1}
+      o: [outcome_c]
+      t: {outcome_c: final_outcome}
+      s:
+        # These child states are able to make use of the parameters that persist
+        # from the parent container, while also defining their own (outcome).
+        - FOO_0: {T: ParamFoo, p: {outcome: outcome_a},
+                  name_param: [params, name_0], outcome_param: [params, outcome],
+                  t: {outcome_a: FOO_1, outcome_b: outcome_c}}
+        # Parameters should only persist from parent to child state,
+        # not from sibling state to sibling state.
+        - FOO_1: {T: ParamFoo, p: {outcome: outcome_b},
+                  name_param: [[name_1]], outcome_param: [[outcome]],
+                  t: {outcome_a: FOO_1, outcome_b: outcome_c}}
