@@ -222,12 +222,32 @@ class TestTools(Tester):
                                             [os.path.join(base_path, 'smacha_templates/smacha_test_examples')])
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-    
+
     def test_generate_seq_nesting_1_super_script_2(self):
         """Test generate seq_nesting_1_super_script_2.yml"""
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(base_path, 'smacha_test_examples/seq_nesting_1_super_script_2.py')) as original_file:
             generated_code = self._generate(os.path.join(base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_1_super_script_2.yml'),
+                                            [os.path.join(base_path, 'smacha_scripts/smacha_test_examples')],
+                                            [os.path.join(base_path, 'smacha_templates/smacha_test_examples')])
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+
+    def test_generate_nesting_params_shorthand(self):
+        """Test generate nesting_params_shorthand.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(base_path, 'smacha_test_examples/nesting_params.py')) as original_file:
+            generated_code = self._generate(os.path.join(base_path, 'smacha_scripts/smacha_test_examples/nesting_params_shorthand.yml'),
+                                            [os.path.join(base_path, 'smacha_scripts/smacha_test_examples')],
+                                            [os.path.join(base_path, 'smacha_templates/smacha_test_examples')])
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+
+    def test_generate_print_userdata_shorthand(self):
+        """Test generate print_userdata_shorthand.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(base_path, 'smacha_test_examples/print_userdata.py')) as original_file:
+            generated_code = self._generate(os.path.join(base_path, 'smacha_scripts/smacha_test_examples/print_userdata_shorthand.yml'),
                                             [os.path.join(base_path, 'smacha_scripts/smacha_test_examples')],
                                             [os.path.join(base_path, 'smacha_templates/smacha_test_examples')])
             original_code = original_file.read()

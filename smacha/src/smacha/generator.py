@@ -480,6 +480,12 @@ class Generator():
         :return: The generated code.
         :rtype: str
         """
+        # Ensure script is in longhand format
+        try:
+            script = self._parser.sub_longhand(script)
+        except Exception as e:
+            raise ParsingError(error='Error when converting script to longhand format: {}'.format(str(e)))
+
         # TODO: Clean up this logic
         if not isinstance(script, dict):
             raise ParsingError(error='Invalid script formatting!')

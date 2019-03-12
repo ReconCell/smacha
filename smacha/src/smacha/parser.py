@@ -15,6 +15,26 @@ class Parser():
     SMACHA-specific script constructs.
     """
 
+    sub_shorthand_defaults = {'name': 'n',
+                              'manifest': 'm',
+                              'node_name': 'nn',
+                              'template': 'T',
+                              'script': 'S',
+                              'outcomes': 'o',
+                              'states': 's',
+                              'params': 'p',
+                              'userdata': 'ud',
+                              'input_keys': 'ik',
+                              'output_keys': 'ok',
+                              'remapping': 'r',
+                              'transitions': 't',
+                              'default_outcome': 'do',
+                              'outcome_map': 'om',
+                              'callbacks': 'cb'}
+
+    sub_longhand_defaults = {v: k for k, v in
+                             sub_shorthand_defaults.iteritems()}
+
     def __init__(self,
                  script_dirs=[],
                  container_persistent_vars=['params'],
@@ -284,6 +304,61 @@ class Parser():
                 return script_vars[query[0]][query[1]]
         else:
             raise ValueError('script_vars query should be a list of length 1 or 2!')
+
+    def sub_shorthand(self, script, subs=sub_shorthand_defaults):
+        """Substitute longhand script notation for shorthand.
+
+        NOTE: This method, in its current form, will modify the input script
+        object!
+
+        :param script: The parsed YAML script.
+        :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        :param subs: A dict of key/val substitutions, where the keys are
+        substituted for the vals in the script.
+        :type subs: dict
+        :return: The updated YAML script with substituted lookups.
+        :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        """
+        try:
+            if isinstance(script, list):
+                try:
+                    for script_val in script:
+                        script_val = self.sub_shorthand(script_val, subs)
+                except:
+                    raise
+                return script
+            elif isinstance(script, dict):
+                try:
+                    for script_var, script_val in list(script.items()):
+                        if script_var in subs.keys():
+                            script[subs[script_var]] = script.pop(script_var)
+                            script[subs[script_var]] = self.sub_shorthand(script_val, subs)
+                        else:
+                            script[script_var] = self.sub_shorthand(script_val, subs)
+                except:
+                    raise
+                return script
+            else:
+                return script
+        except:
+            raise
+
+    def sub_longhand(self, script, subs=sub_longhand_defaults):
+        """Substitute shorthand script notation for longhand.
+
+        NOTE: This method, in its current form, will modify the input script
+        object!
+
+        :param script: The parsed YAML script.
+        :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        :param subs: A dict of key/val substitutions, where the keys are
+        substituted for the vals in the script.
+        :type subs: dict
+        :return: The updated YAML script with substituted lookups.
+        :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
+        """
+        return self.sub_shorthand(script, subs)
+
 
     def construct_string(self, script_vars, string_construct):
         """Construct a string given a list of script_vars lookups.
@@ -601,7 +676,6 @@ class Parser():
         # Handle input_keys and output_keys by cross-checking between userdata
         # and remappings
         #
-        preceding_userdata = dict()
         preceding_output_keys = set()
         input_keys = yaml.comments.CommentedSet()
         input_keys.fa.set_flow_style()
