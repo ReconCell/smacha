@@ -1,0 +1,23 @@
+# SMACHA state sequence example
+n: sm_top
+T: Base
+m: smacha
+nn: smacha_params_test
+o: [final_outcome_a, final_outcome_b, final_outcome_c]
+s:
+- FOO_0: {T: ParamFoo, p: {name: FOO_0, outcome: outcome_a},
+          name_param: [params, name], outcome_param: [params, outcome],
+          t: {outcome_a: CON, outcome_b: final_outcome_b}}
+- CON:
+    T: Concurrence
+    p: {name: FOO_1, outcome: outcome_a, name_1: FOO_2}
+    o: [con_outcome_1, con_outcome_2, con_outcome_3, con_default_outcome]
+    do: con_default_outcome
+    om: {con_outcome_1: {FOO_1: outcome_b},
+         con_outcome_2: {FOO_1: outcome_a, FOO_2: outcome_a},
+         con_outcome_3: {FOO_2: outcome_b}}
+    t: {con_outcome_1: final_outcome_b, con_outcome_2: final_outcome_a,
+        con_outcome_3: final_outcome_c, con_default_outcome: CON}
+    states:
+    - FOO_1: {T: ParamFoo, name_param: [params, name], outcome_param: [params, outcome]}
+    - FOO_2: {T: ParamFoo, name_param: [params, name_1], outcome_param: [params, outcome]}
