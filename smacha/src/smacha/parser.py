@@ -313,11 +313,13 @@ class Parser():
 
         :param script: The parsed YAML script.
         :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
-        :param subs: A dict of key/val substitutions, where the keys are
-        substituted for the vals in the script.
+        :param subs:
+            A dict of key/val substitutions, where the keys are substituted for
+            the vals in the script.
         :type subs: dict
-        :param sub_longhand_params: Flag indicating whether longhand to shorthand
-        script parameter substitution will be used.
+        :param sub_longhand_params:
+            Flag indicating whether longhand to shorthand script parameter
+            substitution will be used.
         :type sub_longhand: bool
         :return: The updated YAML script with substituted lookups.
         :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
@@ -378,8 +380,9 @@ class Parser():
 
         :param script: The parsed YAML script.
         :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
-        :param subs: A dict of key/val substitutions, where the keys are
-        substituted for the vals in the script.
+        :param subs:
+            A dict of key/val substitutions, where the keys are substituted for
+            the vals in the script.
         :type subs: dict
         :return: The updated YAML script with substituted lookups.
         :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
@@ -394,8 +397,9 @@ class Parser():
 
         :param script: The parsed YAML script.
         :type script: dict or :class:`ruamel.yaml.comments.CommentedMap`
-        :param subs: A dict of key/val substitutions, where the keys are
-        substituted for the vals in the script.
+        :param subs:
+            A dict of key/val substitutions, where the keys are substituted for
+            the vals in the script.
         :type subs: dict
         :return: The updated YAML script with substituted lookups.
         :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
