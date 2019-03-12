@@ -359,7 +359,7 @@ class Generator():
 
                         # Ensure script is in longhand format
                         try:
-                            sub_script = self._parser.sub_longhand(sub_script)
+                            sub_script = self._parser.sub_shorthand(sub_script)
                         except Exception as e:
                             raise ParsingError(error='Error when converting sub-script to longhand format: {}'.format(str(e)))
 
@@ -488,7 +488,7 @@ class Generator():
         """
         # Ensure script is in longhand format
         try:
-            script = self._parser.sub_longhand(script)
+            script = self._parser.sub_shorthand(script)
         except Exception as e:
             raise ParsingError(error='Error when converting script to longhand format: {}'.format(str(e)))
 

@@ -15,25 +15,25 @@ class Parser():
     SMACHA-specific script constructs.
     """
 
-    sub_shorthand_defaults = {'name': 'n',
-                              'manifest': 'm',
-                              'node_name': 'nn',
-                              'template': 'T',
-                              'script': 'S',
-                              'outcomes': 'o',
-                              'states': 's',
-                              'params': 'p',
-                              'userdata': 'ud',
-                              'input_keys': 'ik',
-                              'output_keys': 'ok',
-                              'remapping': 'r',
-                              'transitions': 't',
-                              'default_outcome': 'do',
-                              'outcome_map': 'om',
-                              'callbacks': 'cb'}
+    sub_longhand_defaults = {'name': 'n',
+                             'manifest': 'm',
+                             'node_name': 'nn',
+                             'template': 'T',
+                             'script': 'S',
+                             'outcomes': 'o',
+                             'states': 's',
+                             'params': 'p',
+                             'userdata': 'ud',
+                             'input_keys': 'ik',
+                             'output_keys': 'ok',
+                             'remapping': 'r',
+                             'transitions': 't',
+                             'default_outcome': 'do',
+                             'outcome_map': 'om',
+                             'callbacks': 'cb'}
 
-    sub_longhand_defaults = {v: k for k, v in
-                             sub_shorthand_defaults.iteritems()}
+    sub_shorthand_defaults = {v: k for k, v in
+                             sub_longhand_defaults.iteritems()}
 
     def __init__(self,
                  script_dirs=[],
@@ -305,7 +305,7 @@ class Parser():
         else:
             raise ValueError('script_vars query should be a list of length 1 or 2!')
 
-    def sub_shorthand(self, script, subs=sub_shorthand_defaults):
+    def sub_longhand(self, script, subs=sub_longhand_defaults):
         """Substitute longhand script notation for shorthand.
 
         NOTE: This method, in its current form, will modify the input script
@@ -343,7 +343,7 @@ class Parser():
         except:
             raise
 
-    def sub_longhand(self, script, subs=sub_longhand_defaults):
+    def sub_shorthand(self, script, subs=sub_shorthand_defaults):
         """Substitute shorthand script notation for longhand.
 
         NOTE: This method, in its current form, will modify the input script
@@ -357,7 +357,7 @@ class Parser():
         :return: The updated YAML script with substituted lookups.
         :rtype: dict or :class:`ruamel.yaml.comments.CommentedMap`
         """
-        return self.sub_shorthand(script, subs)
+        return self.sub_longhand(script, subs)
 
 
     def construct_string(self, script_vars, string_construct):
