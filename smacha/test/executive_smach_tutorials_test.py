@@ -92,6 +92,16 @@ class TestGenerator(Tester):
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
+    def test_generate_state_machine_nesting2_shorthand(self):
+        """Test generate state_machine_nesting2_shorthand.yml"""
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(base_path, 'executive_smach_tutorials/smach_tutorials/examples/state_machine_nesting2.py')) as original_file:
+            generated_code = self._generate(os.path.join(base_path, 'smacha_scripts/executive_smach_tutorials/state_machine_nesting2_shorthand.yml'),
+                                            [],
+                                            [os.path.join(base_path, 'smacha_templates/executive_smach_tutorials')])
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+
 
 if __name__=="__main__":
 
