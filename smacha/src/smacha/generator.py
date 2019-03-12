@@ -357,6 +357,12 @@ class Generator():
                         # Parse the included sub-script
                         sub_script = self._parser.parse(state_vars['script'])
 
+                        # Ensure script is in longhand format
+                        try:
+                            sub_script = self._parser.sub_longhand(sub_script)
+                        except Exception as e:
+                            raise ParsingError(error='Error when converting sub-script to longhand format: {}'.format(str(e)))
+
                         # Check its validity - it should only be a one-item list.
                         if not isinstance(sub_script, list):
                             raise ParsingError(error='Invalid script formatting- included script does not contain a list!')
