@@ -33,7 +33,7 @@ class Parser():
                              'callbacks': 'cb'}
 
     sub_shorthand_defaults = {v: k for k, v in
-                             sub_longhand_defaults.iteritems()}
+                              list(sub_longhand_defaults.items())}
 
     def __init__(self,
                  script_dirs=[],
