@@ -187,6 +187,10 @@ class Templater():
         # Register custom filters with the environment
         self._template_env.filters['exptostr'] = exptostr
 
+        # Create a template block cache dictionary
+        # to be indexed by tuples of the form (template_name, block_name)
+        self._template_block_cache = {}
+
         pass
 
     def list_templates(self):
@@ -298,53 +302,60 @@ class Templater():
         :return: The rendered template block code.
         :rtype: str
         """
-        # Read the state template file into a template object using the
-        # environment object
-        found_template_name = (
-            self.find_template_name(template_name + '\.tpl(\.\w+)?$'))
-        template = self._template_env.select_template(
-            [template_name, found_template_name])
+        try:
+            # Check if this template/block combo has been previously cached
+            target_block_template = self._template_block_cache[(template_name, target_block)]
+        except:
+            # Read the state template file into a template object using the
+            # environment object
+            found_template_name = (
+                self.find_template_name(template_name + '\.tpl(\.\w+)?$'))
+            template = self._template_env.select_template(
+                [template_name, found_template_name])
 
-        # For reasons not entirely clear, a temporary environment must be
-        # created to make this work.
-        template_env = jinja2.Environment(loader=self._template_loader,
-                                          extensions=[jinja2.ext.do,
-                                                      SkipBlockExtension],
-                                          trim_blocks=False,
-                                          lstrip_blocks=True)
+            # For reasons not entirely clear, a temporary environment must be
+            # created to make this work.
+            template_env = jinja2.Environment(loader=self._template_loader,
+                                            extensions=[jinja2.ext.do,
+                                                        SkipBlockExtension],
+                                            trim_blocks=False,
+                                            lstrip_blocks=True)
 
-        # Always skip the meta block unless it is the target block
-        if target_block != 'meta':
-            template_env.skip_blocks.append('meta')
+            # Always skip the meta block unless it is the target block
+            if target_block != 'meta':
+                template_env.skip_blocks.append('meta')
 
-        # Be sure to also skip comment blocks here as required
-        if not self._include_comments:
-            template_env.skip_blocks.append('upper_comments')
-            template_env.skip_blocks.append('lower_comments')
+            # Be sure to also skip comment blocks here as required
+            if not self._include_comments:
+                template_env.skip_blocks.append('upper_comments')
+                template_env.skip_blocks.append('lower_comments')
 
-        # Be sure to also skip introspection server blocks here as required
-        if not self._include_introspection_server:
-            template_env.skip_blocks.append('introspection_server')
-            template_env.skip_blocks.append('spin')
+            # Be sure to also skip introspection server blocks here as required
+            if not self._include_introspection_server:
+                template_env.skip_blocks.append('introspection_server')
+                template_env.skip_blocks.append('spin')
 
-        # Register custom tests with the environment
-        template_env.tests['expression'] = expression
-        template_env.tests['not_string'] = not_string
+            # Register custom tests with the environment
+            template_env.tests['expression'] = expression
+            template_env.tests['not_string'] = not_string
 
-        # Register custom filters with the environment
-        template_env.filters['exptostr'] = exptostr
+            # Register custom filters with the environment
+            template_env.filters['exptostr'] = exptostr
 
-        # Append non-target blocks to environment skip_blocks list
-        for block_name, block in template.blocks.items():
-            if block_name != target_block:
-                template_env.skip_blocks.append(block_name)
+            # Append non-target blocks to environment skip_blocks list
+            for block_name, block in template.blocks.items():
+                if block_name != target_block:
+                    template_env.skip_blocks.append(block_name)
 
-        # Select the template from the temporary environment with
-        # the appropriate skip_blocks list for non-target blocks
-        found_template_name = self.find_template_name(
-            template_name + '\.tpl(\.\w+)?$', template_env=template_env)
-        target_block_template = (
-            template_env.select_template([template_name, found_template_name]))
+            # Select the template from the temporary environment with
+            # the appropriate skip_blocks list for non-target blocks
+            found_template_name = self.find_template_name(
+                template_name + '\.tpl(\.\w+)?$', template_env=template_env)
+            target_block_template = (
+                template_env.select_template([template_name, found_template_name]))
+
+            # Cache the block template for later use
+            self._template_block_cache[(template_name, target_block)] = target_block_template
 
         # Render code for remaining block
         #
