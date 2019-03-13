@@ -28,15 +28,16 @@ def main():
 
     with sm_top:
 
-        smach.StateMachine.add('FOO_0', Foo('FOO_0', 'outcome_a'), 
-                               transitions={'outcome_a':'FOO_1',
-                                            'outcome_b':'final_outcome'})
-        
-        smach.StateMachine.add('FOO_1', Foo('FOO_1', 'outcome_b'), 
-                               transitions={'outcome_a':'FOO_1',
-                                            'outcome_b':'final_outcome'})
+        smach.StateMachine.add('FOO_0', Foo('FOO_0', 'outcome_a'),
+                               transitions={'outcome_a': 'FOO_1',
+                                            'outcome_b': 'final_outcome'})
+
+        smach.StateMachine.add('FOO_1', Foo('FOO_1', 'outcome_b'),
+                               transitions={'outcome_a': 'FOO_1',
+                                            'outcome_b': 'final_outcome'})
 
     outcome = sm_top.execute()
-   
+
+
 if __name__ == '__main__':
     main()

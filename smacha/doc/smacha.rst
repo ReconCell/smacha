@@ -42,15 +42,23 @@ Why SMACHA?
 
 SMACHA allows for arbitrarily complex SMACH state machine programs to be written
 as much shorter YAML scripts that can be directly executed with ROS. Here is the
-`"Nesting State Machines" example <http://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines>`__
-from the `SMACH Tutorials <http://wiki.ros.org/smach/Tutorials>`__ described in a SMACHA
+`"Nesting State Machines" example <http://wiki.ros.org/smach/Tutorials/Nesting%20State%20Machines>`_
+from the `SMACH Tutorials <http://wiki.ros.org/smach/Tutorials>`_ described in a SMACHA
 script:
 
 .. literalinclude:: /../test/smacha_scripts/executive_smach_tutorials/state_machine_nesting2.yml
    :language: yaml
 
-This demonstrates a reduction from 80 lines of raw SMACH Python code to 15 lines
-of SMACHA script. Not bad.
+This demonstrates a reduction from 80 lines of raw SMACH Python code to 14 lines
+of SMACHA script. Not bad.  However, if we employ
+`YAML inline format <https://en.wikipedia.org/wiki/YAML#Syntax>`_ and
+:doc:`SMACHA shorthand script syntax <Scripting/smacha_scripts>`, we can get this down to 5 lines:
+
+.. _shorthand-example:
+
+.. literalinclude:: /../test/smacha_scripts/executive_smach_tutorials/state_machine_nesting2_shorthand.yml
+   :language: yaml
+
 Outside of script brevity, SMACHA provides many other benefits and tools to
 help rapidly prototype complex state machines for robot control.
 
@@ -64,6 +72,7 @@ Scripting
    Userdata<Scripting/userdata>
    Container States<Scripting/container_states>
    Sub-Scripts and Super-Scripts<Scripting/sub_scripts_and_super_scripts>
+   Shorthand Script Syntax<Scripting/shorthand>
 
 :doc:`Scripting/smacha_scripts` are parsed by the :doc:`Parser module
 <API/smacha.parser>` and direct :doc:`the Generator module

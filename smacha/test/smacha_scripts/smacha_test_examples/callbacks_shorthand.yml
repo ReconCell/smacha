@@ -1,0 +1,59 @@
+--- # SMACHA callbacks example
+n: sm
+T: Base
+m: smacha
+nn: smacha_callbacks_test
+o: [final_outcome]
+ud: {animals: [cats, dogs, sharks], numbers: [1, 2, 3]} 
+s:
+  # Example of using a using a predefined callback named 'foo_animals_cb' in the CallbacksFoo template
+  # to append 'turtles' to the 'animals' list in userdata.
+  - FOO_0: {T: CallbacksFoo, ik: [animals], ok: [animals], cb: {animals: foo_animals_cb}, t: {succeeded: FOO_1}}
+  # Example of using a using a dynamically defined lambda callback in the CallbacksState template
+  # to append 'ducks' to the 'animals' list in userdata.
+  - FOO_1: {T: CallbacksState, ik: [animals], ok: [animals],
+            cb: {animals: "`lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals`"},
+            t: {succeeded: FOO_2}}
+  # Example of using a using a predefined callback named 'foo_numbers_cb' in the CallbacksFoo template
+  # to increment the last number in the 'numbers' list by 1 and append it to the 'numbers' list.
+  - FOO_2: {T: CallbacksFoo, ik: [numbers], ok: [numbers], cb: {numbers: foo_numbers_cb}, t: {succeeded: FOO_3}}
+  # Example of using a using a dynamically defined lambda callback in the CallbacksState template
+  # to increment the last number in the 'numbers' list by 1 and append it to the 'numbers' list.
+  - FOO_3: {T: CallbacksState, ik: [numbers], ok: [numbers],
+            cb: {numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers`"},
+            t: {succeeded: FOO_4}}
+  # Example of using both predefined and dynamically defined callbacks on different userdata keys.
+  - FOO_4: {T: CallbacksFoo, ik: [animals, numbers], ok: [animals, numbers],
+            cb: {animals: foo_animals_cb, numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers`"},
+            t: {succeeded: FOO_5}}
+  # Example of using both predefined and dynamically defined callbacks on different userdata keys.
+  - FOO_5: {T: CallbacksFoo, ik: [animals, numbers], ok: [animals, numbers],
+            cb: {animals: "`lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals`", numbers: foo_numbers_cb},
+            t: {succeeded: FOO_6}}
+  # Example of using a dynamically defined lambda callback to generate a random number as an output key.
+  - FOO_6: {T: CallbacksState, ok: [random_number], cb: {random_number: "`lambda ud: random.random()`"}, t: {succeeded: FOO_7}}
+  # Example of using a dynamically defined lambda callback to append the random number from the previous
+  # state to the 'numbers' list.
+  - FOO_7: {T: CallbacksFoo, ik: [numbers,random_number], ok: [numbers],
+            cb: {numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.random_number) else ud.numbers`"},
+            t: {succeeded: FOO_8}}
+  # Example of using a dynamically defined lambda callback to append a number specified as userdata
+  # to the 'numbers' list.
+  - FOO_8: {T: CallbacksFoo, ud: {number: 123}, ik: [numbers, number], ok: [numbers],
+            cb: {numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.number) else ud.numbers`"},
+            t: {succeeded: FOO_9}}
+  # Example of using two lambda callbacks to generate random numbers, a third to sum them together,
+  # and a fourth to append the sum to the 'numbers' list.
+  # NOTE: The execution order is forced via alphabetic ordering of the callbacks using prefixes.
+  - FOO_9: {T: CallbacksFoo, ud: {a_random_number_1: 0, a_random_number_2: 0, b_random_number_sum: 0},
+            ik: [numbers, a_random_number_1, a_random_number_2, b_random_number_sum],
+            ok: [numbers, a_random_number_1, a_random_number_2, b_random_number_sum],
+            cb: {a_random_number_1: "`lambda ud: random.random()`",
+                a_random_number_2: "`lambda ud: random.random()`",
+                b_random_number_sum: "`lambda ud: ud.a_random_number_1 + ud.a_random_number_2`",
+                numbers: "`lambda ud: ud.numbers if ud.numbers.append(ud.b_random_number_sum) else ud.numbers`"},
+            t: {succeeded: FOO_10}}
+  # Example of using a SMACHA script parameter to parameterize a lambda callback using a string construct.
+  - FOO_10: {T: CallbacksState, p: {number: 42}, ik: [numbers], ok: [numbers],
+             cb: {numbers: ["`lambda ud: ud.numbers if ud.numbers.append(", [[number]], ") else ud.numbers`"]},
+             t: {succeeded: final_outcome}}

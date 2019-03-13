@@ -1,0 +1,6 @@
+--- # Nesting State Machines Tutorial SMACHA script.
+{n: sm_top, T: Base, m: smacha, nn: smach_example_state_machine, o: [outcome5],
+ s: [BAS: {T: Bas, t: {outcome3: SUB}},
+     SUB: {T: StateMachine, o: [outcome4], t: {outcome4: outcome5},
+           s: [FOO: {T: Foo, t: {outcome1: BAR, outcome2: outcome4}},
+               BAR: {T: Bar, t: {outcome1: FOO}}]}]}
