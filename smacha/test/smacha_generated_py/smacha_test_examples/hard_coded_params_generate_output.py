@@ -33,6 +33,10 @@ class Foo(smach.State):
 
 
 
+
+
+
+
 def main():
     rospy.init_node('smacha_params_test')
 

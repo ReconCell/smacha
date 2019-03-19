@@ -18,22 +18,12 @@ outcomes:
 - succeeded
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks %}
+{% from "Utils.tpl.py" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks %}
 
 {% include "State.tpl.py" %}
 
 {% block imports %}
 {% endblock imports %}
-
-{% block defs %}
-{% if callbacks is defined %}
-{% if input_keys is defined %}
-{{ render_def_lambda_callbacks(defined_headers, name, uuid, input_keys, callbacks) }}
-{% else %}
-{{ render_def_lambda_callbacks(defined_headers, name, uuid, [], callbacks) }}
-{% endif %}
-{% endif %}
-{% endblock defs %}
 
 {% block class_defs %}
 {% if 'class_CallbacksState' not in defined_headers %}
@@ -50,6 +40,16 @@ class CallbacksState(smach.State):
         return 'succeeded'
 {% do defined_headers.append('class_CallbacksState') %}{% endif %}
 {% endblock class_defs %}
+
+{% block cb_defs %}
+{% if callbacks is defined %}
+{% if input_keys is defined %}
+{{ render_def_lambda_callbacks(defined_headers, 'CallbacksState', name, uuid, input_keys, callbacks) }}
+{% else %}
+{{ render_def_lambda_callbacks(defined_headers, 'CallbacksState', name, uuid, [], callbacks) }}
+{% endif %}
+{% endif %}
+{% endblock cb_defs %}
 
 {% block header %}
 {% endblock header %}

@@ -26,16 +26,6 @@ outcomes:
 {{ import_module(defined_headers, 'random') }}
 {% endblock imports %}
 
-{% block defs %}
-{% if callbacks is defined %}
-{% if input_keys is defined %}
-{{ render_def_lambda_callbacks(defined_headers, name, uuid, input_keys, callbacks) }}
-{% else %}
-{{ render_def_lambda_callbacks(defined_headers, name, uuid, [], callbacks) }}
-{% endif %}
-{% endif %}
-{% endblock defs %}
-
 {% block class_defs %}
 {% if 'class_RandomOutcomeState' not in defined_headers %}
 class RandomOutcomeState(smach.State):
@@ -57,6 +47,16 @@ class RandomOutcomeState(smach.State):
         return random_outcome
 {% do defined_headers.append('class_RandomOutcomeState') %}{% endif %}
 {% endblock class_defs %}
+
+{% block cb_defs %}
+{% if callbacks is defined %}
+{% if input_keys is defined %}
+{{ render_def_lambda_callbacks(defined_headers, 'RandomOutcomeState', name, uuid, input_keys, callbacks) }}
+{% else %}
+{{ render_def_lambda_callbacks(defined_headers, 'RandomOutcomeState', name, uuid, [], callbacks) }}
+{% endif %}
+{% endif %}
+{% endblock cb_defs %}
 
 {% block header %}
 {% endblock header %}

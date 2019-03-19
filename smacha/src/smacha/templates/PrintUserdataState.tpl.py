@@ -15,11 +15,12 @@ outcomes:
 - succeeded
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import render_input_keys, render_transitions, render_remapping %}
+{% from "Utils.tpl.py" import import_module, render_input_keys, render_transitions, render_remapping %}
 
 {% include "State.tpl.py" %}
 
 {% block imports %}
+{{ import_module(defined_headers, 'rospy') }}
 {% endblock imports %}
 
 {% block defs %}

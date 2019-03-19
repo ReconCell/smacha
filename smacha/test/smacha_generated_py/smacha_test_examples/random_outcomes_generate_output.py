@@ -16,16 +16,20 @@ import random
 
 
 class RandomOutcomeState(smach.State):
-    def __init__(self, input_keys = [], output_keys = [], callbacks = [], outcomes=['succeeded']):
+    def __init__(self, input_keys = [], output_keys = ['outcome'], callbacks = [], outcomes=['succeeded']):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
 
         
         self._cbs = []
 
         if callbacks:
-          for cb in sorted(callbacks):
-              if cb in globals():
-                  self._cbs.append(globals()[cb])
+            for cb in sorted(callbacks):
+                if cb in globals():
+                    self._cbs.append(globals()[cb])
+                elif cb in locals():
+                    self._cbs.append(locals()[cb])
+                elif cb in dir(self):
+                    self._cbs.append(getattr(self, cb))
 
         self._cb_input_keys = []
         self._cb_output_keys = []
@@ -41,9 +45,9 @@ class RandomOutcomeState(smach.State):
                 self.register_output_keys(self._cb_output_keys[-1])
                 self.register_outcomes(self._cb_outcomes[-1])
 
-    
+
     def execute(self, userdata):
-        
+
         
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
@@ -51,12 +55,18 @@ class RandomOutcomeState(smach.State):
                                 self._cb_output_keys):
 
             # Call callback with limited userdata
-            cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+            try:
+                cb_outcome = cb(self, smach.Remapper(userdata,ik,ok,{}))
+            except:
+                cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
 
         # Select random outcome
         random_outcome = random.choice(list(self._outcomes))
-        
+
+        # Set the outcome output key
+        userdata.outcome = random_outcome
+
         return random_outcome
 
 class CallbacksState(smach.State):
@@ -67,9 +77,13 @@ class CallbacksState(smach.State):
         self._cbs = []
 
         if callbacks:
-          for cb in sorted(callbacks):
-              if cb in globals():
-                  self._cbs.append(globals()[cb])
+            for cb in sorted(callbacks):
+                if cb in globals():
+                    self._cbs.append(globals()[cb])
+                elif cb in locals():
+                    self._cbs.append(locals()[cb])
+                elif cb in dir(self):
+                    self._cbs.append(getattr(self, cb))
 
         self._cb_input_keys = []
         self._cb_output_keys = []
@@ -85,9 +99,9 @@ class CallbacksState(smach.State):
                 self.register_output_keys(self._cb_output_keys[-1])
                 self.register_outcomes(self._cb_outcomes[-1])
 
-    
+
     def execute(self, userdata):
-        
+
         
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
@@ -95,10 +109,17 @@ class CallbacksState(smach.State):
                                 self._cb_output_keys):
 
             # Call callback with limited userdata
-            cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+            try:
+                cb_outcome = cb(self, smach.Remapper(userdata,ik,ok,{}))
+            except:
+                cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
-        
+
         return 'succeeded'
+
+
+
+
 
 
 
@@ -109,7 +130,7 @@ def main():
 
     
 
-   
+
 
     sm = smach.StateMachine(outcomes=['final_outcome'])
 
@@ -123,15 +144,15 @@ def main():
                                transitions={'foo_0':'FOO_0',
                                             'foo_1':'FOO_1',
                                             'foo_2':'FOO_2'})
-        
+
         smach.StateMachine.add('FOO_0',
                                        CallbacksState(),
                                transitions={'succeeded':'RANDOMIZE'})
-        
+
         smach.StateMachine.add('FOO_1',
                                        CallbacksState(),
                                transitions={'succeeded':'RANDOMIZE'})
-        
+
         smach.StateMachine.add('FOO_2',
                                        CallbacksState(),
                                transitions={'succeeded':'final_outcome'})
@@ -147,7 +168,7 @@ def main():
     
 
     outcome = sm.execute()
-    
+
 
 
 

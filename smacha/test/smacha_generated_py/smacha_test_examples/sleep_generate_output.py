@@ -20,12 +20,16 @@ class SleepState(smach.State):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
 
         self._time = time
-    
+
     def execute(self, userdata):
-        
+
         rospy.sleep(self._time)
-        
+
         return 'succeeded'
+
+
+
+
 
 
 
@@ -36,7 +40,7 @@ def main():
 
     
 
-   
+
 
     sm = smach.StateMachine(outcomes=['final_outcome'])
 
@@ -48,7 +52,7 @@ def main():
         smach.StateMachine.add('FOO_0',
                                        SleepState(5),
                                transitions={'succeeded':'FOO_1'})
-        
+
         smach.StateMachine.add('FOO_1',
                                        SleepState(10),
                                transitions={'succeeded':'final_outcome'})
@@ -64,7 +68,7 @@ def main():
     
 
     outcome = sm.execute()
-    
+
 
 
 

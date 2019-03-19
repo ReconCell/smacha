@@ -12,11 +12,14 @@ class RandomOutcomeState(smach.State):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
 
         self._cbs = []
-
         if callbacks:
             for cb in sorted(callbacks):
                 if cb in globals():
                     self._cbs.append(globals()[cb])
+                elif cb in locals():
+                    self._cbs.append(locals()[cb])
+                elif cb in dir(self):
+                    self._cbs.append(getattr(self, cb))
 
         self._cb_input_keys = []
         self._cb_output_keys = []
@@ -39,7 +42,10 @@ class RandomOutcomeState(smach.State):
                                 self._cb_output_keys):
 
             # Call callback with limited userdata
-            cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+            try:
+                cb_outcome = cb(self, smach.Remapper(userdata,ik,ok,{}))
+            except:
+                cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
         # Select random outcome
         random_outcome = random.choice(list(self._outcomes))
@@ -55,11 +61,14 @@ class CallbacksState(smach.State):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
 
         self._cbs = []
-
         if callbacks:
             for cb in sorted(callbacks):
                 if cb in globals():
                     self._cbs.append(globals()[cb])
+                elif cb in locals():
+                    self._cbs.append(locals()[cb])
+                elif cb in dir(self):
+                    self._cbs.append(getattr(self, cb))
 
         self._cb_input_keys = []
         self._cb_output_keys = []
@@ -83,7 +92,10 @@ class CallbacksState(smach.State):
                                 self._cb_output_keys):
 
             # Call callback with limited userdata
-            cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+            try:
+                cb_outcome = cb(self, smach.Remapper(userdata,ik,ok,{}))
+            except:
+                cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
         return 'succeeded'
 

@@ -27,7 +27,7 @@ input_keys: []
 output_keys: []
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import render_outcomes, render_userdata %}
+{% from "Utils.tpl.py" import import_module, render_outcomes, render_userdata %}
 
 {% set defined_headers = [] %}
 {% set local_vars = [] %}
@@ -38,10 +38,10 @@ output_keys: []
 {% endblock base_header %}
 
 {% block imports %}
-import roslib; {% if manifest is defined %}roslib.load_manifest('{{ manifest }}'){% endif %}
-import rospy
-import smach
-import smach_ros
+{{ import_module(defined_headers, 'roslib') }}{% if manifest is defined %}; roslib.load_manifest('{{ manifest }}'){% endif %}
+{{ import_module(defined_headers, 'rospy') }}
+{{ import_module(defined_headers, 'smach') }}
+{{ import_module(defined_headers, 'smach_ros') }}
 {{ imports }}
 {% endblock imports %}
 
@@ -52,6 +52,10 @@ import smach_ros
 {% block class_defs %}
 {{ class_defs }}
 {% endblock class_defs %}
+
+{% block cb_defs %}
+{{ cb_defs }}
+{% endblock cb_defs %}
 
 {% if name is defined %}{% set sm_name = name | lower() %}{% else %}{% set sm_name = 'sm' %}{% endif %}
 

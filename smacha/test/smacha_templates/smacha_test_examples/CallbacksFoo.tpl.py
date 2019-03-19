@@ -2,6 +2,7 @@
 
 {% include "State.tpl.py" %}
 
+
 {% block imports %}
 {{ import_module(defined_headers, 'random') }}
 {% endblock imports %}
@@ -26,18 +27,10 @@ def foo_numbers_cb(userdata):
     userdata['numbers'].append(userdata['numbers'][-1]+1)
     return 'succeeded'
 {% do defined_headers.append('foo_numbers_cb') %}{% endif %}
-
-{% if callbacks is defined %}
-{% if input_keys is defined %}
-{{ render_def_lambda_callbacks(defined_headers, name, uuid, input_keys, callbacks) }}
-{% else %}
-{{ render_def_lambda_callbacks(defined_headers, name, uuid, [], callbacks) }}
-{% endif %}
-{% endif %}
 {% endblock defs %}
 
 {% block class_defs %}
-{% if 'class_foo' not in defined_headers %}
+{% if 'class_Foo' not in defined_headers %}
 class Foo(smach.State):
     def __init__(self, name, input_keys=[], output_keys=[], callbacks=[]):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
@@ -56,8 +49,18 @@ class Foo(smach.State):
             rospy.loginfo('Userdata input key \'{}\' AFTER callback execution: {}'.format(input_key, userdata[input_key]))
 
         return 'succeeded'
-{% do defined_headers.append('class_foo') %}{% endif %}
+{% do defined_headers.append('class_Foo') %}{% endif %}
 {% endblock class_defs %}
+
+{% block cb_defs %}
+{% if callbacks is defined %}
+{% if input_keys is defined %}
+{{ render_def_lambda_callbacks(defined_headers, 'Foo', name, uuid, input_keys, callbacks) }}
+{% else %}
+{{ render_def_lambda_callbacks(defined_headers, 'Foo', name, uuid, [], callbacks) }}
+{% endif %}
+{% endif %}
+{% endblock cb_defs %}
 
 {% block header %}
 {% endblock header %}

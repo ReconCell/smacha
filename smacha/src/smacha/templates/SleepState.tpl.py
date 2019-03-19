@@ -18,11 +18,12 @@ outcomes:
 - succeeded
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import render_transitions %}
+{% from "Utils.tpl.py" import import_module, render_transitions %}
 
 {% include "State.tpl.py" %}
 
 {% block imports %}
+{{ import_module(defined_headers, 'rospy') }}
 {% endblock imports %}
 
 {% block defs %}

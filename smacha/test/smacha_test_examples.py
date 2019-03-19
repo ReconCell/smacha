@@ -243,8 +243,8 @@ class TestTools(Tester):
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
-    def test_callbacks(self):
-        """Test callbacks.yml"""
+    def test_generate_callbacks(self):
+        """Test generate callbacks.yml"""
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(base_path, 'smacha_test_examples/callbacks.py')) as original_file:
             generated_code = self._strip_uuids(self._generate(os.path.join(base_path, 'smacha_scripts/smacha_test_examples/callbacks.yml'),
@@ -253,8 +253,8 @@ class TestTools(Tester):
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
-    def test_random_outcomes(self):
-        """Test random_outcomes.yml"""
+    def test_generate_random_outcomes(self):
+        """Test generate random_outcomes.yml"""
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(base_path, 'smacha_test_examples/random_outcomes.py')) as original_file:
             generated_code = self._generate(os.path.join(base_path, 'smacha_scripts/smacha_test_examples/random_outcomes.yml'),
@@ -263,8 +263,8 @@ class TestTools(Tester):
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
-    def test_sleep(self):
-        """Test sleep.yml"""
+    def test_generate_sleep(self):
+        """Test generate sleep.yml"""
         base_path = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(base_path, 'smacha_test_examples/sleep.py')) as original_file:
             generated_code = self._generate(os.path.join(base_path, 'smacha_scripts/smacha_test_examples/sleep.yml'),
