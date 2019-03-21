@@ -20,13 +20,15 @@ outcomes:
 
 {% from "Utils.tpl.py" import import_module, render_transitions %}
 
-{% include "State.tpl.py" %}
+{% extends "State.tpl.py" %}
 
 {% block imports %}
+{{ super() }}
 {{ import_module(defined_headers, 'rospy') }}
 {% endblock imports %}
 
 {% block class_defs %}
+{{ super() }}
 {% if 'class_SleepState' not in defined_headers %}
 class SleepState(smach.State):
     def __init__(self, time, input_keys = [], output_keys = [], callbacks = [], outcomes=['succeeded']):
@@ -43,6 +45,7 @@ class SleepState(smach.State):
 {% endblock class_defs %}
 
 {% block body %}
+{{ super() }}
 smach.{{ parent_type }}.add('{{ name }}',
         {{ '' | indent(23, true) }}SleepState({{ time }}){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %})

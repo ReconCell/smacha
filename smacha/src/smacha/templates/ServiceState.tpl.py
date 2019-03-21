@@ -43,7 +43,7 @@ variables:
 
 {% from "Utils.tpl.py" import render_request_slots, render_input_keys, render_response_slots, render_output_keys, render_transitions, render_remapping %}
 
-{% include "State.tpl.py" %}
+{% extends "State.tpl.py" %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',

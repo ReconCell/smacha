@@ -73,6 +73,8 @@ def main():
         # that should abort the action state when it is received, so we
         # map 'aborted' for this state onto 'succeeded' for the state machine.
 
+
+
         smach.StateMachine.add('GOAL_STATIC',
                                smach_ros.SimpleActionState('test_action', TestAction,
                                                            goal = TestGoal(goal=1)),
@@ -85,6 +87,8 @@ def main():
             goal = TestGoal()
             goal.goal = 2
             return goal
+
+
 
         smach.StateMachine.add('GOAL_CB',
                                smach_ros.SimpleActionState('test_action', TestAction,

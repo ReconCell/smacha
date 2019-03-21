@@ -17,13 +17,15 @@ outcomes:
 
 {% from "Utils.tpl.py" import import_module, render_input_keys, render_transitions, render_remapping %}
 
-{% include "State.tpl.py" %}
+{% extends "State.tpl.py" %}
 
 {% block imports %}
+{{ super() }}
 {{ import_module(defined_headers, 'rospy') }}
 {% endblock imports %}
 
 {% block class_defs %}
+{{ super() }}
 {% if 'class_PrintUserdataState' not in defined_headers %}
 class PrintUserdataState(smach.State):
     def __init__(self, input_keys = [], output_keys = [], callbacks = [], outcomes=['succeeded']):
@@ -40,6 +42,7 @@ class PrintUserdataState(smach.State):
 {% endblock class_defs %}
 
 {% block body %}
+{{ super() }}
 smach.{{ parent_type }}.add('{{ name }}',
         {{ '' | indent(23, true) }}PrintUserdataState({% if input_keys is defined %}{{ render_input_keys(input_keys, indent=0) }}{% endif %}){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},

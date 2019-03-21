@@ -47,13 +47,15 @@ outcomes:
 
 {% from "Utils.tpl.py" import from_import, render_goal_slots, render_input_keys, render_result_slots, render_output_keys, render_transitions, render_remapping %}
 
-{% include "State.tpl.py" %}
+{% extends "State.tpl.py" %}
 
 {% block imports %}
+{{ super() }}
 {{ from_import(defined_headers, 'actionlib', '*') }}
 {% endblock imports %}
 
 {% block body %}
+{{ super() }}
 smach.{{ parent_type }}.add('{{ name }}',
 {{ '' | indent(23, true) }}smach_ros.SimpleActionState('{{ action_server_namespace }}', {{ action }}{% if goal is defined %},
 {{ 'goal = ' | indent(51, true) }}{{ goal }}{% elif goal_slots is defined %},

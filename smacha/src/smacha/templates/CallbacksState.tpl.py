@@ -18,11 +18,12 @@ outcomes:
 - succeeded
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks %}
+{% from "Utils.tpl.py" import render_transitions, render_remapping, render_input_keys, render_output_keys, render_init_callbacks, render_execute_callbacks, render_callbacks %}
 
-{% include "State.tpl.py" %}
+{% extends "State.tpl.py" %}
 
 {% block class_defs %}
+{{ super() }}
 {% if 'class_CallbacksState' not in defined_headers %}
 class CallbacksState(smach.State):
     def __init__(self, input_keys = [], output_keys = [], callbacks = []):
@@ -39,6 +40,7 @@ class CallbacksState(smach.State):
 {% endblock class_defs %}
 
 {% block body %}
+{{ super() }}
 smach.{{ parent_type }}.add('{{ name }}',
         {{ '' | indent(23, true) }}CallbacksState({% if input_keys is defined %}{{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}{% if input_keys is defined %}, {% endif %}{{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
