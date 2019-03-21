@@ -15,7 +15,7 @@ outcomes:
 - succeeded
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import import_module, render_input_keys, render_transitions, render_remapping %}
+{% from "Utils.tpl.py" import import_module %}
 
 {% extends "State.tpl.py" %}
 
@@ -40,11 +40,3 @@ class PrintUserdataState(smach.State):
         return 'succeeded'
 {% do defined_headers.append('class_PrintUserdataState') %}{% endif %}
 {% endblock class_defs %}
-
-{% block body %}
-{{ super() }}
-smach.{{ parent_type }}.add('{{ name }}',
-        {{ '' | indent(23, true) }}PrintUserdataState({% if input_keys is defined %}{{ render_input_keys(input_keys, indent=0) }}{% endif %}){% if transitions is defined %},
-{{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
-{{ render_remapping(remapping) }}{% endif %})
-{% endblock body %}

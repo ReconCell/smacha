@@ -26,7 +26,7 @@ outcomes:
 - aborted
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import import_module, render_transitions, render_remapping %}
+{% from "Utils.tpl.py" import import_module %}
 
 {% extends "State.tpl.py" %}
 
@@ -78,10 +78,3 @@ class TF2ListenerState(smach.State):
         return 'succeeded'
 {% do defined_headers.append('class_TF2ListenerState') %}{% endif %}
 {% endblock class_defs %}
-
-{% block body %}
-{{ super() }}
-smach.StateMachine.add('{{ name }}', TF2ListenerState(){% if transitions is defined %},
-{{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
-{{ render_remapping(remapping) }}{% endif %})
-{% endblock body %}

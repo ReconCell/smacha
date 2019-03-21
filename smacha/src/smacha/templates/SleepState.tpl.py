@@ -45,7 +45,6 @@ class SleepState(smach.State):
 {% endblock class_defs %}
 
 {% block body %}
-{{ super() }}
 smach.{{ parent_type }}.add('{{ name }}',
         {{ '' | indent(23, true) }}SleepState({{ time }}){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %})

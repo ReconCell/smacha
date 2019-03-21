@@ -55,7 +55,6 @@ outcomes:
 {% endblock imports %}
 
 {% block body %}
-{{ super() }}
 smach.{{ parent_type }}.add('{{ name }}',
 {{ '' | indent(23, true) }}smach_ros.SimpleActionState('{{ action_server_namespace }}', {{ action }}{% if goal is defined %},
 {{ 'goal = ' | indent(51, true) }}{{ goal }}{% elif goal_slots is defined %},

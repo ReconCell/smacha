@@ -12,7 +12,7 @@ input_keys: []
 output_keys: []
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import render_def_lambda_callbacks, render_userdata %}
+{% from "Utils.tpl.py" import render_input_keys, render_output_keys, render_outcomes, render_callbacks, render_transitions, render_remapping, render_def_lambda_callbacks, render_userdata %}
 
 {% block base_header %}
 {% endblock base_header %}
@@ -44,6 +44,10 @@ output_keys: []
 {% endblock header %}
 
 {% block body %}
+smach.{{ parent_type }}.add('{{ name }}',
+        {{ '' | indent(23, true) }}{{ class_name }}({% if input_keys is defined %}{{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}{% if input_keys is defined %}, {% endif %}{{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}{% if input_keys is defined or output_keys is defined %}, {% endif %}{{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}{% if outcomes is defined %}{% if input_keys is defined or output_keys is defined or callbacks is defined %}, {% endif %}{{ render_outcomes(outcomes, indent=0) }}{% endif %}){% if transitions is defined %},
+{{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
+{{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}
 
 {% block footer %}

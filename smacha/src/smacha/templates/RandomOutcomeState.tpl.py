@@ -18,7 +18,7 @@ outcomes:
 - User-specified (default = succeeded)
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_outcomes, render_init_callbacks, render_execute_callbacks, render_callbacks %}
+{% from "Utils.tpl.py" import import_module, render_init_callbacks, render_execute_callbacks %}
 
 {% extends "State.tpl.py" %}
 
@@ -49,11 +49,3 @@ class RandomOutcomeState(smach.State):
         return random_outcome
 {% do defined_headers.append('class_RandomOutcomeState') %}{% endif %}
 {% endblock class_defs %}
-
-{% block body %}
-{{ super() }}
-smach.{{ parent_type }}.add('{{ name }}',
-        {{ '' | indent(23, true) }}RandomOutcomeState({% if input_keys is defined %}{{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}{% if input_keys is defined %}, {% endif %}{{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}{% if outcomes is defined %}{% if input_keys is defined or output_keys is defined or callbacks is defined %}, {% endif %}{{ render_outcomes(outcomes, indent=0) }}{% endif %}){% if transitions is defined %},
-{{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
-{{ render_remapping(remapping) }}{% endif %})
-{% endblock body %}
