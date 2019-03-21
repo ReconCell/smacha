@@ -217,8 +217,8 @@ class Generator():
                                   'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
 
                         # Create a new dictionary for the state template variables,
-                        # initialized with the state name and uuid.
-                        template_vars = {'name': state_name, 'uuid': uuid.uuid4().hex}
+                        # initialized with the template name, state name and uuid.
+                        template_vars = {'class_name': state_vars['template'], 'name': state_name, 'uuid': uuid.uuid4().hex}
 
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
@@ -413,8 +413,8 @@ class Generator():
                             print(bcolors.OKBLUE + 'Processing state \'' + state_name + '\'' + bcolors.ENDC)
 
                         # Create a new dictionary for the state template variables,
-                        # initialized with the state name and uuid.
-                        template_vars = {'name': state_name, 'uuid': uuid.uuid4().hex}
+                        # initialized with the template name, state name and uuid.
+                        template_vars = {'class_name': state_vars['template'], 'name': state_name, 'uuid': uuid.uuid4().hex}
 
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():

@@ -23,9 +23,6 @@ outcomes:
 {{ import_module(defined_headers, 'rospy') }}
 {% endblock imports %}
 
-{% block defs %}
-{% endblock defs %}
-
 {% block class_defs %}
 {% if 'class_PrintUserdataState' not in defined_headers %}
 class PrintUserdataState(smach.State):
@@ -41,9 +38,6 @@ class PrintUserdataState(smach.State):
         return 'succeeded'
 {% do defined_headers.append('class_PrintUserdataState') %}{% endif %}
 {% endblock class_defs %}
-
-{% block header %}
-{% endblock header %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',

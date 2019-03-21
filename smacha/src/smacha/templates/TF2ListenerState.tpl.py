@@ -31,15 +31,9 @@ outcomes:
 {% include "State.tpl.py" %}
 {% include "TF2ListenerSingleton.tpl.py" %}
 
-{% block base_header %}
-{% endblock base_header %}
-
 {% block imports %}
 {{ import_module(defined_headers, 'tf2_ros') }}
 {% endblock imports %}
-
-{% block defs %}
-{% endblock defs %}
 
 {% block class_defs %}
 {% if 'class_TF2ListenerState' not in defined_headers %}
@@ -82,29 +76,8 @@ class TF2ListenerState(smach.State):
 {% do defined_headers.append('class_TF2ListenerState') %}{% endif %}
 {% endblock class_defs %}
 
-{% block header %}
-{% endblock header %}
-
-{% block main_def %}
-{% endblock main_def %}
-
 {% block body %}
 smach.StateMachine.add('{{ name }}', TF2ListenerState(){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
 {{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}
-
-{% block footer %}
-{% endblock footer %}
-
-{% block execute %}
-{% endblock execute %}
-
-{% block spin %}
-{% endblock spin %}
-
-{% block base_footer %}
-{% endblock base_footer %}
-
-{% block main %}
-{% endblock main %}

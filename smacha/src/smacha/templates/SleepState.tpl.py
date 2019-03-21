@@ -26,9 +26,6 @@ outcomes:
 {{ import_module(defined_headers, 'rospy') }}
 {% endblock imports %}
 
-{% block defs %}
-{% endblock defs %}
-
 {% block class_defs %}
 {% if 'class_SleepState' not in defined_headers %}
 class SleepState(smach.State):
@@ -44,9 +41,6 @@ class SleepState(smach.State):
         return 'succeeded'
 {% do defined_headers.append('class_SleepState') %}{% endif %}
 {% endblock class_defs %}
-
-{% block header %}
-{% endblock header %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',

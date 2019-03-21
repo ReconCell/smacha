@@ -1,7 +1,4 @@
-{% from "Utils.tpl.py" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks %}
-
-{% include "State.tpl.py" %}
-
+{% from "Utils.tpl.py" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_def_lambda_callbacks, render_init_callbacks, render_execute_callbacks, render_callbacks, render_userdata %}
 
 {% block imports %}
 {{ import_module(defined_headers, 'random') }}
@@ -63,6 +60,7 @@ class Foo(smach.State):
 {% endblock cb_defs %}
 
 {% block header %}
+{% if userdata is defined %}{{ render_userdata(parent_sm_name, userdata) }}{% endif %}
 {% endblock header %}
 
 {% block body %}

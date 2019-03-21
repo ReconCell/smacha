@@ -1,4 +1,5 @@
 import jinja2
+from jinja2 import meta
 from jinja2.ext import Extension
 from jinja2.tests import test_number
 
@@ -185,6 +186,14 @@ class Templater():
         # Register custom filters with the environment
         self._template_env.filters['exptostr'] = exptostr
 
+        # Create a template references cache dictionary
+        # to be indexed by template names.
+        self._template_ref_names_cache = {}
+
+        # Create a template block names cache dictionary
+        # to be indexed by template names.
+        self._template_block_names_cache = {}
+
         # Create a template block cache dictionary
         # to be indexed by tuples of the form (template_name, block_name)
         self._template_block_cache = {}
@@ -341,9 +350,9 @@ class Templater():
             template_env.filters['exptostr'] = exptostr
 
             # Append non-target blocks to environment skip_blocks list
-            for block_name, block in template.blocks.items():
-                if block_name != target_block:
-                    template_env.skip_blocks.append(block_name)
+            for block in self.get_template_blocks(template_name):
+                if block != target_block:
+                    template_env.skip_blocks.append(block)
 
             # Select the template from the temporary environment with
             # the appropriate skip_blocks list for non-target blocks
@@ -391,7 +400,8 @@ class Templater():
         # meta block)
         template_block_code = {
             block: self.render_block(template_name, template_vars, block)
-            for block, _ in template.blocks.items() if block != 'meta'}
+            for block in
+            self.get_template_blocks(template_name) if block != 'meta'}
 
         return template_block_code
 
@@ -456,3 +466,80 @@ class Templater():
                 for template_var in template_module_vars}
 
         return template_vars
+
+    def get_template_refs(self, template_name):
+        """Get all templates referenced in a template.
+
+        Get a list of all templates referenced via {% include %} or
+        {% extends %} tags in a given template.
+
+        :param template_name: The name of the template.
+        :type template_name: str
+        :return: The names of the templates referenced by the template.
+        :rtype: list of str
+        """
+        try:
+            # Check if the template refs for this template have been previously
+            # cached.
+            template_refs = self._template_ref_names_cache[template_name]
+        except:
+            # Read the template source using the template environment
+            try:
+                template_source = self._template_env.loader.get_source(
+                    self._template_env, template_name)[0]
+            except:
+                try:
+                    found_template_name = (
+                        self.find_template_name(template_name + '\.tpl(\.\w+)?$'))
+                    template_source = self._template_env.loader.get_source(
+                        self._template_env, found_template_name)[0]
+                except Exception as e:
+                    raise e
+
+            # Parse the content of the source
+            parsed_content = self._template_env.parse(template_source)
+
+            # Get the list of referenced templates using the Meta API
+            template_refs = list(
+                jinja2.meta.find_referenced_templates(parsed_content))
+
+            # Cache the block template for later use
+            self._template_ref_names_cache[template_name] = template_refs
+
+        return template_refs
+
+    def get_template_blocks(self, template_name):
+        """Get all template blocks.
+
+        Get a list of all blocks in a given template, either those defined
+        directly in the template itself, or those defined in templates
+        referenced via {% include %} or {% extends %} tags.
+
+        :param template_name: The name of the template.
+        :type template_name: str
+        :return: The names of the template blocks.
+        :rtype: set of str
+        """
+        try:
+            # Check if the block names for this template have been previously
+            # cached.
+            template_blocks = self._template_block_names_cache[template_name]
+        except:
+            # Read the state template file into a template object using the
+            # environment object
+            found_template_name = (
+                self.find_template_name(template_name + '\.tpl(\.\w+)?$'))
+            template = self._template_env.select_template(
+                    [template_name, found_template_name])
+
+            # Get a list of the blocks defined directly in the template
+            template_blocks = set(template.blocks.keys())
+
+            # Recurse through referenced templates while updating the set
+            for template_ref in self.get_template_refs(template_name):
+                template_blocks.update(self.get_template_blocks(template_ref))
+
+            # Cache the template block names for later use
+            self._template_block_names_cache[template_name] = template_blocks
+
+        return template_blocks

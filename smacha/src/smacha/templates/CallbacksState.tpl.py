@@ -22,9 +22,6 @@ outcomes:
 
 {% include "State.tpl.py" %}
 
-{% block imports %}
-{% endblock imports %}
-
 {% block class_defs %}
 {% if 'class_CallbacksState' not in defined_headers %}
 class CallbacksState(smach.State):
@@ -40,19 +37,6 @@ class CallbacksState(smach.State):
         return 'succeeded'
 {% do defined_headers.append('class_CallbacksState') %}{% endif %}
 {% endblock class_defs %}
-
-{% block cb_defs %}
-{% if callbacks is defined %}
-{% if input_keys is defined %}
-{{ render_def_lambda_callbacks(defined_headers, 'CallbacksState', name, uuid, input_keys, callbacks) }}
-{% else %}
-{{ render_def_lambda_callbacks(defined_headers, 'CallbacksState', name, uuid, [], callbacks) }}
-{% endif %}
-{% endif %}
-{% endblock cb_defs %}
-
-{% block header %}
-{% endblock header %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',

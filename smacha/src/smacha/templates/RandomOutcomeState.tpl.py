@@ -48,19 +48,6 @@ class RandomOutcomeState(smach.State):
 {% do defined_headers.append('class_RandomOutcomeState') %}{% endif %}
 {% endblock class_defs %}
 
-{% block cb_defs %}
-{% if callbacks is defined %}
-{% if input_keys is defined %}
-{{ render_def_lambda_callbacks(defined_headers, 'RandomOutcomeState', name, uuid, input_keys, callbacks) }}
-{% else %}
-{{ render_def_lambda_callbacks(defined_headers, 'RandomOutcomeState', name, uuid, [], callbacks) }}
-{% endif %}
-{% endif %}
-{% endblock cb_defs %}
-
-{% block header %}
-{% endblock header %}
-
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
         {{ '' | indent(23, true) }}RandomOutcomeState({% if input_keys is defined %}{{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}{% if input_keys is defined %}, {% endif %}{{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}{% if outcomes is defined %}{% if input_keys is defined or output_keys is defined or callbacks is defined %}, {% endif %}{{ render_outcomes(outcomes, indent=0) }}{% endif %}){% if transitions is defined %},
