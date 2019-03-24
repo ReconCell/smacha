@@ -59,14 +59,14 @@ output_keys: []
 #
 # Macro for rendering global 'callbacks' lambda callback definitions.
 #
-{% macro render_def_lambda_callbacks(defined_headers, class_name, state_name, state_uuid, input_keys, callbacks) %}
+{% macro render_def_lambda_callbacks(defined_headers, class_name, state_name, state_uuid, input_keys, outcomes, callbacks) %}
 {% for cb_output_key, cb in callbacks.iteritems() %}
 {% if cb is expression %}
 {% set cb_name = cb_output_key|lower + '_' + state_name|lower + '_' + state_uuid + '_lambda_cb' %}
 {% if cb_name not in defined_headers %}
 @smach.cb_interface(input_keys=[{% for input_key in input_keys %}'{{ input_key }}'{% if not loop.last %}, {% endif %}{% endfor %}], 
                     output_keys=['{{ cb_output_key }}'],
-                    outcomes=['succeeded'])
+                    outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
 def {{ cb_name }}(self, userdata):
     lambda_cb = {{ cb | exptostr }}
     userdata.{{ cb_output_key }} = lambda_cb(userdata)

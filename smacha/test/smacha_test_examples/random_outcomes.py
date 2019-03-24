@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 import roslib; roslib.load_manifest('smacha')
 import rospy
 import smach
@@ -8,10 +9,11 @@ import random
 
 
 class RandomOutcomeState(smach.State):
-    def __init__(self, input_keys = [], output_keys = ['outcome'], callbacks = [], outcomes=['succeeded']):
+    def __init__(self, input_keys = ['outcome'], output_keys = ['outcome'], callbacks = {}, outcomes=['succeeded']):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
 
         self._cbs = []
+
         if callbacks:
             for cb in sorted(callbacks):
                 if cb in globals():
@@ -35,7 +37,9 @@ class RandomOutcomeState(smach.State):
                 self.register_output_keys(self._cb_output_keys[-1])
                 self.register_outcomes(self._cb_outcomes[-1])
 
+
     def execute(self, userdata):
+
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -47,20 +51,15 @@ class RandomOutcomeState(smach.State):
             except:
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
-        # Select random outcome
-        random_outcome = random.choice(list(self._outcomes))
 
-        # Set the outcome output key
-        userdata.outcome = random_outcome
-
-        return random_outcome
-
+        return userdata.outcome
 
 class CallbacksState(smach.State):
-    def __init__(self, input_keys = [], output_keys = [], callbacks = []):
+    def __init__(self, input_keys=[], output_keys=[], callbacks=[]):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
 
         self._cbs = []
+
         if callbacks:
             for cb in sorted(callbacks):
                 if cb in globals():
@@ -86,6 +85,7 @@ class CallbacksState(smach.State):
 
 
     def execute(self, userdata):
+
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -97,7 +97,49 @@ class CallbacksState(smach.State):
             except:
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
+
         return 'succeeded'
+
+
+@smach.cb_interface(input_keys=[], 
+                    output_keys=['outcome'],
+                    outcomes=['foo_0', 'foo_1', 'foo_2'])
+def outcome_randomize_lambda_cb(self, userdata):
+    lambda_cb = lambda ud: random.choice(list(self._outcomes))
+    userdata.outcome = lambda_cb(userdata)
+    return 'succeeded'
+
+RandomOutcomeState.outcome_randomize_lambda_cb = outcome_randomize_lambda_cb
+
+@smach.cb_interface(input_keys=[], 
+                    output_keys=['outcome'],
+                    outcomes=[])
+def outcome_foo_0_lambda_cb(self, userdata):
+    lambda_cb = lambda ud: random.choice(list(self._outcomes))
+    userdata.outcome = lambda_cb(userdata)
+    return 'succeeded'
+
+CallbacksState.outcome_foo_0_lambda_cb = outcome_foo_0_lambda_cb
+
+@smach.cb_interface(input_keys=[], 
+                    output_keys=['outcome'],
+                    outcomes=[])
+def outcome_foo_1_lambda_cb(self, userdata):
+    lambda_cb = lambda ud: random.choice(list(self._outcomes))
+    userdata.outcome = lambda_cb(userdata)
+    return 'succeeded'
+
+CallbacksState.outcome_foo_1_lambda_cb = outcome_foo_1_lambda_cb
+
+@smach.cb_interface(input_keys=[], 
+                    output_keys=['outcome'],
+                    outcomes=[])
+def outcome_foo_2_lambda_cb(self, userdata):
+    lambda_cb = lambda ud: random.choice(list(self._outcomes))
+    userdata.outcome = lambda_cb(userdata)
+    return 'succeeded'
+
+CallbacksState.outcome_foo_2_lambda_cb = outcome_foo_2_lambda_cb
 
 
 def main():
@@ -106,20 +148,24 @@ def main():
     sm = smach.StateMachine(outcomes=['final_outcome'])
 
     with sm:
+
         smach.StateMachine.add('RANDOMIZE',
-                               RandomOutcomeState(outcomes=['foo_0', 'foo_1', 'foo_2']),
-                               transitions={'foo_0': 'FOO_0',
-                                            'foo_1': 'FOO_1',
-                                            'foo_2': 'FOO_2'})
+                                       RandomOutcomeState(callbacks = ['outcome_randomize_lambda_cb'], outcomes=['foo_0', 'foo_1', 'foo_2']),
+                               transitions={'foo_0':'FOO_0',
+                                            'foo_1':'FOO_1',
+                                            'foo_2':'FOO_2'})
 
-        smach.StateMachine.add('FOO_0', CallbacksState(),
-                               transitions={'succeeded': 'RANDOMIZE'})
+        smach.StateMachine.add('FOO_0',
+                                       CallbacksState(callbacks = ['outcome_foo_0_lambda_cb']),
+                               transitions={'succeeded':'RANDOMIZE'})
 
-        smach.StateMachine.add('FOO_1', CallbacksState(),
-                               transitions={'succeeded': 'RANDOMIZE'})
+        smach.StateMachine.add('FOO_1',
+                                       CallbacksState(callbacks = ['outcome_foo_1_lambda_cb']),
+                               transitions={'succeeded':'RANDOMIZE'})
 
-        smach.StateMachine.add('FOO_2', CallbacksState(),
-                               transitions={'succeeded': 'final_outcome'})
+        smach.StateMachine.add('FOO_2',
+                                       CallbacksState(callbacks = ['outcome_foo_2_lambda_cb']),
+                               transitions={'succeeded':'final_outcome'})
 
     outcome = sm.execute()
 

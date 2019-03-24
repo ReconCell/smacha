@@ -1,6 +1,8 @@
 {% block meta %}
 name: SleepState
-description: SMACH state that pauses state machine execution for a specified length of time.
+description:
+  SMACH state that pauses state machine execution for a specified length of
+  time.
 language: Python
 framework: SMACH
 type: State

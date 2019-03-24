@@ -15,8 +15,6 @@ def foo_animals_cb(userdata):
     userdata['animals'].append('turtles')
     return 'succeeded'
 
-
-
 # Define normal callback for 'numbers' output key
 @smach.cb_interface(input_keys=['numbers'],
                     output_keys=['numbers'],
@@ -33,6 +31,7 @@ class Foo(smach.State):
         self._name = name
 
         self._cbs = []
+
         if callbacks:
             for cb in sorted(callbacks):
                 if cb in globals():
@@ -79,10 +78,11 @@ class Foo(smach.State):
         return 'succeeded'
 
 class CallbacksState(smach.State):
-    def __init__(self, input_keys = [], output_keys = [], callbacks = []):
+    def __init__(self, input_keys=[], output_keys=[], callbacks=[]):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
 
         self._cbs = []
+
         if callbacks:
             for cb in sorted(callbacks):
                 if cb in globals():
@@ -108,6 +108,7 @@ class CallbacksState(smach.State):
 
 
     def execute(self, userdata):
+
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -119,151 +120,138 @@ class CallbacksState(smach.State):
             except:
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
+
         return 'succeeded'
 
 
-@smach.cb_interface(input_keys=['animals'],
+
+@smach.cb_interface(input_keys=['animals'], 
                     output_keys=['animals'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def animals_foo_1_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
     userdata.animals = lambda_cb(userdata)
     return 'succeeded'
 
-
 CallbacksState.animals_foo_1_lambda_cb = animals_foo_1_lambda_cb
 
-
-@smach.cb_interface(input_keys=['numbers'],
+@smach.cb_interface(input_keys=['numbers'], 
                     output_keys=['numbers'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def numbers_foo_3_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-
 CallbacksState.numbers_foo_3_lambda_cb = numbers_foo_3_lambda_cb
 
-
-@smach.cb_interface(input_keys=['animals', 'numbers'],
+@smach.cb_interface(input_keys=['animals', 'numbers'], 
                     output_keys=['numbers'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def numbers_foo_4_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-
 Foo.numbers_foo_4_lambda_cb = numbers_foo_4_lambda_cb
 
-
-@smach.cb_interface(input_keys=['animals', 'numbers'],
+@smach.cb_interface(input_keys=['animals', 'numbers'], 
                     output_keys=['animals'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def animals_foo_5_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
     userdata.animals = lambda_cb(userdata)
     return 'succeeded'
 
-
 Foo.animals_foo_5_lambda_cb = animals_foo_5_lambda_cb
 
-
-@smach.cb_interface(input_keys=[],
+@smach.cb_interface(input_keys=[], 
                     output_keys=['random_number'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def random_number_foo_6_lambda_cb(self, userdata):
     lambda_cb = lambda ud: random.random()
     userdata.random_number = lambda_cb(userdata)
     return 'succeeded'
 
-
 CallbacksState.random_number_foo_6_lambda_cb = random_number_foo_6_lambda_cb
 
-
-@smach.cb_interface(input_keys=['numbers', 'random_number'],
+@smach.cb_interface(input_keys=['numbers', 'random_number'], 
                     output_keys=['numbers'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def numbers_foo_7_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.random_number) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-
 Foo.numbers_foo_7_lambda_cb = numbers_foo_7_lambda_cb
 
-
-@smach.cb_interface(input_keys=['numbers', 'number'],
+@smach.cb_interface(input_keys=['numbers', 'number'], 
                     output_keys=['numbers'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def numbers_foo_8_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.number) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-
 Foo.numbers_foo_8_lambda_cb = numbers_foo_8_lambda_cb
 
-
-@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'],
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['a_random_number_1'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def a_random_number_1_foo_9_lambda_cb(self, userdata):
     lambda_cb = lambda ud: random.random()
     userdata.a_random_number_1 = lambda_cb(userdata)
     return 'succeeded'
 
-
 Foo.a_random_number_1_foo_9_lambda_cb = a_random_number_1_foo_9_lambda_cb
 
 
-@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'],
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['a_random_number_2'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def a_random_number_2_foo_9_lambda_cb(self, userdata):
     lambda_cb = lambda ud: random.random()
     userdata.a_random_number_2 = lambda_cb(userdata)
     return 'succeeded'
 
-
 Foo.a_random_number_2_foo_9_lambda_cb = a_random_number_2_foo_9_lambda_cb
 
 
-@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'],
+
+
+
+
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['b_random_number_sum'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def b_random_number_sum_foo_9_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.a_random_number_1 + ud.a_random_number_2
     userdata.b_random_number_sum = lambda_cb(userdata)
     return 'succeeded'
 
-
 Foo.b_random_number_sum_foo_9_lambda_cb = b_random_number_sum_foo_9_lambda_cb
 
 
-@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'],
+@smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['numbers'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def numbers_foo_9_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.b_random_number_sum) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-
 Foo.numbers_foo_9_lambda_cb = numbers_foo_9_lambda_cb
 
-
-@smach.cb_interface(input_keys=['numbers'],
+@smach.cb_interface(input_keys=['numbers'], 
                     output_keys=['numbers'],
-                    outcomes=['succeeded'])
+                    outcomes=[])
 def numbers_foo_10_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(42) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-
 CallbacksState.numbers_foo_10_lambda_cb = numbers_foo_10_lambda_cb
+
 
 
 def main():

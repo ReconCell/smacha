@@ -20,10 +20,11 @@ class PrintUserdataState(smach.State):
 
 
 class CallbacksState(smach.State):
-    def __init__(self, input_keys = [], output_keys = [], callbacks = []):
+    def __init__(self, input_keys=[], output_keys=[], callbacks=[]):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
 
         self._cbs = []
+
         if callbacks:
             for cb in sorted(callbacks):
                 if cb in globals():
@@ -49,6 +50,7 @@ class CallbacksState(smach.State):
 
 
     def execute(self, userdata):
+
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -59,6 +61,7 @@ class CallbacksState(smach.State):
                 cb_outcome = cb(self, smach.Remapper(userdata,ik,ok,{}))
             except:
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+
 
         return 'succeeded'
 
@@ -72,15 +75,19 @@ def main():
     sm.userdata.bar = 'Goodbye World!'
 
     with sm:
-        smach.StateMachine.add('FOO_0', PrintUserdataState(input_keys = ['foo']),
-                               transitions={'succeeded': 'FOO_1'})
+        smach.StateMachine.add('FOO_0',
+                                       PrintUserdataState(input_keys = ['foo']),
+                               transitions={'succeeded':'FOO_1'})
 
-        smach.StateMachine.add('FOO_1', CallbacksState(),
-                               transitions={'succeeded': 'FOO_2'})
+        smach.StateMachine.add('FOO_1',
+                                       CallbacksState(),
+                               transitions={'succeeded':'FOO_2'})
 
-        smach.StateMachine.add('FOO_2', PrintUserdataState(input_keys = ['foobar']),
+        smach.StateMachine.add('FOO_2',
+                                       PrintUserdataState(input_keys = ['foobar']),
                                transitions={'succeeded':'final_outcome'},
-                               remapping={'foobar': 'bar'})
+                               remapping={'foobar':'bar'})
+
 
     outcome = sm.execute()
 

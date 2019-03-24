@@ -29,9 +29,9 @@ output_keys: []
 {% block cb_defs %}
 {% if callbacks is defined %}
 {% if input_keys is defined %}
-{{ render_def_lambda_callbacks(defined_headers, class_name, name, uuid, input_keys, callbacks) }}
+{{ render_def_lambda_callbacks(defined_headers, class_name, name, uuid, input_keys, outcomes, callbacks) }}
 {% else %}
-{{ render_def_lambda_callbacks(defined_headers, class_name, name, uuid, [], callbacks) }}
+{{ render_def_lambda_callbacks(defined_headers, class_name, name, uuid, [], outcomes, callbacks) }}
 {% endif %}
 {% endif %}
 {% endblock cb_defs %}

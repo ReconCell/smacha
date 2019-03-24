@@ -6,9 +6,9 @@ framework: SMACH
 type: State
 tags: [core]
 includes:
-  - State
   - TF2ListenerSingleton
-extends: []
+extends:
+  - State
 variables: []
 input_keys:
 - target:

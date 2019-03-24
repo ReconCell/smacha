@@ -10,16 +10,16 @@ extends: []
 variables:
 - outcomes:
     description: The possible StateMachine container state outcomes.
-    type: list
+    type: list of str
 - - input_keys:
       description: The names of the userdata input keys needed by the state.
-      type: list
+      type: list of str
 - - output_keys:
       description: The names of the userdata output keys produced by the state.
-      type: list
+      type: list of str
 - - userdata:
       description: The definitions for the userdata keys named in the input_keys and output_keys variables.
-      type: dict
+      type: dict of str
 {% endblock meta %}
 
 {% from "Utils.tpl.py" import render_outcomes, render_input_keys, render_output_keys, render_userdata, render_transitions, render_remapping %}

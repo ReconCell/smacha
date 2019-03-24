@@ -52,9 +52,9 @@ class Foo(smach.State):
 {% block cb_defs %}
 {% if callbacks is defined %}
 {% if input_keys is defined %}
-{{ render_def_lambda_callbacks(defined_headers, 'Foo', name, uuid, input_keys, callbacks) }}
+{{ render_def_lambda_callbacks(defined_headers, 'Foo', name, uuid, input_keys, outcomes, callbacks) }}
 {% else %}
-{{ render_def_lambda_callbacks(defined_headers, 'Foo', name, uuid, [], callbacks) }}
+{{ render_def_lambda_callbacks(defined_headers, 'Foo', name, uuid, [], outcomes, callbacks) }}
 {% endif %}
 {% endif %}
 {% endblock cb_defs %}

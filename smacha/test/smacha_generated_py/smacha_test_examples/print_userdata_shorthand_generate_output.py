@@ -28,7 +28,7 @@ class PrintUserdataState(smach.State):
         return 'succeeded'
 
 class CallbacksState(smach.State):
-    def __init__(self, input_keys = [], output_keys = [], callbacks = []):
+    def __init__(self, input_keys=[], output_keys=[], callbacks=[]):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
 
         
