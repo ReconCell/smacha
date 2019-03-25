@@ -1,7 +1,7 @@
 {% block meta %}
-name: MsgPublisherFactory
+name: MsgPublisherObserver
 description:
-  SMACH template that provides a MsgPublisherFactory helper class for
+  SMACH template that provides a MsgPublisherObserver helper class for
   PublishMsgState.
 language: Python
 framework: SMACH
@@ -22,8 +22,12 @@ output_keys: []
 {% endblock imports %}
 
 {% block class_defs %}
-{% if 'class_MsgPublisherFactory' not in defined_headers %}
-class MsgPublisherFactory(object):
+{% if 'class_MsgPublisherObserver' not in defined_headers %}
+class MsgPublisherObserver(object):
+    """
+    Subscribes to a topic and maintains dicts of messages/publishers
+    that are updated with the topic subscription callback.
+    """
     def __init__(self, sub_topic='/tf'):
 
         # Save sub_topic
@@ -103,5 +107,5 @@ class MsgPublisherFactory(object):
                     self._pubs[topic].publish(msg)
                 except Exception as e:
                     rospy.logwarn('Failed to publish message on topic \'{}\': {}'.format(topic, repr(e)))
-{% do defined_headers.append('class_MsgPublisherFactory') %}{% endif %}
+{% do defined_headers.append('class_MsgPublisherObserver') %}{% endif %}
 {% endblock class_defs %}

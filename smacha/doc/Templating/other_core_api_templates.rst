@@ -2,12 +2,12 @@
 Other Core API Templates
 ************************
 
-The MsgPublisherFactory Template
-================================
+The MsgPublisherObserver Template
+=================================
 
-:doc:`../API/Templates/MsgPublisherFactory.tpl.py` provides a helper class for :doc:`../API/Templates/PublishMsgState.tpl.py`  and is specified as follows:
+:doc:`../API/Templates/MsgPublisherObserver.tpl.py` provides a helper class for :doc:`../API/Templates/PublishMsgState.tpl.py`  and is specified as follows:
 
-.. program-output:: ../scripts/help MsgPublisherFactory -n
+.. program-output:: ../scripts/help MsgPublisherObserver -n
 
 The ParseJointTrajectoryPoint Template
 ======================================

@@ -139,82 +139,82 @@ class CallbacksState(smach.State):
 @smach.cb_interface(input_keys=['animals'], 
                     output_keys=['animals'],
                     outcomes=[])
-def animals_foo_1_e118c537c6ff4ed7b0b9748db431669e_lambda_cb(self, userdata):
+def animals_foo_1_bdda2b863f67418f982c21ce37e8f35f_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
     userdata.animals = lambda_cb(userdata)
     return 'succeeded'
 
-CallbacksState.animals_foo_1_e118c537c6ff4ed7b0b9748db431669e_lambda_cb = animals_foo_1_e118c537c6ff4ed7b0b9748db431669e_lambda_cb
+CallbacksState.animals_foo_1_bdda2b863f67418f982c21ce37e8f35f_lambda_cb = animals_foo_1_bdda2b863f67418f982c21ce37e8f35f_lambda_cb
 
 @smach.cb_interface(input_keys=['numbers'], 
                     output_keys=['numbers'],
                     outcomes=[])
-def numbers_foo_3_2812333d00f54467b58515a397e6dc85_lambda_cb(self, userdata):
+def numbers_foo_3_0e0069ed63734240bbb20592652aa341_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-CallbacksState.numbers_foo_3_2812333d00f54467b58515a397e6dc85_lambda_cb = numbers_foo_3_2812333d00f54467b58515a397e6dc85_lambda_cb
+CallbacksState.numbers_foo_3_0e0069ed63734240bbb20592652aa341_lambda_cb = numbers_foo_3_0e0069ed63734240bbb20592652aa341_lambda_cb
 
 @smach.cb_interface(input_keys=['animals', 'numbers'], 
                     output_keys=['numbers'],
                     outcomes=[])
-def numbers_foo_4_200f69dbf14448168bdfea17afdb486f_lambda_cb(self, userdata):
+def numbers_foo_4_de7db050723642b5a4964280cbf17655_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.numbers[-1]+1) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-Foo.numbers_foo_4_200f69dbf14448168bdfea17afdb486f_lambda_cb = numbers_foo_4_200f69dbf14448168bdfea17afdb486f_lambda_cb
+Foo.numbers_foo_4_de7db050723642b5a4964280cbf17655_lambda_cb = numbers_foo_4_de7db050723642b5a4964280cbf17655_lambda_cb
 
 @smach.cb_interface(input_keys=['animals', 'numbers'], 
                     output_keys=['animals'],
                     outcomes=[])
-def animals_foo_5_afca063a2d3644549f622e1f2dd56ac4_lambda_cb(self, userdata):
+def animals_foo_5_5cd0369e3bea4587b9eb1b32a0221511_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
     userdata.animals = lambda_cb(userdata)
     return 'succeeded'
 
-Foo.animals_foo_5_afca063a2d3644549f622e1f2dd56ac4_lambda_cb = animals_foo_5_afca063a2d3644549f622e1f2dd56ac4_lambda_cb
+Foo.animals_foo_5_5cd0369e3bea4587b9eb1b32a0221511_lambda_cb = animals_foo_5_5cd0369e3bea4587b9eb1b32a0221511_lambda_cb
 
 @smach.cb_interface(input_keys=[], 
                     output_keys=['random_number'],
                     outcomes=[])
-def random_number_foo_6_c62fd1a6cfef4d9da961eadb6bd62f1a_lambda_cb(self, userdata):
+def random_number_foo_6_54ff84d5b78c4092b86a2d6df0b81a3e_lambda_cb(self, userdata):
     lambda_cb = lambda ud: random.random()
     userdata.random_number = lambda_cb(userdata)
     return 'succeeded'
 
-CallbacksState.random_number_foo_6_c62fd1a6cfef4d9da961eadb6bd62f1a_lambda_cb = random_number_foo_6_c62fd1a6cfef4d9da961eadb6bd62f1a_lambda_cb
+CallbacksState.random_number_foo_6_54ff84d5b78c4092b86a2d6df0b81a3e_lambda_cb = random_number_foo_6_54ff84d5b78c4092b86a2d6df0b81a3e_lambda_cb
 
 @smach.cb_interface(input_keys=['numbers', 'random_number'], 
                     output_keys=['numbers'],
                     outcomes=[])
-def numbers_foo_7_e17993ce8e0b41e1ac7e74cecb77abc4_lambda_cb(self, userdata):
+def numbers_foo_7_d2b54f862a2e4bd097e10a0deade8f54_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.random_number) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-Foo.numbers_foo_7_e17993ce8e0b41e1ac7e74cecb77abc4_lambda_cb = numbers_foo_7_e17993ce8e0b41e1ac7e74cecb77abc4_lambda_cb
+Foo.numbers_foo_7_d2b54f862a2e4bd097e10a0deade8f54_lambda_cb = numbers_foo_7_d2b54f862a2e4bd097e10a0deade8f54_lambda_cb
 
 @smach.cb_interface(input_keys=['numbers', 'number'], 
                     output_keys=['numbers'],
                     outcomes=[])
-def numbers_foo_8_fdb28cd82e304dde97c8016293876a80_lambda_cb(self, userdata):
+def numbers_foo_8_05086232f6fc426db0a8f49fad35d3e1_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.number) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-Foo.numbers_foo_8_fdb28cd82e304dde97c8016293876a80_lambda_cb = numbers_foo_8_fdb28cd82e304dde97c8016293876a80_lambda_cb
+Foo.numbers_foo_8_05086232f6fc426db0a8f49fad35d3e1_lambda_cb = numbers_foo_8_05086232f6fc426db0a8f49fad35d3e1_lambda_cb
 
 @smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['a_random_number_1'],
                     outcomes=[])
-def a_random_number_1_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb(self, userdata):
+def a_random_number_1_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb(self, userdata):
     lambda_cb = lambda ud: random.random()
     userdata.a_random_number_1 = lambda_cb(userdata)
     return 'succeeded'
 
-Foo.a_random_number_1_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb = a_random_number_1_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb
+Foo.a_random_number_1_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb = a_random_number_1_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb
 
 
 
@@ -224,12 +224,12 @@ Foo.a_random_number_1_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb = a_rando
 @smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['a_random_number_2'],
                     outcomes=[])
-def a_random_number_2_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb(self, userdata):
+def a_random_number_2_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb(self, userdata):
     lambda_cb = lambda ud: random.random()
     userdata.a_random_number_2 = lambda_cb(userdata)
     return 'succeeded'
 
-Foo.a_random_number_2_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb = a_random_number_2_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb
+Foo.a_random_number_2_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb = a_random_number_2_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb
 
 
 
@@ -239,12 +239,12 @@ Foo.a_random_number_2_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb = a_rando
 @smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['b_random_number_sum'],
                     outcomes=[])
-def b_random_number_sum_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb(self, userdata):
+def b_random_number_sum_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.a_random_number_1 + ud.a_random_number_2
     userdata.b_random_number_sum = lambda_cb(userdata)
     return 'succeeded'
 
-Foo.b_random_number_sum_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb = b_random_number_sum_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb
+Foo.b_random_number_sum_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb = b_random_number_sum_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb
 
 
 
@@ -254,22 +254,22 @@ Foo.b_random_number_sum_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb = b_ran
 @smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['numbers'],
                     outcomes=[])
-def numbers_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb(self, userdata):
+def numbers_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(ud.b_random_number_sum) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-Foo.numbers_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb = numbers_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb
+Foo.numbers_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb = numbers_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb
 
 @smach.cb_interface(input_keys=['numbers'], 
                     output_keys=['numbers'],
                     outcomes=[])
-def numbers_foo_10_7e952cf0f8e242608d83254f1a9333ca_lambda_cb(self, userdata):
+def numbers_foo_10_83872781fae14194b56570ad44deb294_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.numbers if ud.numbers.append(42) else ud.numbers
     userdata.numbers = lambda_cb(userdata)
     return 'succeeded'
 
-CallbacksState.numbers_foo_10_7e952cf0f8e242608d83254f1a9333ca_lambda_cb = numbers_foo_10_7e952cf0f8e242608d83254f1a9333ca_lambda_cb
+CallbacksState.numbers_foo_10_83872781fae14194b56570ad44deb294_lambda_cb = numbers_foo_10_83872781fae14194b56570ad44deb294_lambda_cb
 
 
 
@@ -305,37 +305,37 @@ def main():
                                transitions={'succeeded':'FOO_1'})
 
         smach.StateMachine.add('FOO_1',
-                                       CallbacksState(input_keys = ['animals'], output_keys = ['animals'], callbacks = ['animals_foo_1_e118c537c6ff4ed7b0b9748db431669e_lambda_cb']),
+                                       CallbacksState(input_keys = ['animals'], output_keys = ['animals'], callbacks = ['animals_foo_1_bdda2b863f67418f982c21ce37e8f35f_lambda_cb']),
                                transitions={'succeeded':'FOO_2'})
 
         smach.StateMachine.add('FOO_2', Foo('FOO_2', input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['foo_numbers_cb']), 
                                transitions={'succeeded':'FOO_3'})
 
         smach.StateMachine.add('FOO_3',
-                                       CallbacksState(input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['numbers_foo_3_2812333d00f54467b58515a397e6dc85_lambda_cb']),
+                                       CallbacksState(input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['numbers_foo_3_0e0069ed63734240bbb20592652aa341_lambda_cb']),
                                transitions={'succeeded':'FOO_4'})
 
-        smach.StateMachine.add('FOO_4', Foo('FOO_4', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['foo_animals_cb', 'numbers_foo_4_200f69dbf14448168bdfea17afdb486f_lambda_cb']), 
+        smach.StateMachine.add('FOO_4', Foo('FOO_4', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['foo_animals_cb', 'numbers_foo_4_de7db050723642b5a4964280cbf17655_lambda_cb']), 
                                transitions={'succeeded':'FOO_5'})
 
-        smach.StateMachine.add('FOO_5', Foo('FOO_5', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['animals_foo_5_afca063a2d3644549f622e1f2dd56ac4_lambda_cb', 'foo_numbers_cb']), 
+        smach.StateMachine.add('FOO_5', Foo('FOO_5', input_keys = ['animals', 'numbers'], output_keys = ['animals', 'numbers'], callbacks = ['animals_foo_5_5cd0369e3bea4587b9eb1b32a0221511_lambda_cb', 'foo_numbers_cb']), 
                                transitions={'succeeded':'FOO_6'})
 
         smach.StateMachine.add('FOO_6',
-                                       CallbacksState(output_keys = ['random_number'], callbacks = ['random_number_foo_6_c62fd1a6cfef4d9da961eadb6bd62f1a_lambda_cb']),
+                                       CallbacksState(output_keys = ['random_number'], callbacks = ['random_number_foo_6_54ff84d5b78c4092b86a2d6df0b81a3e_lambda_cb']),
                                transitions={'succeeded':'FOO_7'})
 
-        smach.StateMachine.add('FOO_7', Foo('FOO_7', input_keys = ['numbers', 'random_number'], output_keys = ['numbers'], callbacks = ['numbers_foo_7_e17993ce8e0b41e1ac7e74cecb77abc4_lambda_cb']), 
+        smach.StateMachine.add('FOO_7', Foo('FOO_7', input_keys = ['numbers', 'random_number'], output_keys = ['numbers'], callbacks = ['numbers_foo_7_d2b54f862a2e4bd097e10a0deade8f54_lambda_cb']), 
                                transitions={'succeeded':'FOO_8'})
 
-        smach.StateMachine.add('FOO_8', Foo('FOO_8', input_keys = ['numbers', 'number'], output_keys = ['numbers'], callbacks = ['numbers_foo_8_fdb28cd82e304dde97c8016293876a80_lambda_cb']), 
+        smach.StateMachine.add('FOO_8', Foo('FOO_8', input_keys = ['numbers', 'number'], output_keys = ['numbers'], callbacks = ['numbers_foo_8_05086232f6fc426db0a8f49fad35d3e1_lambda_cb']), 
                                transitions={'succeeded':'FOO_9'})
 
-        smach.StateMachine.add('FOO_9', Foo('FOO_9', input_keys = ['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], output_keys = ['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], callbacks = ['a_random_number_1_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb', 'a_random_number_2_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb', 'b_random_number_sum_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb', 'numbers_foo_9_b0202fb94dfb48c98fff8b67c5b94fb0_lambda_cb']), 
+        smach.StateMachine.add('FOO_9', Foo('FOO_9', input_keys = ['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], output_keys = ['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], callbacks = ['a_random_number_1_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb', 'a_random_number_2_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb', 'b_random_number_sum_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb', 'numbers_foo_9_a1101340d69d46deb4f40618983071b9_lambda_cb']), 
                                transitions={'succeeded':'FOO_10'})
 
         smach.StateMachine.add('FOO_10',
-                                       CallbacksState(input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['numbers_foo_10_7e952cf0f8e242608d83254f1a9333ca_lambda_cb']),
+                                       CallbacksState(input_keys = ['numbers'], output_keys = ['numbers'], callbacks = ['numbers_foo_10_83872781fae14194b56570ad44deb294_lambda_cb']),
                                transitions={'succeeded':'final_outcome'})
 
 

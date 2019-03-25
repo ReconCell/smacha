@@ -116,42 +116,42 @@ class CallbacksState(smach.State):
 @smach.cb_interface(input_keys=[], 
                     output_keys=['outcome'],
                     outcomes=['foo_0', 'foo_1', 'foo_2'])
-def outcome_randomize_79db0ae3460f446889a393e682809f5f_lambda_cb(self, userdata):
+def outcome_randomize_ce0785236663491b8f805ad54c17f03f_lambda_cb(self, userdata):
     lambda_cb = lambda ud: random.choice(list(self._outcomes))
     userdata.outcome = lambda_cb(userdata)
     return 'succeeded'
 
-RandomOutcomeState.outcome_randomize_79db0ae3460f446889a393e682809f5f_lambda_cb = outcome_randomize_79db0ae3460f446889a393e682809f5f_lambda_cb
+RandomOutcomeState.outcome_randomize_ce0785236663491b8f805ad54c17f03f_lambda_cb = outcome_randomize_ce0785236663491b8f805ad54c17f03f_lambda_cb
 
 @smach.cb_interface(input_keys=[], 
                     output_keys=['outcome'],
                     outcomes=[])
-def outcome_foo_0_c4072abf43dd4ea188b4210348df9eb1_lambda_cb(self, userdata):
+def outcome_foo_0_4bc2ca27f40044cdb6c3a30ff1e96e8f_lambda_cb(self, userdata):
     lambda_cb = lambda ud: random.choice(list(self._outcomes))
     userdata.outcome = lambda_cb(userdata)
     return 'succeeded'
 
-CallbacksState.outcome_foo_0_c4072abf43dd4ea188b4210348df9eb1_lambda_cb = outcome_foo_0_c4072abf43dd4ea188b4210348df9eb1_lambda_cb
+CallbacksState.outcome_foo_0_4bc2ca27f40044cdb6c3a30ff1e96e8f_lambda_cb = outcome_foo_0_4bc2ca27f40044cdb6c3a30ff1e96e8f_lambda_cb
 
 @smach.cb_interface(input_keys=[], 
                     output_keys=['outcome'],
                     outcomes=[])
-def outcome_foo_1_3b5f8d8ae2f249d19293b6574be87737_lambda_cb(self, userdata):
+def outcome_foo_1_5768cb894e204f31ac306dd63d092ca7_lambda_cb(self, userdata):
     lambda_cb = lambda ud: random.choice(list(self._outcomes))
     userdata.outcome = lambda_cb(userdata)
     return 'succeeded'
 
-CallbacksState.outcome_foo_1_3b5f8d8ae2f249d19293b6574be87737_lambda_cb = outcome_foo_1_3b5f8d8ae2f249d19293b6574be87737_lambda_cb
+CallbacksState.outcome_foo_1_5768cb894e204f31ac306dd63d092ca7_lambda_cb = outcome_foo_1_5768cb894e204f31ac306dd63d092ca7_lambda_cb
 
 @smach.cb_interface(input_keys=[], 
                     output_keys=['outcome'],
                     outcomes=[])
-def outcome_foo_2_bf0c8dd5d497492ba77f18759baaef60_lambda_cb(self, userdata):
+def outcome_foo_2_ad89b465837a445e8cc9b927df6f94a8_lambda_cb(self, userdata):
     lambda_cb = lambda ud: random.choice(list(self._outcomes))
     userdata.outcome = lambda_cb(userdata)
     return 'succeeded'
 
-CallbacksState.outcome_foo_2_bf0c8dd5d497492ba77f18759baaef60_lambda_cb = outcome_foo_2_bf0c8dd5d497492ba77f18759baaef60_lambda_cb
+CallbacksState.outcome_foo_2_ad89b465837a445e8cc9b927df6f94a8_lambda_cb = outcome_foo_2_ad89b465837a445e8cc9b927df6f94a8_lambda_cb
 
 
 
@@ -172,21 +172,21 @@ def main():
     with sm:
 
         smach.StateMachine.add('RANDOMIZE',
-                                       RandomOutcomeState(callbacks = ['outcome_randomize_79db0ae3460f446889a393e682809f5f_lambda_cb'], outcomes=['foo_0', 'foo_1', 'foo_2']),
+                                       RandomOutcomeState(callbacks = ['outcome_randomize_ce0785236663491b8f805ad54c17f03f_lambda_cb'], outcomes=['foo_0', 'foo_1', 'foo_2']),
                                transitions={'foo_0':'FOO_0',
                                             'foo_1':'FOO_1',
                                             'foo_2':'FOO_2'})
 
         smach.StateMachine.add('FOO_0',
-                                       CallbacksState(callbacks = ['outcome_foo_0_c4072abf43dd4ea188b4210348df9eb1_lambda_cb']),
+                                       CallbacksState(callbacks = ['outcome_foo_0_4bc2ca27f40044cdb6c3a30ff1e96e8f_lambda_cb']),
                                transitions={'succeeded':'RANDOMIZE'})
 
         smach.StateMachine.add('FOO_1',
-                                       CallbacksState(callbacks = ['outcome_foo_1_3b5f8d8ae2f249d19293b6574be87737_lambda_cb']),
+                                       CallbacksState(callbacks = ['outcome_foo_1_5768cb894e204f31ac306dd63d092ca7_lambda_cb']),
                                transitions={'succeeded':'RANDOMIZE'})
 
         smach.StateMachine.add('FOO_2',
-                                       CallbacksState(callbacks = ['outcome_foo_2_bf0c8dd5d497492ba77f18759baaef60_lambda_cb']),
+                                       CallbacksState(callbacks = ['outcome_foo_2_ad89b465837a445e8cc9b927df6f94a8_lambda_cb']),
                                transitions={'succeeded':'final_outcome'})
 
 

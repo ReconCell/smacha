@@ -341,7 +341,7 @@ Other Templates
 .. toctree::
    :hidden:
 
-   The MsgPublisherFactory Template<API/Templates/MsgPublisherFactory.tpl.py>
+   The MsgPublisherObserver Template<API/Templates/MsgPublisherObserver.tpl.py>
    The ParseJointTrajectoryPoint Template<API/Templates/ParseJointTrajectoryPoint.tpl.py>
    The ParsePointCloud Template<API/Templates/ParsePointCloud.tpl.py>
    The ParsePointCloud2 Template<API/Templates/ParsePointCloud2.tpl.py>
@@ -355,7 +355,7 @@ Other Templates
    The Utilities Template<API/Templates/Utils.tpl.py>
    The WaitForMsgState Template<API/Templates/WaitForMsgState.tpl.py>
 
-- :doc:`API/Templates/MsgPublisherFactory.tpl.py`: provides a helper class for :doc:`API/Templates/PublishMsgState.tpl.py`.
+- :doc:`API/Templates/MsgPublisherObserver.tpl.py`: provides a helper class for :doc:`API/Templates/PublishMsgState.tpl.py`.
 - :doc:`API/Templates/ParseJointTrajectoryPoint.tpl.py`: provides a helper function for parsing `trajectory_msgs/JointTrajectoryPoint <https://docs.ros.org/api/trajectory_msgs/html/msg/JointTrajectoryPoint.html>`_ types.
 - :doc:`API/Templates/ParsePointCloud.tpl.py`: provides a helper function for parsing `sensor_msgs/PointCloud <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud.html>`_ types.
 - :doc:`API/Templates/ParsePointCloud2.tpl.py`: provides a helper function for parsing `sensor_msgs/PointCloud2 <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html>`_ types.

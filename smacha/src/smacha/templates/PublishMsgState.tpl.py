@@ -73,7 +73,7 @@ output_keys:
 {% include "ParsePoseArray.tpl.py" %}
 {% include "ParsePointCloud.tpl.py" %}
 {% include "ParsePointCloud2.tpl.py" %}
-{% include "MsgPublisherFactory.tpl.py" %}
+{% include "MsgPublisherObserver.tpl.py" %}
 
 {% block imports %}
 {{ super() }}
@@ -84,14 +84,14 @@ output_keys:
 {{ super() }}
 {% if 'class_PublishMsgState' not in defined_headers %}
 class PublishMsgState(smach.State):
-    def __init__(self, name, pub_factory, action, input_keys = ['msg'], output_keys = ['topic'], callbacks = None):
+    def __init__(self, name, msg_pub_observer, action, input_keys = ['msg'], output_keys = ['topic'], callbacks = None):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded', 'aborted'])
 
         # Save the state name
         self._name = name
 
-        # Save the MsgPublisherFactory object reference
-        self._pub_factory = pub_factory
+        # Save the MsgPublisherObserver object reference
+        self._msg_pub_observer= msg_pub_observer
 
         # Save the action
         self._action = action
@@ -162,13 +162,13 @@ class PublishMsgState(smach.State):
         outcome = 'aborted'
         if self._action == 'add':
             if 'frame_id' in self._input_keys:
-                outcome = self._pub_factory.add(published_msg, topic, frame_id=userdata.frame_id)
+                outcome = self._msg_pub_observer.add(published_msg, topic, frame_id=userdata.frame_id)
             else:
-                outcome = self._pub_factory.add(published_msg, topic)
+                outcome = self._msg_pub_observer.add(published_msg, topic)
         elif self._action == 'remove':
-            outcome = self._pub_factory.remove(topic)
+            outcome = self._msg_pub_observer.remove(topic)
         elif self._action == 'remove_all':
-            outcome = self._pub_factory.remove_all()
+            outcome = self._msg_pub_observer.remove_all()
 
         # Set topic output key if specified
         if self._action == 'add' and outcome == 'succeeded':
@@ -188,14 +188,14 @@ class PublishMsgState(smach.State):
 
 {% block main_def %}
 {{ super() }}
-{% if 'msg_pub_factory' not in defined_headers %}
-msg_pub_factory = MsgPublisherFactory()
-{% do defined_headers.append('msg_pub_factory') %}{% endif %}
+{% if 'tf_msg_pub_observer' not in defined_headers %}
+tf_msg_pub_observer = MsgPublisherObserver(sub_topic='/tf')
+{% do defined_headers.append('tf_msg_pub_observer') %}{% endif %}
 {% endblock main_def %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
-        {{ '' | indent(23, true) }}PublishMsgState('{{ name }}', msg_pub_factory, '{{ action }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
+        {{ '' | indent(23, true) }}PublishMsgState('{{ name }}', tf_msg_pub_observer, '{{ action }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
 {{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}
