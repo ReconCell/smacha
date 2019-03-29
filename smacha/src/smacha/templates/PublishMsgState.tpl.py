@@ -44,14 +44,24 @@ input_keys:
 - msg:
     description: >
       The ROS message to be published.
+
+      In case the intended content of the message is specified in list form,
+      parsers will be applied for known message types in an attempt to convert
+      the list input into a corresponding ROS message type.
+      Parsers for the following message types are currently operational:
+      geometry_msgs/PointStamped,
+      geometry_msgs/PoseStamped,
+      geometry_msgs/PoseArray,
+      geometry_msgs/PointCloud, and
+      geometry_msgs/PointCloud2.
+
+      E.g. if msg is specified as [1.0, 2.0, 3.0], then it should be parsed
+      and converted to a geometry_msgs/PointStamped type, whereas if it is
+      specified as [[1.0, 2.0, 3.0], [0.0, 0.0, 0.0, 1.0]], then it should be
+      parsed and converted to a geometry_msgs/PoseStamped type.
     type:
-      - geometry_msgs/Point
-      - geometry_msgs/PointStamped
-      - geometry_msgs/Pose
-      - geometry_msgs/PoseStamped
-      - geometry_msgs/PoseArray
-      - geometry_msgs/PointCloud
-      - geometry_msgs/PointCloud2
+      - genpy.message.Message
+      - list
 - - msg_type:
       description: >
         The specified type of the ROS message to be published. The options are

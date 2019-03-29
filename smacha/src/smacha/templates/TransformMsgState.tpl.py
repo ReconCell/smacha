@@ -34,14 +34,24 @@ input_keys:
 - msg:
     description: >
       The ROS message to be transformed.
+
+      In case the intended content of the message is specified in list form,
+      parsers will be applied for known message types in an attempt to convert
+      the list input into a corresponding ROS message type.
+      Parsers for the following message types are currently operational:
+      geometry_msgs/PointStamped,
+      geometry_msgs/PoseStamped,
+      geometry_msgs/PoseArray,
+      geometry_msgs/PointCloud, and
+      geometry_msgs/PointCloud2.
+
+      E.g. if msg is specified as [1.0, 2.0, 3.0], then it should be parsed
+      and converted to a geometry_msgs/PointStamped type, whereas if it is
+      specified as [[1.0, 2.0, 3.0], [0.0, 0.0, 0.0, 1.0]], then it should be
+      parsed and converted to a geometry_msgs/PoseStamped type.
     type:
-      - geometry_msgs/Point
-      - geometry_msgs/PointStamped
-      - geometry_msgs/Pose
-      - geometry_msgs/PoseStamped
-      - geometry_msgs/PoseArray
-      - geometry_msgs/PointCloud
-      - geometry_msgs/PointCloud2
+      - genpy.message.Message
+      - list
 - - source:
       description: >
         The id of a tf frame from which the specified ROS message should be transformed.
@@ -61,37 +71,19 @@ output_keys:
       description: >
         The default output_key for the transformed ROS message.
       type:
-        - geometry_msgs/Point
-        - geometry_msgs/PointStamped
-        - geometry_msgs/Pose
-        - geometry_msgs/PoseStamped
-        - geometry_msgs/PoseArray
-        - geometry_msgs/PointCloud
-        - geometry_msgs/PointCloud2
+        - genpy.message.Message
   - msg:
       description: >
         A possible output_key for the transformed ROS message matching the
         'msg' input_key, ensuring that the 'msg' input_key itself is
         transformed.
       type:
-        - geometry_msgs/Point
-        - geometry_msgs/PointStamped
-        - geometry_msgs/Pose
-        - geometry_msgs/PoseStamped
-        - geometry_msgs/PoseArray
-        - geometry_msgs/PointCloud
-        - geometry_msgs/PointCloud2
+        - genpy.message.Message
   - output_msg:
       description: >
         A possible output_key for the transformed ROS message.
       type:
-        - geometry_msgs/Point
-        - geometry_msgs/PointStamped
-        - geometry_msgs/Pose
-        - geometry_msgs/PoseStamped
-        - geometry_msgs/PoseArray
-        - geometry_msgs/PointCloud
-        - geometry_msgs/PointCloud2
+        - genpy.message.Message
 - - transform:
       description: >
         The default output_key for the transform.
