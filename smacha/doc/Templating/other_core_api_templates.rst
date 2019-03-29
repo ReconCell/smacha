@@ -2,93 +2,93 @@
 Other Core API Templates
 ************************
 
-The MsgPublisherObserver Template
-=================================
+MsgPublisherObserver
+====================
 
-:doc:`../API/Templates/MsgPublisherObserver.tpl.py` provides a helper class for :doc:`../API/Templates/PublishMsgState.tpl.py`  and is specified as follows:
+The :doc:`MsgPublisherObserver <../API/Templates/MsgPublisherObserver.tpl.py>` template provides a helper class for :doc:`../API/Templates/PublishMsgState.tpl.py`  and is specified as follows:
 
 .. program-output:: ../scripts/help MsgPublisherObserver -n
 
-The ParseJointTrajectoryPoint Template
-======================================
+ParseJointTrajectoryPoint
+=========================
 
-:doc:`../API/Templates/ParseJointTrajectoryPoint.tpl.py` provides a helper function for parsing `trajectory_msgs/JointTrajectoryPoint <https://docs.ros.org/api/trajectory_msgs/html/msg/JointTrajectoryPoint.html>`_ types and is specified as follows:
+The :doc:`ParseJointTrajectoryPoint <../API/Templates/ParseJointTrajectoryPoint.tpl.py>` template provides a helper function for parsing `trajectory_msgs/JointTrajectoryPoint <https://docs.ros.org/api/trajectory_msgs/html/msg/JointTrajectoryPoint.html>`_ types and is specified as follows:
 
 .. program-output:: ../scripts/help ParseJointTrajectoryPoint -n
 
-The ParsePointCloud Template
-============================
+ParsePointCloud
+===============
 
-:doc:`../API/Templates/ParsePointCloud.tpl.py` provides a helper function for parsing `sensor_msgs/PointCloud <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud.html>`_ types and is specified as follows:
+The :doc:`ParsePointCloud <../API/Templates/ParsePointCloud.tpl.py>` template provides a helper function for parsing `sensor_msgs/PointCloud <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud.html>`_ types and is specified as follows:
 
 .. program-output:: ../scripts/help ParsePointCloud -n
 
-The ParsePointCloud2 Template
-=============================
+ParsePointCloud2
+================
 
-:doc:`../API/Templates/ParsePointCloud2.tpl.py` provides a helper function for parsing `sensor_msgs/PointCloud2 <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html>`_ types and is specified as follows:
+The :doc:`ParsePointCloud2 <../API/Templates/ParsePointCloud2.tpl.py>` template provides a helper function for parsing `sensor_msgs/PointCloud2 <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html>`_ types and is specified as follows:
 
 .. program-output:: ../scripts/help ParsePointCloud2 -n
 
-The ParsePointStamped Template
-==============================
+ParsePointStamped
+=================
 
-:doc:`../API/Templates/ParsePointStamped.tpl.py` provides a helper function for parsing `geometry_msgs/PointStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PointStamped.html>`_ types and is specified as follows:
+The :doc:`ParsePointStamped <../API/Templates/ParsePointStamped.tpl.py>` template provides a helper function for parsing `geometry_msgs/PointStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PointStamped.html>`_ types and is specified as follows:
 
 .. program-output:: ../scripts/help ParsePointStamped -n
 
-The ParsePose Template
-======================
+ParsePose 
+=========
 
-:doc:`../API/Templates/ParsePose.tpl.py` provides a helper function for parsing `geometry_msgs/Pose <https://docs.ros.org/api/geometry_msgs/html/msg/Pose.html>`_ types and is specified as follows:
+The :doc:`ParsePose <../API/Templates/ParsePose.tpl.py>` template provides a helper function for parsing `geometry_msgs/Pose <https://docs.ros.org/api/geometry_msgs/html/msg/Pose.html>`_ types and is specified as follows:
 
 .. program-output:: ../scripts/help ParsePose -n
 
-The ParsePoseArray Template
-===========================
+ParsePoseArray
+==============
 
-:doc:`../API/Templates/ParsePoseArray.tpl.py` provides a helper function for parsing `geometry_msgs/PoseArray <https://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html>`_ types and is specified as follows:
+The :doc:`ParsePoseArray <../API/Templates/ParsePoseArray.tpl.py>` template provides a helper function for parsing `geometry_msgs/PoseArray <https://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html>`_ types and is specified as follows:
 
 .. program-output:: ../scripts/help ParsePoseArray -n
 
-The ParsePoseStamped Template
-=============================
+ParsePoseStamped
+================
 
-:doc:`../API/Templates/ParsePoseStamped.tpl.py` provides a helper function for parsing `geometry_msgs/PoseStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PoseStamped.html>`_ types and is specified as follows:
+The :doc:`ParsePoseStamped <../API/Templates/ParsePoseStamped.tpl.py>` template provides a helper function for parsing `geometry_msgs/PoseStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PoseStamped.html>`_ types and is specified as follows:
 
 .. program-output:: ../scripts/help ParsePoseStamped -n
 
-The ParseTransformStamped Template
-==================================
+ParseTransformStamped
+=====================
 
-:doc:`../API/Templates/ParseTransformStamped.tpl.py` provides a helper function for parsing `geometry_msgs/TransformStamped <https://docs.ros.org/api/geometry_msgs/html/msg/TransformStamped.html>`_ types and is specified as follows:
+The :doc:`ParseTransformStamped <../API/Templates/ParseTransformStamped.tpl.py>` provides a helper function for parsing `geometry_msgs/TransformStamped <https://docs.ros.org/api/geometry_msgs/html/msg/TransformStamped.html>`_ types and is specified as follows:
 
 .. program-output:: ../scripts/help ParseTransformStamped -n
 
-The State Template
-==================
+State 
+=====
 
-:doc:`../API/Templates/State.tpl.py` contains code common to all state templates and is specified as follows:
+The :doc:`State <../API/Templates/State.tpl.py>` template contains code common to all state templates and is specified as follows:
 
 .. program-output:: ../scripts/help State -n
 
-The TF2ListenerSingleton Template
-=================================
+TF2ListenerSingleton
+====================
 
-:doc:`../API/Templates/TF2ListenerSingleton.tpl.py` provides a helper class for :doc:`../API/Templates/TF2ListenerState.tpl.py` and is specified as follows:
+The :doc:`TF2ListenerSingleton <../API/Templates/TF2ListenerSingleton.tpl.py>` template provides a helper class for :doc:`../API/Templates/TF2ListenerState.tpl.py` and is specified as follows:
 
 .. program-output:: ../scripts/help TF2ListenerSingleton -n
 
-The Utils Template
-==================
+Utils
+=====
 
-:doc:`../API/Templates/Utils.tpl.py` contains template macros and other utilities and is specified as follows:
+The :doc:`Utils <../API/Templates/Utils.tpl.py>` template contains template macros and other utilities and is specified as follows:
 
 .. program-output:: ../scripts/help Utils -n
 
-The WaitForMsgState Template
-============================
+WaitForMsgState
+===============
 
-:doc:`../API/Templates/WaitForMsgState.tpl.py` provides a helper class for :doc:`../API/Templates/ReadTopicState.tpl.py` and is specified as follows:
+The :doc:`WaitForMsgState <../API/Templates/WaitForMsgState.tpl.py>` template provides a helper class for :doc:`../API/Templates/ReadTopicState.tpl.py` and is specified as follows:
 
 .. program-output:: ../scripts/help WaitForMsgState -n
