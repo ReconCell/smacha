@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import roslib; roslib.load_manifest('smacha')
+import roslib
 import rospy
 import smach
 import smach_ros
@@ -67,7 +67,7 @@ class CallbacksState(smach.State):
 
 
 def main():
-    rospy.init_node('smacha_print_userdata_test')
+    rospy.init_node('sm')
 
     sm = smach.StateMachine(outcomes=['final_outcome'])
 

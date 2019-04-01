@@ -1,8 +1,6 @@
 --- # SMACHA Nesting Parameter Passing Test
-n: sm_top
+n: sm
 T: Base
-m: smacha
-nn: smacha_nesting_params_test
 o: [final_outcome]
 s:
   # This container state defines some parameter variables (name_0 and name_1)

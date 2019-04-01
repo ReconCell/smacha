@@ -1,8 +1,6 @@
 --- # SMACHA callbacks example
 name: sm
 template: Base
-manifest: smacha
-node_name: smacha_callbacks_test
 outcomes: [final_outcome]
 userdata: {animals: [cats, dogs, sharks], numbers: [1, 2, 3]} 
 states:

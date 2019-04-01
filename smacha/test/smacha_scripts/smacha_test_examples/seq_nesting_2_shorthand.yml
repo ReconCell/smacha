@@ -1,8 +1,6 @@
 # SMACHA state sequence example
-n: sm_top
+n: sm
 T: Base
-m: smacha
-nn: smacha_params_test
 o: [final_outcome_a, final_outcome_b, final_outcome_c]
 s:
 - FOO_0: {T: ParamFoo, p: {name: FOO_0, outcome: outcome_a},

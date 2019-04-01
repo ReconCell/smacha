@@ -1,8 +1,6 @@
 --- # SMACHA Hard-Coded Parameter Passing Test
-name: sm_top
+name: sm
 template: Base
-manifest: smacha
-node_name: smacha_params_test
 outcomes: [final_outcome]
 states:
   # These states show examples of hard-coding of parameter variables that are
