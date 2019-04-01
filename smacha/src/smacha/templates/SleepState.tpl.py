@@ -12,8 +12,8 @@ includes:
 extends: []
 variables:
 - time:
-    description: The length of time to sleep for in milliseconds.
-    type: int
+    description: The length of time to sleep for in seconds.
+    type: float
 input_keys: []
 output_keys: []
 outcomes:

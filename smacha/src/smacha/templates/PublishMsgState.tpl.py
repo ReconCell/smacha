@@ -36,10 +36,6 @@ variables:
       remove the specified message publication topic, and remove all currently
       published topics respectively.
     type: str
-- - frame_id:
-      description:
-        The id of a specific tf frame to which the published message should be attached.
-      type: str
 input_keys:
 - msg:
     description: >
@@ -62,19 +58,35 @@ input_keys:
     type:
       - genpy.message.Message
       - list
+- topic:
+    description:
+      The name of the topic to which the message should be published.
+    type: str
 - - msg_type:
       description: >
         The specified type of the ROS message to be published. The options are
         the possible types of the 'msg' input_key specified as a str.
       type: str
+- - frame_id:
+      description:
+        The id of a specific tf frame to which the published message should be attached.
+      type: str
 output_keys:
+- msg:
+    description: >
+      See input_keys_description.
+    type:
+      - genpy.message.Message
+      - list
 - topic:
     description:
-      The name of the topic to which the message should be published.
+      See input_keys description.
     type: str
 {% endblock meta %}
 
 {% from "Utils.tpl.py" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_init_callbacks, render_execute_callbacks, render_callbacks %}
+
+{% if sub_topic is not defined %}{% set sub_topic = 'tf' %}{% endif %}
 
 {% extends "State.tpl.py" %}
 
@@ -94,7 +106,7 @@ output_keys:
 {{ super() }}
 {% if 'class_PublishMsgState' not in defined_headers %}
 class PublishMsgState(smach.State):
-    def __init__(self, name, msg_pub_observer, action, input_keys = ['msg'], output_keys = ['topic'], callbacks = None):
+    def __init__(self, name, msg_pub_observer, action, input_keys = ['msg', 'topic'], output_keys = ['msg', 'topic'], callbacks = None):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded', 'aborted'])
 
         # Save the state name
@@ -198,14 +210,14 @@ class PublishMsgState(smach.State):
 
 {% block main_def %}
 {{ super() }}
-{% if 'tf_msg_pub_observer' not in defined_headers %}
-tf_msg_pub_observer = MsgPublisherObserver(sub_topic='/tf')
-{% do defined_headers.append('tf_msg_pub_observer') %}{% endif %}
+{% if sub_topic + '_msg_pub_observer' not in defined_headers %}
+{{ sub_topic }}_msg_pub_observer = MsgPublisherObserver(sub_topic='{{ sub_topic }}')
+{% do defined_headers.append(sub_topic + '_msg_pub_observer') %}{% endif %}
 {% endblock main_def %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
-        {{ '' | indent(23, true) }}PublishMsgState('{{ name }}', tf_msg_pub_observer, '{{ action }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
+        {{ '' | indent(23, true) }}{{ class_name }}('{{ name }}', {{ sub_topic }}_msg_pub_observer, '{{ action }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
 {{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}

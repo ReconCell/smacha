@@ -8,7 +8,8 @@ framework: SMACH
 type: None
 tags: [core]
 includes: []
-extends: []
+extends:
+- WaitForMsgState
 variables: []
 input_keys: []
 output_keys: []
@@ -16,16 +17,19 @@ output_keys: []
 
 {% from "Utils.tpl.py" import import_module, from_import %}
 
+{% extends "WaitForMsgState.tpl.py" %}
+
 {% block imports %}
-{{ import_module(defined_headers, 'roslib') }}
+{{ super() }}
 {{ from_import(defined_headers, 'tf2_msgs.msg', 'TFMessage') }}
 {% endblock imports %}
 
 {% block class_defs %}
+{{ super() }}
 {% if 'class_MsgPublisherObserver' not in defined_headers %}
 class MsgPublisherObserver(object):
     """
-    Subscribes to a topic and maintains dicts of messages/publishers
+    Subscribes to a topic and maintains dicts of messages & publishers
     that are updated with the topic subscription callback.
     """
     def __init__(self, sub_topic='/tf'):
@@ -33,15 +37,9 @@ class MsgPublisherObserver(object):
         # Save sub_topic
         self._sub_topic = sub_topic
 
-        # A subscriber, to time publication w.r.t. a tf topic
-        #
-        # NOTE: This was previously set to use a 'rospy.AnyMsg' topic,
-        #       but this appeared to break TF2 when attempting to listen
-        #       for transforms.
-        try:
-            self._sub = rospy.Subscriber(self._sub_topic, TFMessage, self._pub_cb)
-        except Exception as e:
-            raise ValueError('Failed to subscribe to TFMessage topic: {}'.format(repr(e)))
+        # A subject topic to be subscribed to in order to synchronize message
+        # publication.
+        self._sub = None
 
         # A dict of messages
         self._msgs = dict()
@@ -49,7 +47,45 @@ class MsgPublisherObserver(object):
         # A dict of message publishers
         self._pubs = dict()
 
+    def _pub_cb(self, data):
+        # Publish messages
+        if self._msgs:
+            for topic, msg in self._msgs.items():
+                try:
+                    # Update the timestamp
+                    msg.header.stamp = rospy.Time.now()
+                except Exception as e:
+                    rospy.logwarn('Failed to update timestamp for topic \'{}\': {}'.format(topic, repr(e)))
+                    pass
+
+                try:
+                    # Publish
+                    self._pubs[topic].publish(msg)
+                except Exception as e:
+                    rospy.logwarn('Failed to publish message on topic \'{}\': {}'.format(topic, repr(e)))
+
     def add(self, msg, topic, frame_id=None):
+        # Subscribe to the subject topic if this has not already been done
+        if not self._sub:
+            # Try detecting the message type/class of the sub_topic
+            # See: https://schulz-m.github.io/2016/07/18/rospy-subscribe-to-any-msg-type/
+            try:
+                with (WaitForMsgState)(self._sub_topic, rospy.AnyMsg, latch=True) as wait_for_any_msg:
+                    any_msg = wait_for_any_msg.waitForMsg()
+                    msg_type = any_msg._connection_header['type']
+                    rospy.loginfo('Message type for topic {} detected as {}'.format(topic, msg_type))
+                    msg_class = roslib.message.get_message_class(msg_type)
+            except Exception as e:
+                self._bags[bag_file].close()
+                rospy.logerr('Failed to detect message type/class for topic {}: {}'.format(topic, repr(e)))
+                return 'aborted'
+
+            # Set up the subscriber
+            try:
+                self._sub = rospy.Subscriber(self._sub_topic, msg_class, self._pub_cb)
+            except Exception as e:
+                raise ValueError('Failed to subscribe to TFMessage topic: {}'.format(repr(e)))
+
         # Add message with specified frame_id
         try:
             assert frame_id
@@ -90,22 +126,11 @@ class MsgPublisherObserver(object):
             rospy.logwarn('Failed to remove all publishers: {}'.format(repr(e)))
             return 'aborted'
         return 'succeeded'
-
-    def _pub_cb(self, data):
-        # Publish messages
-        if self._msgs:
-            for topic, msg in self._msgs.items():
-                try:
-                    # Update the timestamp
-                    msg.header.stamp = rospy.Time.now()
-                except Exception as e:
-                    rospy.logwarn('Failed to update timestamp for topic \'{}\': {}'.format(topic, repr(e)))
-                    pass
-
-                try:
-                    # Publish
-                    self._pubs[topic].publish(msg)
-                except Exception as e:
-                    rospy.logwarn('Failed to publish message on topic \'{}\': {}'.format(topic, repr(e)))
 {% do defined_headers.append('class_MsgPublisherObserver') %}{% endif %}
 {% endblock class_defs %}
+
+{% block header %}
+{% endblock header %}
+
+{% block body %}
+{% endblock body %}

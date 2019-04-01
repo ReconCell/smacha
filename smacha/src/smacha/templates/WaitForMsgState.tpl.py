@@ -20,7 +20,7 @@ description: >
   and the userdata, so that a self defined method can convert message data to
   smach userdata. Those userdata fields have to be passed via 'output_keys'.
 
-  For more info, see:
+  Based on the original code described here:
       http://wiki.ros.org/executive_smach/AdditionalStateTypes
       https://github.com/felix-kolbe/uashh-rvl-ros-pkg/blob/master/uashh_smach/src/uashh_smach/util.py
 language: Python
@@ -66,11 +66,6 @@ outcomes:
 - aborted
 {% endblock meta %}
 
-#
-# Based on the original code described here:
-# http://wiki.ros.org/executive_smach/AdditionalStateTypes
-# https://github.com/felix-kolbe/uashh-rvl-ros-pkg/blob/master/uashh_smach/src/uashh_smach/util.py
-#
 {% from "Utils.tpl.py" import import_module, render_transitions, render_remapping, render_output_keys %}
 
 {% extends "State.tpl.py" %}
