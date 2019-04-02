@@ -320,6 +320,13 @@ class TestTools(Tester):
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
+    def test_generate_rosbag_recording_2(self):
+        """Test generate rosbag_recording_2.yml"""
+        with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_recording_2.py')) as original_file:
+            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_recording_2.yml'))
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+
 if __name__=="__main__":
     # Parse arguments
     arg_parser = argparse.ArgumentParser(description='SMACHA test examples unit tests.')

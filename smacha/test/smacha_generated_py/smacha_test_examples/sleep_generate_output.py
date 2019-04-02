@@ -3,7 +3,7 @@
 
 
 
-import roslib; roslib.load_manifest('smacha')
+import roslib
 import rospy
 import smach
 import smach_ros
@@ -36,7 +36,7 @@ class SleepState(smach.State):
 
 
 def main():
-    rospy.init_node('smacha_sleep_test')
+    rospy.init_node('sm')
 
     
 
