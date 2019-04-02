@@ -18,7 +18,7 @@ states:
 - START_RECORDING:
     template: RecordROSBagState
     action: start
-    userdata: {file: "'/tmp/test.bag'", topics: [smacha/rosbag_recording_1_point]}
+    userdata: {file: /tmp/rosbag_recording_1.bag, topics: [smacha/rosbag_recording_1_point]}
     remapping: {file: file, topics: topics}
     transitions: {succeeded: WAIT, aborted: aborted}
 - WAIT:

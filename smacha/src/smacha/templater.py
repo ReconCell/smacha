@@ -77,10 +77,10 @@ def not_string(value):
     """Custom test function to check if a template variable is not a string.
 
     If the value passed in is in fact a string, it first checks to see if it
-    looks like a viable expression. Thus, if it looks like a reference to an
-    object member (i.e. contains any dots) or if it looks like a function call
-    or object instantiation (i.e. contains an expression followed by wrapping
-    parentheses, it returns true, otherwise it returns false.
+    looks like a viable expression. Thus, if it looks like a reference to a
+    type (i.e. contains any full-stops/periods) or if it looks like a function
+    call or object instantiation (i.e. contains an expression followed by
+    wrapping parentheses, it returns true, otherwise it returns false.
 
     To force a string, the expression may be wrapped in single and double
     quotes (e.g. "'expression'") in the SMACHA YAML script and the above
@@ -107,10 +107,13 @@ def not_string(value):
     elif isinstance(value, str):
         if is_number(value):
             return True
-        # This one could, and should, be improved:
-        elif re.match(r'\D+[.]\D+', value):
+        # Match type-esque expressions that contain
+        # full-stops/periods (e.g. 'geometry_msgs.msg.Point')
+        elif re.match(r'(\w+[.])+\w+$', value):
             return True
-        elif re.match(r'.*\(.*\)', value):
+        # Match function call-esque expressions that contain wrapping
+        # parentheses (e.g. 'Point()')
+        elif re.match(r'.+\(.*\)$', value):
             return True
 
     # Probably safest to fall back to a string assumption in most other cases:
