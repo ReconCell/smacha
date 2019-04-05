@@ -8,8 +8,7 @@ framework: SMACH
 type: None
 tags: [core]
 includes: []
-extends:
-- WaitForMsgState
+extends: []
 variables: []
 input_keys: []
 output_keys: []
@@ -17,15 +16,12 @@ output_keys: []
 
 {% from "Utils.tpl.py" import import_module, from_import %}
 
-{% extends "WaitForMsgState.tpl.py" %}
-
 {% block imports %}
-{{ super() }}
-{{ from_import(defined_headers, 'tf2_msgs.msg', 'TFMessage') }}
+{{ import_module(defined_headers, 'roslib') }}
+{{ import_module(defined_headers, 'rosgraph') }}
 {% endblock imports %}
 
 {% block class_defs %}
-{{ super() }}
 {% if 'class_MsgPublisherObserver' not in defined_headers %}
 class MsgPublisherObserver(object):
     """
@@ -33,6 +29,8 @@ class MsgPublisherObserver(object):
     that are updated with the topic subscription callback.
     """
     def __init__(self, sub_topic='/tf'):
+        # Get a reference to the ROS master
+        self._master = rosgraph.Master('msg_publisher_observer')
 
         # Save sub_topic
         self._sub_topic = sub_topic
@@ -63,21 +61,22 @@ class MsgPublisherObserver(object):
                     self._pubs[topic].publish(msg)
                 except Exception as e:
                     rospy.logwarn('Failed to publish message on topic \'{}\': {}'.format(topic, repr(e)))
+                    rospy.logwarn('self._pubs: {}'.format(self._pubs))
 
     def add(self, msg, topic, frame_id=None):
         # Subscribe to the subject topic if this has not already been done
         if not self._sub:
-            # Try detecting the message type/class of the sub_topic
-            # See: https://schulz-m.github.io/2016/07/18/rospy-subscribe-to-any-msg-type/
+            # Try finding the sub_topic in currently published topics and
+            # detecting its message type/class
             try:
-                with (WaitForMsgState)(self._sub_topic, rospy.AnyMsg, latch=True) as wait_for_any_msg:
-                    any_msg = wait_for_any_msg.waitForMsg()
-                    msg_type = any_msg._connection_header['type']
-                    rospy.loginfo('Message type for topic {} detected as {}'.format(topic, msg_type))
+                topics = {topic_key.strip('/'): topic_val for topic_key, topic_val in self._master.getPublishedTopics('')}
+                if self._sub_topic in list(topics.keys()):
+                    msg_type = topics[self._sub_topic]
                     msg_class = roslib.message.get_message_class(msg_type)
+                else:
+                    raise ValueError('{} topic is not currently being published!'.format(self._sub_topic))
             except Exception as e:
-                self._bags[bag_file].close()
-                rospy.logerr('Failed to detect message type/class for topic {}: {}'.format(topic, repr(e)))
+                rospy.logerr('Failed to detect message type/class for topic {}: {}'.format(self._sub_topic, repr(e)))
                 return 'aborted'
 
             # Set up the subscriber
@@ -128,9 +127,3 @@ class MsgPublisherObserver(object):
         return 'succeeded'
 {% do defined_headers.append('class_MsgPublisherObserver') %}{% endif %}
 {% endblock class_defs %}
-
-{% block header %}
-{% endblock header %}
-
-{% block body %}
-{% endblock body %}

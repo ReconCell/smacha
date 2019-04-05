@@ -215,6 +215,21 @@ class PublishMsgState(smach.State):
 {% do defined_headers.append(sub_topic + '_msg_pub_observer') %}{% endif %}
 {% endblock main_def %}
 
+{% block header %}
+{{ super() }}
+{#
+ # By using this bit of trickery, we ensure that the mandatory userdata variable
+ # 'topic' gets defined as an empty string before any other userdata
+ # variables are defined (these are rendered via the 'header_userdata' block
+ # usually, which is rendered after the 'header' block). This allows for the
+ # specification of 'topic' to be omitted in the SMACHA script state
+ # definitions when the 'action' variable is set to 'remove_all'.
+ #}
+{% if mandatory_userdata is not defined %}{% set mandatory_userdata = dict() %}{% endif %}
+{% if action == 'remove_all' and 'topic' not in mandatory_userdata.keys() %}{% set _dummy = mandatory_userdata.update({'topic':''}) %}{% endif %}
+{% if mandatory_userdata is defined %}{{ render_userdata(parent_sm_name, mandatory_userdata) }}{% endif %}
+{% endblock header %}
+
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
         {{ '' | indent(23, true) }}{{ class_name }}('{{ name }}', {{ sub_topic }}_msg_pub_observer, '{{ action }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
