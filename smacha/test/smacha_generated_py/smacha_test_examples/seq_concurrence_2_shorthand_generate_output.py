@@ -49,7 +49,13 @@ def main():
 
 
 
+
+
+
+
+
     with sm:
+
 
         smach.StateMachine.add('FOO_0', Foo('FOO_0', 'outcome_a'), 
                                transitions={'outcome_a':'CON',
@@ -64,7 +70,13 @@ def main():
 
 
 
+
+
+
+
+
         with sm_con:
+
 
             smach.Concurrence.add('FOO_1', Foo('FOO_1', 'outcome_a'))
 

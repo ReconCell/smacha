@@ -36,18 +36,14 @@ states:
     transitions: {succeeded: WAIT, aborted: aborted}
 - WAIT:
     template: SleepState
-    time: 1
+    time: 10
     transitions: {succeeded: STOP_RECORDING}
 - STOP_RECORDING:
     template: RecordROSBagState
     action: stop_all
-    userdata: {file: None, topics: None}
-    remapping: {file: file, topics: topics}
     transitions: {succeeded: UNPUBLISH_MSG, aborted: aborted}
 - UNPUBLISH_MSG:
     template: PublishMsgState
     sub_topic: tf
     action: remove_all
-    userdata: {topic: None}
-    remapping: {topic: topic}
     transitions: {succeeded: succeeded, aborted: aborted}

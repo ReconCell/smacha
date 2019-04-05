@@ -47,7 +47,13 @@ def main():
 
 
 
+
+
+
+
+
     with sm:
+
 
         smach.StateMachine.add('FOO_0',
                                        SleepState(5),

@@ -49,7 +49,13 @@ def main():
 
 
 
+
+
+
+
+
     with sm:
+
 
         sm_con = smach.Concurrence(outcomes=['con_outcome_1', 'con_outcome_2', 'con_outcome_3', 'con_default_outcome'],
                                            default_outcome='con_default_outcome',
@@ -60,7 +66,13 @@ def main():
 
 
 
+
+
+
+
+
         with sm_con:
+
 
             smach.Concurrence.add('FOO_0', Foo('FOO_0', 'outcome_a'))
 

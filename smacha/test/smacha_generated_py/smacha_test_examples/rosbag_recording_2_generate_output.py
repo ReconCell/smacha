@@ -61,23 +61,17 @@ from sensor_msgs.point_cloud2 import create_cloud_xyz32
 
 
 
+import rosgraph
 
-
-
-
-
-
-
-
-
-
+import rosbag
 
 
 import threading
 
-from tf2_msgs.msg import TFMessage
-
-import rosbag
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue
 
 
 
@@ -241,110 +235,14 @@ def parse_pointcloud2(pointcloud_input):
 
 
 
-class WaitForMsgState(smach.State):
-    """This class acts as a generic message listener with blocking, timeout, latch and flexible usage.
-
-    It is meant to be extended with a case specific class that initializes this one appropriately
-    and contains the msg_cb (or overrides execute if really needed).
-
-    Its waitForMsg method implements the core functionality: waiting for the message, returning
-    the message itself or None on timeout.
-
-    Its execute method wraps the waitForMsg and returns succeeded or aborted, depending on the returned
-    message beeing existent or None. Additionally, in the successfull case, the msg_cb, if given, will
-    be called with the message and the userdata, so that a self defined method can convert message data to
-    smach userdata.
-    Those userdata fields have to be passed via 'output_keys'.
-
-    If the state outcome should depend on the message content, the msg_cb can dictate the outcome:
-    If msg_cb returns True, execute() will return "succeeded".
-    If msg_cb returns False, execute() will return "aborted".
-    If msg_cb has no return statement, execute() will act as described above.
-
-    If thats still not enough, execute() might be overridden.
-
-    latch: If True waitForMsg will return the last received message, so one message might be returned indefinite times.
-    timeout: Seconds to wait for a message, defaults to None, disabling timeout
-    output_keys: Userdata keys that the message callback needs to write to.
-    """
-
-    def __init__(self, topic, msg_type, msg_cb=None, output_keys=None, latch=False, timeout=None):
-        if output_keys is None:
-            output_keys = []
-        smach.State.__init__(self, outcomes=['succeeded', 'aborted', 'preempted'], output_keys=output_keys)
-        self.latch = latch
-        self.timeout = timeout
-        self.mutex = threading.Lock()
-        self.msg = None
-        self.msg_cb = msg_cb
-        self.subscriber = rospy.Subscriber(topic, msg_type, self._callback, queue_size=1)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *err):
-        self.subscriber.unregister()
-
-    def _callback(self, msg):
-        self.mutex.acquire()
-        self.msg = msg
-        self.mutex.release()
-
-    def waitForMsg(self):
-        """Await and return the message or None on timeout."""
-        rospy.loginfo('Waiting for message...')
-        if self.timeout is not None:
-            timeout_time = rospy.Time.now() + rospy.Duration.from_sec(self.timeout)
-        while self.timeout is None or rospy.Time.now() < timeout_time:
-            self.mutex.acquire()
-            if self.msg is not None:
-                rospy.loginfo('Got message.')
-                message = self.msg
-
-                if not self.latch:
-                    self.msg = None
-
-                self.mutex.release()
-                return message
-            self.mutex.release()
-
-            if self.preempt_requested():
-                self.service_preempt()
-                rospy.loginfo('waitForMsg is preempted!')
-                return 'preempted'
-
-            rospy.sleep(.1) # TODO: maybe convert ROSInterruptException into valid outcome
-
-        rospy.loginfo('Timeout on waiting for message!')
-        return None
-
-    def execute(self, ud):
-        """Default simplest execute(), see class description."""
-        msg = self.waitForMsg()
-        if msg is not None:
-            if msg == 'preempted':
-                return 'preempted'
-            # call callback if there is one
-            if self.msg_cb is not None:
-                cb_result = self.msg_cb(msg, ud)
-                # check if callback wants to dictate output
-                if cb_result is not None:
-                    if cb_result:
-                        return 'succeeded'
-                    else:
-                        return 'aborted'
-            return 'succeeded'
-        else:
-            return 'aborted'
-
-
-
 class MsgPublisherObserver(object):
     """
     Subscribes to a topic and maintains dicts of messages & publishers
     that are updated with the topic subscription callback.
     """
     def __init__(self, sub_topic='/tf'):
+        # Get a reference to the ROS master
+        self._master = rosgraph.Master('msg_publisher_observer')
 
         # Save sub_topic
         self._sub_topic = sub_topic
@@ -375,21 +273,22 @@ class MsgPublisherObserver(object):
                     self._pubs[topic].publish(msg)
                 except Exception as e:
                     rospy.logwarn('Failed to publish message on topic \'{}\': {}'.format(topic, repr(e)))
+                    rospy.logwarn('self._pubs: {}'.format(self._pubs))
 
     def add(self, msg, topic, frame_id=None):
         # Subscribe to the subject topic if this has not already been done
         if not self._sub:
-            # Try detecting the message type/class of the sub_topic
-            # See: https://schulz-m.github.io/2016/07/18/rospy-subscribe-to-any-msg-type/
+            # Try finding the sub_topic in currently published topics and
+            # detecting its message type/class
             try:
-                with (WaitForMsgState)(self._sub_topic, rospy.AnyMsg, latch=True) as wait_for_any_msg:
-                    any_msg = wait_for_any_msg.waitForMsg()
-                    msg_type = any_msg._connection_header['type']
-                    rospy.loginfo('Message type for topic {} detected as {}'.format(topic, msg_type))
+                topics = {topic_key.strip('/'): topic_val for topic_key, topic_val in self._master.getPublishedTopics('')}
+                if self._sub_topic in list(topics.keys()):
+                    msg_type = topics[self._sub_topic]
                     msg_class = roslib.message.get_message_class(msg_type)
+                else:
+                    raise ValueError('{} topic is not currently being published!'.format(self._sub_topic))
             except Exception as e:
-                self._bags[bag_file].close()
-                rospy.logerr('Failed to detect message type/class for topic {}: {}'.format(topic, repr(e)))
+                rospy.logerr('Failed to detect message type/class for topic {}: {}'.format(self._sub_topic, repr(e)))
                 return 'aborted'
 
             # Set up the subscriber
@@ -438,26 +337,6 @@ class MsgPublisherObserver(object):
             rospy.logwarn('Failed to remove all publishers: {}'.format(repr(e)))
             return 'aborted'
         return 'succeeded'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -610,26 +489,133 @@ class PublishMsgState(smach.State):
 
         return outcome
 
-class ROSBagRecorderObserver(object):
+class ROSBagRecorder(object):
     """
     Subscribes to topics and maintains a dicts of currently open rosbag
     recordings & topic subscribers that are updated with the topic subscription
     callbacks.
     """
     def __init__(self):
-        # A dict of rosbags indexed by filename
+        # Get a reference to the ROS master
+        self._master = rosgraph.Master('rosbag_recorder_observer')
+
+        # A dict of bag master check threads indexed by bag filenames
+        self._master_check_threads = dict()
+
+        # The rate at which to poll the ROS master for new topics
+        self._master_check_interval = 1.0
+
+        # A dict of rosbags indexed by filenames
         self._bags = dict()
 
-        # A dict of dicts of subscribers indexed by bag_file and topic
+        # A dict of bag writing threads indexed by bag filenames
+        self._write_threads = dict()
+
+        # A dict of bag writing queues indexed by bag filenames
+        self._write_queues = dict()
+
+        # A dict of bag writing stop flags indexed by bag filenames
+        self._stop_flags = dict()
+
+        # A dict of bag thread stop conditions indexed by bag filenames
+        self._stop_conditions = dict()
+
+        # A dict of bag file locks indexed by bag filenames
+        self._bag_locks = dict()
+
+        # A dict of dicts of subscribers indexed by bag_files and topics
         # respectively
         self._bag_subs = dict()
 
-    def _write_cb(self, data, bag_file, topic, msg_class):
+        # Length of timeout (in seconds), as well as sleep rate, for waiting
+        # for the threads to finish writing before forcibly closing a bag.
+        self._bag_close_timeout = 10.0
+        self._bag_close_sleep_rate = 100.0
+
+    def _write_cb(self, msg, args):
+        bag_file = args[0]
+        topic = args[1]
+        msg_class = args[2]
         try:
-            self._bags[bag_file].write(topic, data)
+            self._write_queues[bag_file].put((topic, msg, rospy.get_rostime()))
         except Exception as e:
-            rospy.logwarn('Failed to write data of type {} from topic {} to rosbag {}: {}'.format(msg_class, topic, bag_file, repr(e)))
+            rospy.logwarn('Failed to write message of type {} from topic {} to rosbag {}: {}'.format(msg_class, topic, bag_file, repr(e)))
             pass
+
+    def _run_master_check_thread(self, bag_file, topics):
+        # Set up an observer loop
+        try:
+            while not self._stop_flags[bag_file]:
+                # Get a list of topics currently being published
+                try:
+                    currently_published_topics = self._master.getPublishedTopics('')
+                except Exception as e:
+                    self._unsubscribe_bag_topics(bag_file)
+                    self._close_bag(bag_file)
+                    raise ValueError('Failed to get list of currently published topics from ROS master: {}'.format(repr(e)))
+
+                # Check for new topics
+                for topic, msg_type in currently_published_topics:
+                    # If the topic has previously been subscribed to for this
+                    # bag_file, or is not listed as a topic for this bag_file,
+                    # skip it.
+                    if topic in list(self._bag_subs[bag_file].keys()) or (topic not in topics and topic.strip('/') not in topics):
+                        continue
+
+                    # Subscribe to the topic
+                    try:
+                        msg_class = roslib.message.get_message_class(msg_type)
+                        self._bag_subs[bag_file][topic] = rospy.Subscriber(topic, msg_class, self._write_cb, (bag_file, topic, msg_class))
+                    except Exception as e:
+                        self._unsubscribe_bag_topics(bag_file)
+                        self._close_bag(bag_file)
+                        raise ValueError('Failed to subscribe to topic {}: {}'.format(topic, repr(e)))
+
+                # Wait a while
+                self._stop_conditions[bag_file].acquire()
+                self._stop_conditions[bag_file].wait(self._master_check_interval)
+
+        except Exception as e:
+            rospy.logerr('Error when recording rosbag file {}: {}'.format(bag_file, repr(e)))
+
+        # Unsubscribe from topics and close bag
+        self._unsubscribe_bag_topics(bag_file)
+        self._close_bag(bag_file)
+
+    def _unsubscribe_bag_topics(self, bag_file):
+        for _, sub in self._bag_subs[bag_file].items():
+            try:
+                sub.unregister()
+            except Exception as e:
+                rospy.logerr('Failed to unregister topic subscriber {} while stopping rosbag recording with filename \'{}\': {}'.format(sub, bag_file, repr(e)))
+                raise
+        del self._bag_subs[bag_file]
+
+    def _close_bag(self, bag_file):
+        try:
+            self._bags[bag_file].close()
+        except Exception as e:
+            rospy.logerr('Failed to close rosbag with filename \'{}\': {}'.format(bag_file, repr(e)))
+            raise
+        del self._bags[bag_file]
+
+    def _run_write_thread(self, bag_file):
+        try:
+            while not self._stop_flags[bag_file]:
+                # Wait for a message
+                item = self._write_queues[bag_file].get()
+
+                if item == self:
+                    continue
+
+                topic, msg, t = item
+
+                # Write to the bag
+                with self._bag_locks[bag_file]:
+                    self._bags[bag_file].write(topic, msg, t)
+
+        except Exception as e:
+            rospy.logerr('Error when writing to rosbag file {}: {}'.format(bag_file, repr(e)))
 
     def start(self, bag_file, topics):
         # Open the bag file for writing
@@ -641,68 +627,60 @@ class ROSBagRecorderObserver(object):
             rospy.logerr('Failed to start rosbag recording with filename \'{}\': {}'.format(bag_file, repr(e)))
             return 'aborted'
 
-        # Subscribe to the topics
-        for topic in topics:
-            if topic not in self._bag_subs[bag_file].keys():
-                # Try detecting the message type/class if necessary.
-                # See: https://schulz-m.github.io/2016/07/18/rospy-subscribe-to-any-msg-type/
-                try:
-                    with (WaitForMsgState)(topic, rospy.AnyMsg, latch=True) as wait_for_any_msg:
-                        any_msg = wait_for_any_msg.waitForMsg()
-                        msg_type = any_msg._connection_header['type']
-                        rospy.loginfo('Message type for topic {} detected as {}'.format(topic, msg_type))
-                        msg_class = roslib.message.get_message_class(msg_type)
-                except Exception as e:
-                    self._bags[bag_file].close()
-                    rospy.logerr('Failed to detect message type/class for topic {}: {}'.format(topic, repr(e)))
-                    return 'aborted'
+        # Set up the bag writing queue
+        self._write_queues[bag_file] = Queue()
 
-            # Subscribe to the topic
-            try:
-                self._bag_subs[bag_file][topic] = rospy.Subscriber(topic, msg_class, lambda data: self._write_cb(data, bag_file, topic, msg_class))
-            except Exception as e:
-                self._bags[bag_file].close()
-                raise ValueError('Failed to subscribe to TFMessage topic: {}'.format(repr(e)))
+        # Set the bag thread lock, write stopping flag, and thread stopping conditions
+        self._bag_locks[bag_file] = threading.Lock()
+        self._stop_flags[bag_file] = False
+        self._stop_conditions[bag_file] = threading.Condition()
+
+        # Spin up the master check and bag writing threads
+        self._master_check_threads[bag_file] = threading.Thread(target=self._run_master_check_thread, args=[bag_file, topics])
+        self._write_threads[bag_file] = threading.Thread(target=self._run_write_thread, args=[bag_file])
+        self._master_check_threads[bag_file].start()
+        self._write_threads[bag_file].start()
 
         return 'succeeded'
 
     def stop(self, bag_file):
-        # Stop bag recording
-        self._bags[bag_file].close()
+        # Signal threads to stop bag recording
+        with self._stop_conditions[bag_file]:
+            self._stop_flags[bag_file] = True
+            self._stop_conditions[bag_file].notify_all()
 
-        # Unsubscribe from bag topics
-        for _, sub in self._bag_subs[bag_file].items():
-            sub.unregister()
-        del self._bag_subs[bag_file]
+        # Signal the bag write thread to stop writing
+        self._write_queues[bag_file].put(self)
+
+        # Wait for the bag to be closed
+        t = rospy.get_time()
+        r = rospy.Rate(self._bag_close_sleep_rate)
+        while bag_file in list(self._bag_subs.keys()) and bag_file in list(self._bags.keys()):
+            if rospy.get_time() - t < self._bag_close_timeout:
+                r.sleep()
+            else:
+                break
+        else:
+            return 'succeeded'
+
+        # If the bag is still open, issue a warning and attempt forced closure.
+        rospy.logwarn('Warning: timeout exceeded for stopping writing to rosbag file {}. Attempting forced stop...')
+        try:
+            self._unsubscribe_bag_topics(bag_file)
+            self._close_bag(bag_file)
+        except Exception as e:
+            rospy.logerr('Error during forced stop of writing to rosbag file {}: {}'.format(bag_file, repr(e)))
+            return 'aborted'
 
         return 'succeeded'
 
     def stop_all(self):
         # Stop all current recordings
         for bag_file in self._bags.keys():
-            self.stop(bag_file)
+            if self.stop(bag_file) != 'succeeded':
+                return 'aborted'
 
         return 'succeeded'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -720,14 +698,14 @@ class ROSBagRecorderObserver(object):
 
 
 class RecordROSBagState(smach.State):
-    def __init__(self, name, bag_rec_observer, action, input_keys=['file', 'topics'], output_keys=[], callbacks = None):
+    def __init__(self, name, bag_recorder, action, input_keys=['file', 'topics'], output_keys=[], callbacks = None):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded', 'aborted'])
 
         # Save the state name
         self._name = name
 
-        # Save the ROSBagRecorderObserver object reference
-        self._bag_rec_observer= bag_rec_observer
+        # Save the ROSBagRecorder object reference
+        self._bag_recorder= bag_recorder
 
         # Save the action
         self._action = action
@@ -793,11 +771,11 @@ class RecordROSBagState(smach.State):
         # Start or stop recording
         outcome = 'aborted'
         if self._action == 'start' or self._action == 'record':
-            outcome = self._bag_rec_observer.start(bag_file, topics)
+            outcome = self._bag_recorder.start(bag_file, topics)
         elif self._action == 'stop':
-            outcome = self._bag_rec_observer.stop(bag_file)
+            outcome = self._bag_recorder.stop(bag_file)
         elif self._action == 'stop_all':
-            outcome = self._bag_rec_observer.stop_all()
+            outcome = self._bag_recorder.stop_all()
 
         return outcome
 
@@ -826,11 +804,20 @@ def main():
 
     tf_msg_pub_observer = MsgPublisherObserver(sub_topic='tf')
 
-    bag_rec_observer = ROSBagRecorderObserver()
+    bag_recorder = ROSBagRecorder()
 
 
 
     sm = smach.StateMachine(outcomes=['succeeded', 'aborted'])
+
+
+    sm.userdata.file = ''
+
+    sm.userdata.topics = ''
+
+    sm.userdata.topic = ''
+
+
 
 
     sm.userdata.point = Point()
@@ -849,13 +836,8 @@ def main():
 
     sm.userdata.topics_2 = ['smacha/rosbag_recording_1_pose']
 
-    sm.userdata.file = 'None'
-
-    sm.userdata.topics = 'None'
-
-    sm.userdata.topic = 'None'
-
     with sm:
+
 
         smach.StateMachine.add('PUBLISH_MSG_1',
                                        PublishMsgState('PUBLISH_MSG_1', tf_msg_pub_observer, 'add'),
@@ -872,35 +854,32 @@ def main():
                                           'topic':'pose_topic'})
 
         smach.StateMachine.add('START_RECORDING_1',
-                                       RecordROSBagState('START_RECORDING_1', bag_rec_observer, 'start'),
+                                       RecordROSBagState('START_RECORDING_1', bag_recorder, 'start'),
                                transitions={'aborted':'aborted',
                                             'succeeded':'START_RECORDING_2'},
                                remapping={'file':'file_1',
                                           'topics':'topics_1'})
 
         smach.StateMachine.add('START_RECORDING_2',
-                                       RecordROSBagState('START_RECORDING_2', bag_rec_observer, 'start'),
+                                       RecordROSBagState('START_RECORDING_2', bag_recorder, 'start'),
                                transitions={'aborted':'aborted',
                                             'succeeded':'WAIT'},
                                remapping={'file':'file_2',
                                           'topics':'topics_2'})
 
         smach.StateMachine.add('WAIT',
-                                       SleepState(1),
+                                       SleepState(10),
                                transitions={'succeeded':'STOP_RECORDING'})
 
         smach.StateMachine.add('STOP_RECORDING',
-                                       RecordROSBagState('STOP_RECORDING', bag_rec_observer, 'stop_all'),
+                                       RecordROSBagState('STOP_RECORDING', bag_recorder, 'stop_all'),
                                transitions={'aborted':'aborted',
-                                            'succeeded':'UNPUBLISH_MSG'},
-                               remapping={'file':'file',
-                                          'topics':'topics'})
+                                            'succeeded':'UNPUBLISH_MSG'})
 
         smach.StateMachine.add('UNPUBLISH_MSG',
                                        PublishMsgState('UNPUBLISH_MSG', tf_msg_pub_observer, 'remove_all'),
                                transitions={'aborted':'aborted',
-                                            'succeeded':'succeeded'},
-                               remapping={'topic':'topic'})
+                                            'succeeded':'succeeded'})
 
 
 

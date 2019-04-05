@@ -49,7 +49,13 @@ def main():
 
 
 
+
+
+
+
+
     with sm:
+
 
         smach.StateMachine.add('FOO_0', Foo('FOO_0', 'outcome_a'), 
                                transitions={'outcome_a':'FOO_1',

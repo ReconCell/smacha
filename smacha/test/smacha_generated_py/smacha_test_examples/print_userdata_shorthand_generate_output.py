@@ -94,12 +94,18 @@ def main():
 
 
 
+
+
+
+
     sm.userdata.foo = 'Hello World!'
+
 
 
     sm.userdata.bar = 'Goodbye World!'
 
     with sm:
+
 
         smach.StateMachine.add('FOO_0',
                                        PrintUserdataState(input_keys = ['foo']),

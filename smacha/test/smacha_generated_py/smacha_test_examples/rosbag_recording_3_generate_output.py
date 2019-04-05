@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+
+
+
 import roslib
 import rospy
 import smach
@@ -7,21 +10,69 @@ import smach_ros
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Point32
 from geometry_msgs.msg import PointStamped
+
+
+
+
+
+
+
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseStamped
+
 from geometry_msgs.msg import Quaternion
+
+
+
+
+
+
+
+
+
 from geometry_msgs.msg import PoseArray
+
+
+
+
+
+
+
+
+
 from sensor_msgs.msg import PointCloud
+
 from sensor_msgs import point_cloud2 as pc2
+
+
+
+
+
+
+
+
 from sensor_msgs.msg import PointCloud2
 from sensor_msgs.point_cloud2 import create_cloud_xyz32
+
+
+
+
+
+
+
+
 import rosgraph
+
 import rosbag
+
+
 import threading
+
 try:
     from queue import Queue
 except ImportError:
     from Queue import Queue
+
 
 
 def parse_pointstamped(point_input):
@@ -56,6 +107,13 @@ def parse_pointstamped(point_input):
         raise ValueError('Point not properly specified (should be Point, PointStamped or [3] list type)!')
 
 
+
+
+
+
+
+
+
 def parse_posestamped(pose_input):
     """
     Parse pose_input into PoseStamped.
@@ -81,6 +139,13 @@ def parse_posestamped(pose_input):
         return pose
     except Exception as e:
         raise ValueError('Pose not properly specified (should be Pose, PoseStamped or [[3],[4]] list)!')
+
+
+
+
+
+
+
 
 
 def parse_posearray(posearray_input):
@@ -122,6 +187,13 @@ def parse_posearray(posearray_input):
         raise ValueError('Pose array not properly specified (should be PoseArray or list of Pose, PoseStamped or [[3],[4]] list types)!')
 
 
+
+
+
+
+
+
+
 def parse_pointcloud(pointcloud_input):
     """
     Parse pointcloud_input into PointCloud.
@@ -136,6 +208,13 @@ def parse_pointcloud(pointcloud_input):
         return PointCloud(points = map(lambda point: Point32(*point), points))
     except Exception as e:
         raise ValueError('Point cloud not properly specified (should be PointCloud or PointCloud2 type): ' + repr(e))
+
+
+
+
+
+
+
 
 
 def parse_pointcloud2(pointcloud_input):
@@ -153,6 +232,7 @@ def parse_pointcloud2(pointcloud_input):
         return pointcloud2
     except:
         raise ValueError('Point cloud not properly specified (should be PointCloud or PointCloud2 type)!')
+
 
 
 class MsgPublisherObserver(object):
@@ -259,6 +339,19 @@ class MsgPublisherObserver(object):
         return 'succeeded'
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 class PublishMsgState(smach.State):
     def __init__(self, name, msg_pub_observer, action, input_keys = ['msg', 'topic'], output_keys = ['msg', 'topic'], callbacks = None):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded', 'aborted'])
@@ -281,6 +374,7 @@ class PublishMsgState(smach.State):
                              "<class 'sensor_msgs.msg._PointCloud.PointCloud'>": parse_pointcloud,
                              "<class 'sensor_msgs.msg._PointCloud2.PointCloud2'>": parse_pointcloud2}
 
+        
         self._cbs = []
 
         if callbacks:
@@ -337,6 +431,8 @@ class PublishMsgState(smach.State):
         return msg
 
     def execute(self, userdata):
+
+        
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -347,6 +443,7 @@ class PublishMsgState(smach.State):
                 cb_outcome = cb(self, smach.Remapper(userdata,ik,ok,{}))
             except:
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+
 
         # Parse msg
         if self._action != 'remove_all':
@@ -391,7 +488,6 @@ class PublishMsgState(smach.State):
                     setattr(userdata, output_key, published_msg)
 
         return outcome
-
 
 class ROSBagRecorder(object):
     """
@@ -587,6 +683,20 @@ class ROSBagRecorder(object):
         return 'succeeded'
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class RecordROSBagState(smach.State):
     def __init__(self, name, bag_recorder, action, input_keys=['file', 'topics'], output_keys=[], callbacks = None):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded', 'aborted'])
@@ -600,6 +710,7 @@ class RecordROSBagState(smach.State):
         # Save the action
         self._action = action
 
+        
         self._cbs = []
 
         if callbacks:
@@ -625,7 +736,10 @@ class RecordROSBagState(smach.State):
                 self.register_output_keys(self._cb_output_keys[-1])
                 self.register_outcomes(self._cb_outcomes[-1])
 
+
     def execute(self, userdata):
+
+        
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -636,6 +750,7 @@ class RecordROSBagState(smach.State):
                 cb_outcome = cb(self, smach.Remapper(userdata,ik,ok,{}))
             except:
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+
 
         # Get filename from userdata
         try:
@@ -664,7 +779,6 @@ class RecordROSBagState(smach.State):
 
         return outcome
 
-
 class SleepState(smach.State):
     def __init__(self, time, input_keys = [], output_keys = [], callbacks = [], outcomes=['succeeded']):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
@@ -678,39 +792,127 @@ class SleepState(smach.State):
         return 'succeeded'
 
 
+
+
+
+
+
+
+
 def main():
     rospy.init_node('sm')
 
     tf_msg_pub_observer = MsgPublisherObserver(sub_topic='tf')
+
     bag_recorder = ROSBagRecorder()
+
+
 
     sm = smach.StateMachine(outcomes=['succeeded', 'aborted'])
 
+
     sm.userdata.file = ''
+
     sm.userdata.topics = ''
+
     sm.userdata.topic = ''
+
+
+
+
     sm.userdata.point = Point()
-    sm.userdata.topic = 'smacha/rosbag_recording_1_point'
-    sm.userdata.file = '/tmp/rosbag_recording_1.bag'
-    sm.userdata.topics = ['smacha/rosbag_recording_1_point']
+
+    sm.userdata.point_topic = 'smacha/rosbag_recording_3_point'
+
+    sm.userdata.pose = Pose()
+
+    sm.userdata.pose_topic = 'smacha/rosbag_recording_3_pose'
+
+    sm.userdata.pointcloud = PointCloud()
+
+    sm.userdata.pointcloud_topic = 'smacha/rosbag_recording_3_pointcloud'
+
+    sm.userdata.pointcloud2 = PointCloud2()
+
+    sm.userdata.pointcloud2_topic = 'smacha/rosbag_recording_3_pointcloud2'
+
+    sm.userdata.posearray = PoseArray()
+
+    sm.userdata.posearray_topic = 'smacha/rosbag_recording_3_posearray'
+
+    sm.userdata.file_1 = '/tmp/rosbag_recording_3_bag_1.bag'
+
+    sm.userdata.topics_1 = ['smacha/rosbag_recording_3_point', 'smacha/rosbag_recording_3_pose']
+
+    sm.userdata.file_2 = '/tmp/rosbag_recording_3_bag_2.bag'
+
+    sm.userdata.topics_2 = ['smacha/rosbag_recording_3_pose', 'smacha/rosbag_recording_3_pointcloud']
+
+    sm.userdata.file_3 = '/tmp/rosbag_recording_3_bag_3.bag'
+
+    sm.userdata.topics_3 = ['smacha/rosbag_recording_3_pointcloud2', 'smacha/rosbag_recording_3_posearray']
 
     with sm:
-        smach.StateMachine.add('PUBLISH_MSG',
-                                       PublishMsgState('PUBLISH_MSG', tf_msg_pub_observer, 'add'),
-                               transitions={'aborted':'aborted',
-                                            'succeeded':'START_RECORDING'},
-                               remapping={'msg':'point',
-                                          'topic':'topic'})
 
-        smach.StateMachine.add('START_RECORDING',
-                                       RecordROSBagState('START_RECORDING', bag_recorder, 'start'),
+
+        smach.StateMachine.add('PUBLISH_MSG_1',
+                                       PublishMsgState('PUBLISH_MSG_1', tf_msg_pub_observer, 'add'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'PUBLISH_MSG_2'},
+                               remapping={'msg':'point',
+                                          'topic':'point_topic'})
+
+        smach.StateMachine.add('PUBLISH_MSG_2',
+                                       PublishMsgState('PUBLISH_MSG_2', tf_msg_pub_observer, 'add'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'PUBLISH_MSG_3'},
+                               remapping={'msg':'pose',
+                                          'topic':'pose_topic'})
+
+        smach.StateMachine.add('PUBLISH_MSG_3',
+                                       PublishMsgState('PUBLISH_MSG_3', tf_msg_pub_observer, 'add'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'PUBLISH_MSG_4'},
+                               remapping={'msg':'pointcloud',
+                                          'topic':'pointcloud_topic'})
+
+        smach.StateMachine.add('PUBLISH_MSG_4',
+                                       PublishMsgState('PUBLISH_MSG_4', tf_msg_pub_observer, 'add'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'PUBLISH_MSG_5'},
+                               remapping={'msg':'pointcloud2',
+                                          'topic':'pointcloud2_topic'})
+
+        smach.StateMachine.add('PUBLISH_MSG_5',
+                                       PublishMsgState('PUBLISH_MSG_5', tf_msg_pub_observer, 'add'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'START_RECORDING_1'},
+                               remapping={'msg':'posearray',
+                                          'topic':'posearray_topic'})
+
+        smach.StateMachine.add('START_RECORDING_1',
+                                       RecordROSBagState('START_RECORDING_1', bag_recorder, 'start'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'START_RECORDING_2'},
+                               remapping={'file':'file_1',
+                                          'topics':'topics_1'})
+
+        smach.StateMachine.add('START_RECORDING_2',
+                                       RecordROSBagState('START_RECORDING_2', bag_recorder, 'start'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'START_RECORDING_3'},
+                               remapping={'file':'file_2',
+                                          'topics':'topics_2'})
+
+        smach.StateMachine.add('START_RECORDING_3',
+                                       RecordROSBagState('START_RECORDING_3', bag_recorder, 'start'),
                                transitions={'aborted':'aborted',
                                             'succeeded':'WAIT'},
-                               remapping={'file':'file',
-                                          'topics':'topics'})
+                               remapping={'file':'file_3',
+                                          'topics':'topics_3'})
 
         smach.StateMachine.add('WAIT',
-                                       SleepState(1),
+                                       SleepState(10),
                                transitions={'succeeded':'STOP_RECORDING'})
 
         smach.StateMachine.add('STOP_RECORDING',
@@ -723,7 +925,25 @@ def main():
                                transitions={'aborted':'aborted',
                                             'succeeded':'succeeded'})
 
+
+
+        
+
+
+
+
+
+    
+
     outcome = sm.execute()
+
+
+
+
+
+    
+
+
 
 if __name__ == '__main__':
     main()
