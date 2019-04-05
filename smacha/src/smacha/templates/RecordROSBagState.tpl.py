@@ -2,20 +2,20 @@
 
 {% extends "State.tpl.py" %}
 
-{% include "ROSBagRecorderObserver.tpl.py" %}
+{% include "ROSBagRecorder.tpl.py" %}
 
 {% block class_defs %}
 {{ super() }}
 {% if 'class_RecordROSBagState' not in defined_headers %}
 class RecordROSBagState(smach.State):
-    def __init__(self, name, bag_rec_observer, action, input_keys=['file', 'topics'], output_keys=[], callbacks = None):
+    def __init__(self, name, bag_recorder, action, input_keys=['file', 'topics'], output_keys=[], callbacks = None):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded', 'aborted'])
 
         # Save the state name
         self._name = name
 
-        # Save the ROSBagRecorderObserver object reference
-        self._bag_rec_observer= bag_rec_observer
+        # Save the ROSBagRecorder object reference
+        self._bag_recorder= bag_recorder
 
         # Save the action
         self._action = action
@@ -45,11 +45,11 @@ class RecordROSBagState(smach.State):
         # Start or stop recording
         outcome = 'aborted'
         if self._action == 'start' or self._action == 'record':
-            outcome = self._bag_rec_observer.start(bag_file, topics)
+            outcome = self._bag_recorder.start(bag_file, topics)
         elif self._action == 'stop':
-            outcome = self._bag_rec_observer.stop(bag_file)
+            outcome = self._bag_recorder.stop(bag_file)
         elif self._action == 'stop_all':
-            outcome = self._bag_rec_observer.stop_all()
+            outcome = self._bag_recorder.stop_all()
 
         return outcome
 {% do defined_headers.append('class_RecordROSBagState') %}{% endif %}
@@ -57,14 +57,30 @@ class RecordROSBagState(smach.State):
 
 {% block main_def %}
 {{ super() }}
-{% if 'bag_rec_observer' not in defined_headers %}
-bag_rec_observer = ROSBagRecorderObserver()
-{% do defined_headers.append('bag_rec_observer') %}{% endif %}
+{% if 'bag_recorder' not in defined_headers %}
+bag_recorder = ROSBagRecorder()
+{% do defined_headers.append('bag_recorder') %}{% endif %}
 {% endblock main_def %}
+
+{% block header %}
+{{ super() }}
+{#
+ # By using this bit of trickery, we ensure that the mandatory userdata variables
+ # 'file' and 'topics' get defined as empty strings before any other userdata
+ # variables are defined (these are rendered via the 'header_userdata' block
+ # usually, which is rendered after the 'header' block). This allows for the
+ # specification of 'file' and 'topics' to be omitted in the SMACHA script state
+ # definitions when the 'action' variable is set to 'stop_all', for example.
+ #}
+{% if mandatory_userdata is not defined %}{% set mandatory_userdata = dict() %}{% endif %}
+{% if action == 'stop_all' and 'file' not in mandatory_userdata.keys() %}{% set _dummy = mandatory_userdata.update({'file':''}) %}{% endif %}
+{% if (action == 'stop_all' or action == 'stop') and 'topics' not in mandatory_userdata.keys() %}{% set _dummy = mandatory_userdata.update({'topics':''}) %}{% endif %}
+{% if mandatory_userdata is defined %}{{ render_userdata(parent_sm_name, mandatory_userdata) }}{% endif %}
+{% endblock header %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
-        {{ '' | indent(23, true) }}{{ class_name }}('{{ name }}', bag_rec_observer, '{{ action }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
+        {{ '' | indent(23, true) }}{{ class_name }}('{{ name }}', bag_recorder, '{{ action }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
 {{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}
