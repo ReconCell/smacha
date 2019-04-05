@@ -69,11 +69,17 @@ def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main
 {% block body %}
     {{ sm_name }} = smach.StateMachine({{ render_outcomes(outcomes) }})
 
-    {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) | indent(4) }}{% endif %}
+    {# Container header insertion variable indexed by container state name #}
     {% if name in header %}{{ header[name] | indent(4, true) }}{% endif %}
+
+    {# Render container userdata #}
+    {% if userdata is defined %}{{ render_userdata(name | lower(), userdata) | indent(4) }}{% endif %}
+    {# Render state userdata #}
+    {% if name in header_userdata %}{{ header_userdata[name] | indent(4, true) }}{% endif %}
 
     with {{ sm_name }}:
 
+        {# Container body insertion variable #}
         {{ body | indent(8) }}
 {% endblock body %}
 

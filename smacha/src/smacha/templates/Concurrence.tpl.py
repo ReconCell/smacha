@@ -31,11 +31,17 @@ outcomes: []
 {{ render_input_keys(input_keys, indent=35) }}{% endif %}{% if output_keys is defined %},
 {{ render_output_keys(output_keys) }}{% endif %})
 
-{% if userdata is defined %}{{ render_userdata(name | lower(), userdata) }}{% endif %}
+{# Container header insertion variable indexed by container state name #}
 {% if name in header %}{{ header[name] }}{% endif %}
+
+{# Render container userdata #}
+{% if userdata is defined %}{{ render_userdata(name | lower(), userdata) }}{% endif %}
+{# Render state userdat #}
+{% if name in header_userdata %}{{ header_userdata[name] | indent(4, true) }}{% endif %}
 
 with {{ sm_name }}:
 
+    {# Container body insertion variable #}
     {{ body | indent(4) }}
 
 smach.{{ parent_type }}.add('{{ name }}', {{ sm_name }}{% if transitions is defined and parent_type != 'Concurrence' %},

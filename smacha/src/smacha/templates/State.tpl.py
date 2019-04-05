@@ -40,8 +40,11 @@ output_keys: []
 {% endblock main_def %}
 
 {% block header %}
-{% if userdata is defined %}{{ render_userdata(parent_sm_name, userdata) }}{% endif %}
 {% endblock header %}
+
+{% block header_userdata %}
+{% if userdata is defined %}{{ render_userdata(parent_sm_name, userdata) }}{% endif %}
+{% endblock header_userdata %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',

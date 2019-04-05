@@ -23,16 +23,16 @@ class Generator():
                            ['userdata', 'remapping', 'transitions'],
                        buffer_names =
                            ['base_header', 'imports', 'defs', 'class_defs', 'cb_defs', 'main_def',
-                            'header', 'body', 'footer', 'execute', 'base_footer', 'main'],
+                            'header', 'header_userdata', 'body', 'footer', 'execute', 'base_footer', 'main'],
                        buffer_types =
                            ['list', 'list', 'list', 'list', 'list', 'list',
-                            'dict', 'list', 'list', 'list', 'list', 'list'],
+                            'dict', 'dict', 'list', 'list', 'list', 'list', 'list'],
                        container_insertion_order = 
                            ['prepend', 'prepend', 'prepend', 'prepend', 'prepend', 'prepend',
-                            'prepend', 'append', 'append', 'append', 'append', 'append'],
+                            'prepend', 'prepend', 'append', 'append', 'append', 'append', 'append'],
                        buffer_insertion_order =
                            ['append', 'append', 'append', 'append', 'append', 'append',
-                            'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
+                            'append', 'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
                        local_var_lists = ['local_vars']):
         # TODO: Refactor this parameter mess!
         """Constructor.

@@ -59,9 +59,9 @@ class Foo(smach.State):
 {% endif %}
 {% endblock cb_defs %}
 
-{% block header %}
+{% block header_userdata %}
 {% if userdata is defined %}{{ render_userdata(parent_sm_name, userdata) }}{% endif %}
-{% endblock header %}
+{% endblock header_userdata %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}', Foo('{{ name }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %}, 
