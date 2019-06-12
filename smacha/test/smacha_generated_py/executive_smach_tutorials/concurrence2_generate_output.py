@@ -44,10 +44,14 @@ class Bar(smach.State):
     def __init__(self):
         smach.State.__init__(self, 
                              outcomes=['outcome1'])
-        
+
     def execute(self, userdata):
         rospy.loginfo('Executing state BAR') 
         return 'outcome1'
+
+
+
+
 
 
 
@@ -58,7 +62,7 @@ def main():
 
     
 
-   
+
 
     sm_top = smach.StateMachine(outcomes=['outcome6'])
 
@@ -69,21 +73,22 @@ def main():
 
         smach.StateMachine.add('BAS', Bas(),
                                transitions={'outcome3':'CON'})
-        
+
         sm_con = smach.Concurrence(outcomes=['outcome4', 'outcome5'],
                                            default_outcome='outcome4',
                                            outcome_map={'outcome5': { 'BAR': 'outcome1', 'FOO': 'outcome2'}})
-        
-        
-        
-        
+
+
+
+
         with sm_con:
-        
+
             smach.Concurrence.add('FOO', Foo())
-            
+
             smach.Concurrence.add('BAR', Bar())
-            
-        
+
+
+
         smach.StateMachine.add('CON', sm_con,
                                transitions={'outcome4':'CON',
                                             'outcome5':'outcome6'})
@@ -99,7 +104,7 @@ def main():
     
 
     outcome = sm_top.execute()
-    
+
 
 
 

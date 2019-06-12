@@ -306,11 +306,14 @@ if __name__ == '__main__':
                 print(bcolors.HEADER + bcolors.BOLD + 'Outcomes:' + bcolors.ENDC)
             if isinstance(parsed_meta_block['outcomes'], list):
                 for var in parsed_meta_block['outcomes']:
-                    print_tabs(1)
-                    if args.no_ansi:
-                        print('{}'.format(var))
+                    if isinstance(var, dict):
+                        parse_var(var)
                     else:
-                        print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(var) + bcolors.ENDC)
+                        print_tabs(1)
+                        if args.no_ansi:
+                            print('{}'.format(var))
+                        else:
+                            print(bcolors.OKBLUE + bcolors.BOLD + '{}'.format(var) + bcolors.ENDC)
             else:
                 print_tabs(1)
                 if args.no_ansi:

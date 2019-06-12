@@ -1,8 +1,7 @@
 --- # SMACHA random outcomes example
 name: sm
 template: Base
-manifest: smacha
-node_name: smacha_random_outcomes_test
+ode_name: smacha_random_outcomes_test
 outcomes: [final_outcome]
 states:
   - RANDOMIZE:

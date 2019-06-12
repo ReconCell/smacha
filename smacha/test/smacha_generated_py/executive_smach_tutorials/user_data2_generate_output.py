@@ -37,11 +37,15 @@ class Bar(smach.State):
         smach.State.__init__(self, 
                              outcomes=['outcome1'],
                              input_keys=['bar_counter_in'])
-        
+
     def execute(self, userdata):
         rospy.loginfo('Executing state BAR')
         rospy.loginfo('Counter = %f'%userdata.bar_counter_in) 
         return 'outcome1'
+
+
+
+
 
 
 
@@ -52,14 +56,15 @@ def main():
 
     
 
-   
+
 
     sm = smach.StateMachine(outcomes=['outcome4'])
 
 
-    
+
     sm.userdata.sm_counter = 0
-    
+
+
 
 
     with sm:
@@ -69,7 +74,7 @@ def main():
                                             'outcome2':'outcome4'},
                                remapping={'foo_counter_in':'sm_counter',
                                           'foo_counter_out':'sm_counter'})
-        
+
         smach.StateMachine.add('BAR', Bar(), 
                                transitions={'outcome1':'FOO'},
                                remapping={'bar_counter_in':'sm_counter'})
@@ -85,7 +90,7 @@ def main():
     
 
     outcome = sm.execute()
-    
+
 
 
 

@@ -5,27 +5,44 @@ language: Python
 framework: SMACH
 type: State
 tags: [core]
-includes:
+includes: []
+extends:
   - State
-extends: []
-variables: []
+variables:
+- input_keys:
+    description:
+      The names of the userdata input keys to be printed.
+    type: list of str
+- - output_keys:
+      description:
+        The names of the userdata output keys corresponding to each
+        optionally specified callback function.
+      type: list of str
+- - callbacks:
+      description:
+        Either callback function names or backtick-wrapped lambda functions
+        for possible modifications to the printing procedure.
+      type: dict of str
+- - outcomes:
+      description: The possible outcomes.
+      type: list of str
 input_keys: []
 output_keys: []
 outcomes:
 - succeeded
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import render_input_keys, render_transitions, render_remapping %}
+{% from "Utils.tpl.py" import import_module %}
 
-{% include "State.tpl.py" %}
+{% extends "State.tpl.py" %}
 
 {% block imports %}
+{{ super() }}
+{{ import_module(defined_headers, 'rospy') }}
 {% endblock imports %}
 
-{% block defs %}
-{% endblock defs %}
-
 {% block class_defs %}
+{{ super() }}
 {% if 'class_PrintUserdataState' not in defined_headers %}
 class PrintUserdataState(smach.State):
     def __init__(self, input_keys = [], output_keys = [], callbacks = [], outcomes=['succeeded']):
@@ -40,13 +57,3 @@ class PrintUserdataState(smach.State):
         return 'succeeded'
 {% do defined_headers.append('class_PrintUserdataState') %}{% endif %}
 {% endblock class_defs %}
-
-{% block header %}
-{% endblock header %}
-
-{% block body %}
-smach.{{ parent_type }}.add('{{ name }}',
-        {{ '' | indent(23, true) }}PrintUserdataState({% if input_keys is defined %}{{ render_input_keys(input_keys, indent=0) }}{% endif %}){% if transitions is defined %},
-{{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
-{{ render_remapping(remapping) }}{% endif %})
-{% endblock body %}

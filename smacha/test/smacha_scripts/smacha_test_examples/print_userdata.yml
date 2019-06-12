@@ -1,8 +1,6 @@
 --- # SMACHA print userdata example
 name: sm
 template: Base
-manifest: smacha
-node_name: smacha_print_userdata_test
 outcomes: [final_outcome]
 userdata: {foo: 'Hello World!'}
 states:

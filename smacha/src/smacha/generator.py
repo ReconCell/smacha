@@ -22,17 +22,17 @@ class Generator():
                        sub_script_persistent_vars =
                            ['userdata', 'remapping', 'transitions'],
                        buffer_names =
-                           ['base_header', 'imports', 'defs', 'class_defs', 'main_def',
-                            'header', 'body', 'footer', 'execute', 'base_footer', 'main'],
+                           ['base_header', 'imports', 'defs', 'class_defs', 'cb_defs', 'main_def',
+                            'header', 'header_userdata', 'body', 'footer', 'execute', 'base_footer', 'main'],
                        buffer_types =
-                           ['list', 'list', 'list', 'list', 'list',
-                            'dict', 'list', 'list', 'list', 'list', 'list'],
+                           ['list', 'list', 'list', 'list', 'list', 'list',
+                            'dict', 'dict', 'list', 'list', 'list', 'list', 'list'],
                        container_insertion_order = 
-                           ['prepend', 'prepend', 'prepend', 'prepend', 'prepend',
-                            'prepend', 'append', 'append', 'append', 'append', 'append'],
+                           ['prepend', 'prepend', 'prepend', 'prepend', 'prepend', 'prepend',
+                            'prepend', 'prepend', 'append', 'append', 'append', 'append', 'append'],
                        buffer_insertion_order =
-                           ['append', 'append', 'append', 'append', 'append',
-                            'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
+                           ['append', 'append', 'append', 'append', 'append', 'append',
+                            'append', 'append', 'append', 'prepend', 'prepend', 'prepend', 'prepend'],
                        local_var_lists = ['local_vars']):
         # TODO: Refactor this parameter mess!
         """Constructor.
@@ -217,8 +217,8 @@ class Generator():
                                   'Processing nested container state \'' + state_name + '\'' + bcolors.ENDC)
 
                         # Create a new dictionary for the state template variables,
-                        # initialized with the state name and uuid.
-                        template_vars = {'name': state_name, 'uuid': uuid.uuid4().hex}
+                        # initialized with the template name, state name and uuid.
+                        template_vars = {'class_name': state_vars['template'], 'name': state_name, 'uuid': uuid.uuid4().hex}
 
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():
@@ -413,8 +413,8 @@ class Generator():
                             print(bcolors.OKBLUE + 'Processing state \'' + state_name + '\'' + bcolors.ENDC)
 
                         # Create a new dictionary for the state template variables,
-                        # initialized with the state name and uuid.
-                        template_vars = {'name': state_name, 'uuid': uuid.uuid4().hex}
+                        # initialized with the template name, state name and uuid.
+                        template_vars = {'class_name': state_vars['template'], 'name': state_name, 'uuid': uuid.uuid4().hex}
 
                         # Add the other state variables to the template variables dictionary
                         for state_var, state_var_val in state_vars.items():

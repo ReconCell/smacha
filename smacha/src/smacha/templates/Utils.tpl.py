@@ -57,20 +57,22 @@ output_keys: []
 {% macro render_response_slots(response_slots, indent=51) %}{{ 'response_slots = ' | indent(indent, true) }}[{% for response_slot in response_slots %}'{{ response_slot }}'{% if not loop.last %}, {% endif %}{% endfor %}]{% endmacro %}
 
 #
-# Macro for rendering 'callbacks' lambda callback definitions.
+# Macro for rendering global 'callbacks' lambda callback definitions.
 #
-{% macro render_def_lambda_callbacks(defined_headers, state_name, state_uuid, input_keys, callbacks) %}
+{% macro render_def_lambda_callbacks(defined_headers, class_name, state_name, state_uuid, input_keys, outcomes, callbacks) %}
 {% for cb_output_key, cb in callbacks.iteritems() %}
 {% if cb is expression %}
 {% set cb_name = cb_output_key|lower + '_' + state_name|lower + '_' + state_uuid + '_lambda_cb' %}
 {% if cb_name not in defined_headers %}
 @smach.cb_interface(input_keys=[{% for input_key in input_keys %}'{{ input_key }}'{% if not loop.last %}, {% endif %}{% endfor %}], 
                     output_keys=['{{ cb_output_key }}'],
-                    outcomes=['succeeded'])
-def {{ cb_name }}(userdata):
+                    outcomes=[{% for outcome in outcomes %}'{{ outcome }}'{% if not loop.last %}, {% endif %}{% endfor %}])
+def {{ cb_name }}(self, userdata):
     lambda_cb = {{ cb | exptostr }}
     userdata.{{ cb_output_key }} = lambda_cb(userdata)
     return 'succeeded'
+
+{{ class_name }}.{{ cb_name }} = {{ cb_name }}
 {% do defined_headers.append(cb_name) %}{% endif %}
 {% endif %}
 {% endfor %}
@@ -83,9 +85,13 @@ def {{ cb_name }}(userdata):
         self._cbs = []
 
         if callbacks:
-          for cb in sorted(callbacks):
-              if cb in globals():
-                  self._cbs.append(globals()[cb])
+            for cb in sorted(callbacks):
+                if cb in globals():
+                    self._cbs.append(globals()[cb])
+                elif cb in locals():
+                    self._cbs.append(locals()[cb])
+                elif cb in dir(self):
+                    self._cbs.append(getattr(self, cb))
 
         self._cb_input_keys = []
         self._cb_output_keys = []
@@ -112,7 +118,10 @@ def {{ cb_name }}(userdata):
                                 self._cb_output_keys):
 
             # Call callback with limited userdata
-            cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
+            try:
+                cb_outcome = cb(self, smach.Remapper(userdata,ik,ok,{}))
+            except:
+                cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 {% endmacro %}
 
 #
@@ -142,35 +151,19 @@ def {{ cb_name }}(userdata):
 #
 # Macro for importing a module.
 #
-{% macro import_module(defined_headers, module) %}
-{% if 'import_' + module not in defined_headers %}
-import {{ module }}
-{% do defined_headers.append('import_' + module) %}
-{% endif %}{% endmacro %}
+{% macro import_module(defined_headers, module) %}{% if 'import_' + module not in defined_headers %}import {{ module }}{% do defined_headers.append('import_' + module) %}{% endif %}{% endmacro %}
 
 #
 # Macro for importing a module and renaming it as something else.
 #
-{% macro import_module_as(defined_headers, module, new_name) %}
-{% if 'import_' + module + '_as_' + new_name not in defined_headers %}
-import {{ module }} as {{ new_name }}
-{% do defined_headers.append('import_' + module + '_as_' + new_name) %}
-{% endif %}{% endmacro %}
+{% macro import_module_as(defined_headers, module, new_name) %}{% if 'import_' + module + '_as_' + new_name not in defined_headers %}import {{ module }} as {{ new_name }}{% do defined_headers.append('import_' + module + '_as_' + new_name) %}{% endif %}{% endmacro %}
 
 #
 # Macro for importing a name from a module.
 #
-{% macro from_import(defined_headers, module, name) %}
-{% if 'from_' + module + '_import_' + name not in defined_headers %}
-from {{ module }} import {{ name }}
-{% do defined_headers.append('from_' + module + '_import_' + name) %}
-{% endif %}{% endmacro %}
+{% macro from_import(defined_headers, module, name) %}{% if 'from_' + module + '_import_' + name not in defined_headers %}from {{ module }} import {{ name }}{% do defined_headers.append('from_' + module + '_import_' + name) %}{% endif %}{% endmacro %}
 
 #
 # Macro for importing a name from a module and renaming it as something else.
 #
-{% macro from_import_as(defined_headers, module, name, new_name) %}
-{% if 'from_' + module + '_import_' + name + '_as_' + new_name not in defined_headers %}
-from {{ module }} import {{ name }} as {{ new_name }}
-{% do defined_headers.append('from_' + module + '_import_' + name + '_as_' + new_name) %}
-{% endif %}{% endmacro %}
+{% macro from_import_as(defined_headers, module, name, new_name) %}{% if 'from_' + module + '_import_' + name + '_as_' + new_name not in defined_headers %}from {{ module }} import {{ name }} as {{ new_name }}{% do defined_headers.append('from_' + module + '_import_' + name + '_as_' + new_name) %}{% endif %}{% endmacro %}

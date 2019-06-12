@@ -10,7 +10,8 @@ includes:
 extends: []
 variables:
 - service_namespace:
-    description: The ROS topic/namespace of the service, e.g. '/robot_1/gripper_service'.
+    description:
+      The ROS topic/namespace of the service, e.g. '/robot_1/gripper_service'.
     type: str
 - service:
     description: The service type.
@@ -20,48 +21,38 @@ variables:
       type: str
   - request_slots:
       description: Request slots as defined by userdata.
-      type: list
+      type: list of str
   - request_cb:
-      description: A request callback as defined either by a lambda function in the script or in an inheriting template.
+      description:
+        A request callback as defined either by a lambda function in the script
+        or in an inheriting template.
       type: [function, str]
 - - response_slots:
       description: Response slots as defined by userdata.
-      type: list
+      type: list of str
   - response_cb:
-      description: A response callback as defined either by a lambda function in the script or in an inheriting template.
+      description:
+        A response callback as defined either by a lambda function in the
+        script or in an inheriting template.
       type: [function, str]
 - - input_keys:
-      description: The names of the userdata input keys needed for the request callback.
-      type: list
+      description:
+        The names of the userdata input keys needed for the request callback.
+      type: list of str
 - - output_keys:
-      description: The names of the userdata output keys needed for the response callback.
-      type: list
+      description:
+        The names of the userdata output keys needed for the response callback.
+      type: list of str
 - - userdata:
-      description: The definitions for the userdata keys named in the input_keys and output_keys variables.
-      type: dict
+      description:
+        The definitions for the userdata keys named in the input_keys and
+        output_keys variables.
+      type: dict of str
 {% endblock meta %}
 
 {% from "Utils.tpl.py" import render_request_slots, render_input_keys, render_response_slots, render_output_keys, render_transitions, render_remapping %}
 
-{% include "State.tpl.py" %}
-
-{% block base_header %}
-{% endblock base_header %}
-
-{% block imports %}
-{% endblock imports %}
-
-{% block defs %}
-{% endblock defs %}
-
-{% block class_defs %}
-{% endblock class_defs %}
-
-{% block header %}
-{% endblock header %}
-
-{% block main_def %}
-{% endblock main_def %}
+{% extends "State.tpl.py" %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
@@ -76,18 +67,3 @@ smach.{{ parent_type }}.add('{{ name }}',
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
 {{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}
-
-{% block footer %}
-{% endblock footer %}
-
-{% block execute %}
-{% endblock execute %}
-
-{% block spin %}
-{% endblock spin %}
-
-{% block base_footer %}
-{% endblock base_footer %}
-
-{% block main %}
-{% endblock main %}

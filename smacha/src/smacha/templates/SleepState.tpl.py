@@ -1,6 +1,8 @@
 {% block meta %}
 name: SleepState
-description: SMACH state that pauses state machine execution for a specified length of time.
+description:
+  SMACH state that pauses state machine execution for a specified length of
+  time.
 language: Python
 framework: SMACH
 type: State
@@ -10,25 +12,25 @@ includes:
 extends: []
 variables:
 - time:
-    description: The length of time to sleep for in milliseconds.
-    type: int
+    description: The length of time to sleep for in seconds.
+    type: float
 input_keys: []
 output_keys: []
 outcomes:
 - succeeded
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import render_transitions %}
+{% from "Utils.tpl.py" import import_module, render_transitions %}
 
-{% include "State.tpl.py" %}
+{% extends "State.tpl.py" %}
 
 {% block imports %}
+{{ super() }}
+{{ import_module(defined_headers, 'rospy') }}
 {% endblock imports %}
 
-{% block defs %}
-{% endblock defs %}
-
 {% block class_defs %}
+{{ super() }}
 {% if 'class_SleepState' not in defined_headers %}
 class SleepState(smach.State):
     def __init__(self, time, input_keys = [], output_keys = [], callbacks = [], outcomes=['succeeded']):
@@ -43,9 +45,6 @@ class SleepState(smach.State):
         return 'succeeded'
 {% do defined_headers.append('class_SleepState') %}{% endif %}
 {% endblock class_defs %}
-
-{% block header %}
-{% endblock header %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',

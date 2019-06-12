@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import roslib; roslib.load_manifest('smacha')
+import roslib
 import rospy
 import smach
 import smach_ros
@@ -22,11 +22,11 @@ class Foo(smach.State):
 
 
 def main():
-    rospy.init_node('smacha_nesting_params_test')
+    rospy.init_node('sm')
 
-    sm_top = smach.StateMachine(outcomes=['final_outcome'])
+    sm = smach.StateMachine(outcomes=['final_outcome'])
 
-    with sm_top:
+    with sm:
 
         sm_sub = smach.StateMachine(outcomes=['outcome_c'])
 
@@ -42,7 +42,7 @@ def main():
         smach.StateMachine.add('SUB', sm_sub,
                                transitions={'outcome_c':'final_outcome'})
 
-    outcome = sm_top.execute()
+    outcome = sm.execute()
 
 
 if __name__ == '__main__':
