@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-
-
-
 import roslib
 import rospy
 import smach
@@ -10,69 +7,22 @@ import smach_ros
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Point32
 from geometry_msgs.msg import PointStamped
-
-
-
-
-
-
-
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseStamped
-
 from geometry_msgs.msg import Quaternion
-
-
-
-
-
-
-
-
-
 from geometry_msgs.msg import PoseArray
-
-
-
-
-
-
-
-
-
 from sensor_msgs.msg import PointCloud
-
 from sensor_msgs import point_cloud2 as pc2
-
-
-
-
-
-
-
-
 from sensor_msgs.msg import PointCloud2
 from sensor_msgs.point_cloud2 import create_cloud_xyz32
-
-
-
-
-
-
-
-
-import rosgraph
-
-import rosbag
-
-
 import threading
+import rosbag
+import rosgraph
 
 try:
     from queue import Queue
 except ImportError:
     from Queue import Queue
-
 
 
 def parse_pointstamped(point_input):
@@ -107,13 +57,6 @@ def parse_pointstamped(point_input):
         raise ValueError('Point not properly specified (should be Point, PointStamped or [3] list type)!')
 
 
-
-
-
-
-
-
-
 def parse_posestamped(pose_input):
     """
     Parse pose_input into PoseStamped.
@@ -139,13 +82,6 @@ def parse_posestamped(pose_input):
         return pose
     except Exception as e:
         raise ValueError('Pose not properly specified (should be Pose, PoseStamped or [[3],[4]] list)!')
-
-
-
-
-
-
-
 
 
 def parse_posearray(posearray_input):
@@ -187,13 +123,6 @@ def parse_posearray(posearray_input):
         raise ValueError('Pose array not properly specified (should be PoseArray or list of Pose, PoseStamped or [[3],[4]] list types)!')
 
 
-
-
-
-
-
-
-
 def parse_pointcloud(pointcloud_input):
     """
     Parse pointcloud_input into PointCloud.
@@ -208,13 +137,6 @@ def parse_pointcloud(pointcloud_input):
         return PointCloud(points = map(lambda point: Point32(*point), points))
     except Exception as e:
         raise ValueError('Point cloud not properly specified (should be PointCloud or PointCloud2 type): ' + repr(e))
-
-
-
-
-
-
-
 
 
 def parse_pointcloud2(pointcloud_input):
@@ -234,133 +156,148 @@ def parse_pointcloud2(pointcloud_input):
         raise ValueError('Point cloud not properly specified (should be PointCloud or PointCloud2 type)!')
 
 
-
-class MsgPublisherObserver(object):
+class MsgPublisher(object):
     """
-    Subscribes to a topic and maintains dicts of messages & publishers
-    that are updated with the topic subscription callback.
     """
-    def __init__(self, sub_topic='/tf'):
-        # Get a reference to the ROS master
-        self._master = rosgraph.Master('msg_publisher_observer')
-
-        # Save sub_topic
-        self._sub_topic = sub_topic
-
-        # A subject topic to be subscribed to in order to synchronize message
-        # publication.
-        self._sub = None
-
-        # A dict of messages
-        self._msgs = dict()
-
-        # A dict of message publishers
+    def __init__(self):
+        # A dict of message publishers indexed by topic
         self._pubs = dict()
 
-    def _pub_cb(self, data):
-        # Publish messages
-        if self._msgs:
-            for topic, msg in self._msgs.items():
+        # A dict of messages indexed by topic
+        self._msgs = dict()
+
+        # A dict of callbacks indexed by topic
+        self._callbacks = dict()
+
+        # A dict of message publication rates indexed by topic
+        self._pub_rates = dict()
+
+        # A dict of message publisher threads indexed by topic
+        self._pub_threads = dict()
+
+        # A dict of message publisher stop flags indexed by topic
+        self._stop_flags = dict()
+
+        # Length of timeout (in seconds) for waiting for the threads to finish
+        # publishing before forcibly unpublishing.
+        self._unpublish_timeout = 10.0
+
+    def _run_pub_thread(self, topic):
+        r = rospy.Rate(self._pub_rates[topic])
+        while not self._stop_flags[topic]:
+            # Apply callback to message
+            if self._callbacks[topic]:
                 try:
-                    # Update the timestamp
-                    msg.header.stamp = rospy.Time.now()
+                    self._msgs[topic] = self._callbacks[topic](self._msgs[topic])
                 except Exception as e:
-                    rospy.logwarn('Failed to update timestamp for topic \'{}\': {}'.format(topic, repr(e)))
-                    pass
-
-                try:
-                    # Publish
-                    self._pubs[topic].publish(msg)
-                except Exception as e:
-                    rospy.logwarn('Failed to publish message on topic \'{}\': {}'.format(topic, repr(e)))
-                    rospy.logwarn('self._pubs: {}'.format(self._pubs))
-
-    def add(self, msg, topic, frame_id=None):
-        # Subscribe to the subject topic if this has not already been done
-        if not self._sub:
-            # Try finding the sub_topic in currently published topics and
-            # detecting its message type/class
+                    rospy.logerr('Error when applying callback to message being published on topic {}: {}'.format(topic, repr(e)))
+            # Publish message
             try:
-                topics = {topic_key.strip('/'): topic_val for topic_key, topic_val in self._master.getPublishedTopics('')}
-                if self._sub_topic in list(topics.keys()):
-                    msg_type = topics[self._sub_topic]
-                    msg_class = roslib.message.get_message_class(msg_type)
-                else:
-                    raise ValueError('{} topic is not currently being published!'.format(self._sub_topic))
+                self._pubs[topic].publish(self._msgs[topic])
             except Exception as e:
-                rospy.logerr('Failed to detect message type/class for topic {}: {}'.format(self._sub_topic, repr(e)))
-                return 'aborted'
+                rospy.logerr('Error while publishing to topic {}: {}'.format(topic, repr(e)))
+            r.sleep()
 
-            # Set up the subscriber
-            try:
-                self._sub = rospy.Subscriber(self._sub_topic, msg_class, self._pub_cb)
-            except Exception as e:
-                raise ValueError('Failed to subscribe to TFMessage topic: {}'.format(repr(e)))
+        self._unpublish(topic)
 
-        # Add message with specified frame_id
+    def _unpublish(self, topic):
         try:
-            assert frame_id
-            self._msgs[topic] = msg
-            self._msgs[topic].header.frame_id = frame_id
-        except:
-            # Add message with frame_id unspecified
+            self._pubs[topic].unregister()
+        except Exception as e:
+            rospy.logerr('Failed to unregister publisher of topic {}: {}'.format(topic, repr(e)))
+            raise
+        del self._pubs[topic]
+        del self._msgs[topic]
+        del self._callbacks[topic]
+        del self._pub_rates[topic]
+
+    def start(self, msg, topic, rate, frame_id=None, callback=None):
+        # Set the message publisher stopping flag
+        self._stop_flags[topic] = False
+
+        # Save the message
+        self._msgs[topic] = msg
+
+        # Save the message publication rate
+        self._pub_rates[topic] = rate
+
+        # Use frame_id if specified
+        if frame_id:
             try:
-                self._msgs[topic] = msg
-            except Exception as e:
-                rospy.logwarn('Failed to add message for publication on topic \'{}\': {}'.format(topic, repr(e)))
-                return 'aborted'
+                assert(isinstance(frame_id, str))
+                self._msgs[topic].header.frame_id = frame_id
+            except:
+                rospy.logwarn('Failed to add specified frame_id {} to message for publication on topic {}: {}'.format(frame_id, topic, repr(e)))
+
+        # Use callback if specified
+        if callback:
+            try:
+                assert(callable(callback))
+                self._callbacks[topic] = callback
+            except:
+                rospy.logwarn('Failed to add specified callback {} to publisher of topic {}: {}'.format(callback, topic, repr(e)))
+                self._callbacks[topic] = None
+        else:
+            self._callbacks[topic] = None
 
         # Add publisher
         try:
-            self._pubs[topic] = rospy.Publisher(topic, type(msg))
+            self._pubs[topic] = rospy.Publisher(topic, type(self._msgs[topic]))
         except Exception as e:
-            self._msgs.pop(topic,0)
-            rospy.logwarn('Failed to add publisher for topic \'{}\': {}'.format(topic, repr(e)))
+            del self._pub_rates[topic]
+            self._msgs[topic]
+            rospy.logwarn('Failed to add publisher for topic {}: {}'.format(topic, repr(e)))
             return 'aborted'
+
+        # Spin up the message publication thread
+        self._pub_threads[topic] = threading.Thread(target=self._run_pub_thread, args=[topic])
+        self._pub_threads[topic].start()
+
         return 'succeeded'
 
-    def remove(self, topic):
+    def stop(self, topic):
+        # Signal thread to stop publishing
+        self._stop_flags[topic] = True
+
+        # Wait for the topic to be unpublished
+        t = rospy.get_time()
+        r = rospy.Rate(self._pub_rates[topic])
+        while topic in list(self._pubs.keys()):
+            if rospy.get_time() - t < self._unpublish_timeout:
+                r.sleep()
+            else:
+                break
+        else:
+            return 'succeeded'
+
+        # If the publisher is still running, issue a warning and attempt forced unpublish.
+        rospy.logwarn('Warning: timeout exceeded for stopping publisher thread for topic {}. Attempting forced stop...'.format(topic))
         try:
-            # Remove message + publisher
-            self._msgs.pop(topic, 0)
-            self._pubs.pop(topic, 0)
+            self._unpublish(topic)
         except Exception as e:
-            rospy.logwarn('Failed to remove publisher for topic \'{}\': {}'.format(topic, repr(e)))
+            rospy.logerr('Error during forced stop of publisher of topic {}: {}'.format(topic, repr(e)))
             return 'aborted'
+
         return 'succeeded'
 
-    def remove_all(self):
-        try:
-            self._msgs.clear()
-            self._pubs.clear()
-        except Exception as e:
-            rospy.logwarn('Failed to remove all publishers: {}'.format(repr(e)))
-            return 'aborted'
+    def stop_all(self):
+        # Stop all current publishers
+        for topic in self._pubs.keys():
+            if self.stop(topic) != 'succeeded':
+                return 'aborted'
+
         return 'succeeded'
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class PublishMsgState(smach.State):
-    def __init__(self, name, msg_pub_observer, action, input_keys = ['msg', 'topic'], output_keys = ['msg', 'topic'], callbacks = None):
+    def __init__(self, name, msg_publisher, action, input_keys = ['msg', 'topic', 'rate'], output_keys = ['msg', 'topic'], callbacks = None):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded', 'aborted'])
 
         # Save the state name
         self._name = name
 
         # Save the MsgPublisherObserver object reference
-        self._msg_pub_observer= msg_pub_observer
+        self._msg_publisher = msg_publisher
 
         # Save the action
         self._action = action
@@ -374,7 +311,6 @@ class PublishMsgState(smach.State):
                              "<class 'sensor_msgs.msg._PointCloud.PointCloud'>": parse_pointcloud,
                              "<class 'sensor_msgs.msg._PointCloud2.PointCloud2'>": parse_pointcloud2}
 
-        
         self._cbs = []
 
         if callbacks:
@@ -431,8 +367,6 @@ class PublishMsgState(smach.State):
         return msg
 
     def execute(self, userdata):
-
-        
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -445,8 +379,10 @@ class PublishMsgState(smach.State):
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
 
-        # Parse msg
-        if self._action != 'remove_all':
+        # Start or stop the message publisher
+        outcome = 'aborted'
+        if self._action == 'start':
+            # Parse msg
             try:
                 if 'msg_type' in self._input_keys:
                     published_msg = self._parse_msg(userdata.msg, msg_type=userdata.msg_type)
@@ -456,44 +392,61 @@ class PublishMsgState(smach.State):
                 rospy.logerr('Failed to parse message: '.format(repr(e)))
                 return 'aborted'
 
-        # Get topic if it's specified as an input key
-        if 'topic' in self._input_keys:
-            topic = userdata.topic
-        # Otherwise, construct it from the state name
-        else:
-            topic = 'smacha/' + self._name.lower()
-
-        # Add or remove the message + publisher
-        outcome = 'aborted'
-        if self._action == 'add':
-            if 'frame_id' in self._input_keys:
-                outcome = self._msg_pub_observer.add(published_msg, topic, frame_id=userdata.frame_id)
+            # Get topic if it's specified as an input key
+            if 'topic' in self._input_keys:
+                topic = userdata.topic
+            # Otherwise, construct it from the state name
             else:
-                outcome = self._msg_pub_observer.add(published_msg, topic)
-        elif self._action == 'remove':
-            outcome = self._msg_pub_observer.remove(topic)
-        elif self._action == 'remove_all':
-            outcome = self._msg_pub_observer.remove_all()
+                topic = 'smacha/' + self._name.lower()
+
+            # Get rate if it's specified as an input key
+            if 'rate' in self._input_keys:
+                rate = userdata.rate
+            else:
+                rate = 100.0
+
+            # Get callback if it's specified as an input key
+            if 'callback' in self._input_keys:
+                callback = userdata.callback
+            else:
+                callback = ''
+
+            # Get frame_id if it's specified as an input key
+            if 'frame_id' in self._input_keys:
+                frame_id = userdata.frame_id
+            else:
+                frame_id = ''
+
+            # Start the publisher
+            outcome = self._msg_publisher.start(published_msg, topic, rate, frame_id=frame_id, callback=callback)
+
+        elif self._action == 'stop':
+            outcome = self._msg_publisher.stop(topic)
+
+        elif self._action == 'stop_all':
+            outcome = self._msg_publisher.stop_all()
 
         # Set topic output key if specified
-        if self._action == 'add' and outcome == 'succeeded':
+        if self._action == 'start' and outcome == 'succeeded':
             for output_key in ['topic', 'output_topic', 'topic_output']:
                 if output_key in self._output_keys:
                     setattr(userdata, output_key, topic)
 
         # Set msg output key if specified
-        if self._action == 'add' and outcome == 'succeeded':
+        if self._action == 'start' and outcome == 'succeeded':
             for output_key in ['msg', 'output_msg', 'msg_output']:
                 if output_key in self._output_keys:
                     setattr(userdata, output_key, published_msg)
 
         return outcome
 
-class ROSBagRecorder(object):
-    """
-    Subscribes to topics and maintains a dicts of currently open rosbag
-    recordings & topic subscribers that are updated with the topic subscription
-    callbacks.
+
+class ROSBagAPIThreadRecorder(object):
+    """A rosbag recorder class that uses the rosbag API (application
+    programming interface) as well as the threading library in order to manage
+    multiple recording threads. NOTE: this means that this recorder may have
+    issues with the Python GIL (global interpreter lock) when other threads (e.g.
+    MoveIt! commands) block execution.
     """
     def __init__(self):
         # Get a reference to the ROS master
@@ -503,7 +456,7 @@ class ROSBagRecorder(object):
         self._master_check_threads = dict()
 
         # The rate at which to poll the ROS master for new topics
-        self._master_check_interval = 1.0
+        self._master_check_interval = 0.1
 
         # A dict of rosbags indexed by filenames
         self._bags = dict()
@@ -547,12 +500,14 @@ class ROSBagRecorder(object):
         try:
             while not self._stop_flags[bag_file]:
                 # Get a list of topics currently being published
+                currently_published_topics = []
                 try:
                     currently_published_topics = self._master.getPublishedTopics('')
                 except Exception as e:
-                    self._unsubscribe_bag_topics(bag_file)
-                    self._close_bag(bag_file)
-                    raise ValueError('Failed to get list of currently published topics from ROS master: {}'.format(repr(e)))
+                    # TODO: Allow this warning to be included if a
+                    # debug/verbosity flag is passed to the state.
+                    # rospy.logwarn('Failed to get list of currently published topics from ROS master: {}'.format(repr(e)))
+                    pass
 
                 # Check for new topics
                 for topic, msg_type in currently_published_topics:
@@ -593,7 +548,8 @@ class ROSBagRecorder(object):
 
     def _close_bag(self, bag_file):
         try:
-            self._bags[bag_file].close()
+            with self._bag_locks[bag_file]:
+                self._bags[bag_file].close()
         except Exception as e:
             rospy.logerr('Failed to close rosbag with filename \'{}\': {}'.format(bag_file, repr(e)))
             raise
@@ -618,6 +574,8 @@ class ROSBagRecorder(object):
             rospy.logerr('Error when writing to rosbag file {}: {}'.format(bag_file, repr(e)))
 
     def start(self, bag_file, topics):
+        """Start a rosbag recording.
+        """
         # Open the bag file for writing
         try:
             assert(bag_file not in self._bags.keys())
@@ -644,6 +602,8 @@ class ROSBagRecorder(object):
         return 'succeeded'
 
     def stop(self, bag_file):
+        """Stop a rosbag recording.
+        """
         # Signal threads to stop bag recording
         with self._stop_conditions[bag_file]:
             self._stop_flags[bag_file] = True
@@ -655,7 +615,7 @@ class ROSBagRecorder(object):
         # Wait for the bag to be closed
         t = rospy.get_time()
         r = rospy.Rate(self._bag_close_sleep_rate)
-        while bag_file in list(self._bag_subs.keys()) and bag_file in list(self._bags.keys()):
+        while bag_file in list(self._bags.keys()):
             if rospy.get_time() - t < self._bag_close_timeout:
                 r.sleep()
             else:
@@ -664,7 +624,7 @@ class ROSBagRecorder(object):
             return 'succeeded'
 
         # If the bag is still open, issue a warning and attempt forced closure.
-        rospy.logwarn('Warning: timeout exceeded for stopping writing to rosbag file {}. Attempting forced stop...')
+        rospy.logwarn('Warning: timeout exceeded for stopping writing to rosbag file {}. Attempting forced stop...'.format(bag_file))
         try:
             self._unsubscribe_bag_topics(bag_file)
             self._close_bag(bag_file)
@@ -675,26 +635,14 @@ class ROSBagRecorder(object):
         return 'succeeded'
 
     def stop_all(self):
+        """Stop all rosbag recordings.
+        """
         # Stop all current recordings
-        for bag_file in self._bags.keys():
+        for bag_file in list(self._bags.keys()):
             if self.stop(bag_file) != 'succeeded':
                 return 'aborted'
 
         return 'succeeded'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class RecordROSBagState(smach.State):
@@ -710,7 +658,6 @@ class RecordROSBagState(smach.State):
         # Save the action
         self._action = action
 
-        
         self._cbs = []
 
         if callbacks:
@@ -738,8 +685,6 @@ class RecordROSBagState(smach.State):
 
 
     def execute(self, userdata):
-
-        
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -779,6 +724,7 @@ class RecordROSBagState(smach.State):
 
         return outcome
 
+
 class SleepState(smach.State):
     def __init__(self, time, input_keys = [], output_keys = [], callbacks = [], outcomes=['succeeded']):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
@@ -792,66 +738,86 @@ class SleepState(smach.State):
         return 'succeeded'
 
 
-
-
-
-
-
-
-
 def main():
     rospy.init_node('sm')
 
-    tf_msg_pub_observer = MsgPublisherObserver(sub_topic='tf')
+    msg_publisher = MsgPublisher()
 
-    bag_recorder = ROSBagRecorder()
-
-
+    bag_recorder = ROSBagAPIThreadRecorder()
 
     sm = smach.StateMachine(outcomes=['succeeded', 'aborted'])
 
-
+    sm.userdata.rate = 100.0
+    sm.userdata.rate = 100.0
+    sm.userdata.rate = 100.0
+    sm.userdata.rate = 100.0
+    sm.userdata.rate = 100.0
     sm.userdata.file = ''
-
     sm.userdata.topics = ''
-
+    sm.userdata.rate = 100.0
     sm.userdata.topic = ''
-
-
-
-
     sm.userdata.point = Point()
-
-    sm.userdata.point_topic = 'smacha/rosbag_recording_1_point'
-
+    sm.userdata.point_topic = 'smacha/rosbag_api_recording_3_point'
+    sm.userdata.rate_1 = 10.0
     sm.userdata.pose = Pose()
-
-    sm.userdata.pose_topic = 'smacha/rosbag_recording_1_pose'
-
-    sm.userdata.file_1 = '/tmp/rosbag_recording_2_bag_1.bag'
-
-    sm.userdata.topics_1 = ['smacha/rosbag_recording_1_point']
-
-    sm.userdata.file_2 = '/tmp/rosbag_recording_2_bag_2.bag'
-
-    sm.userdata.topics_2 = ['smacha/rosbag_recording_1_pose']
+    sm.userdata.pose_topic = 'smacha/rosbag_api_recording_3_pose'
+    sm.userdata.rate_2 = 20.0
+    sm.userdata.pointcloud = PointCloud()
+    sm.userdata.pointcloud_topic = 'smacha/rosbag_api_recording_3_pointcloud'
+    sm.userdata.rate_3 = 30.0
+    sm.userdata.pointcloud2 = PointCloud2()
+    sm.userdata.pointcloud2_topic = 'smacha/rosbag_api_recording_3_pointcloud2'
+    sm.userdata.rate_4 = 40.0
+    sm.userdata.posearray = PoseArray()
+    sm.userdata.posearray_topic = 'smacha/rosbag_api_recording_3_posearray'
+    sm.userdata.rate_5 = 50.0
+    sm.userdata.file_1 = '/tmp/rosbag_api_recording_3_bag_1.bag'
+    sm.userdata.topics_1 = ['smacha/rosbag_api_recording_3_point', 'smacha/rosbag_api_recording_3_pose']
+    sm.userdata.file_2 = '/tmp/rosbag_api_recording_3_bag_2.bag'
+    sm.userdata.topics_2 = ['smacha/rosbag_api_recording_3_pose', 'smacha/rosbag_api_recording_3_pointcloud']
+    sm.userdata.file_3 = '/tmp/rosbag_api_recording_3_bag_3.bag'
+    sm.userdata.topics_3 = ['smacha/rosbag_api_recording_3_pointcloud2', 'smacha/rosbag_api_recording_3_posearray']
 
     with sm:
-
-
         smach.StateMachine.add('PUBLISH_MSG_1',
-                                       PublishMsgState('PUBLISH_MSG_1', tf_msg_pub_observer, 'add'),
+                                       PublishMsgState('PUBLISH_MSG_1', msg_publisher, 'start'),
                                transitions={'aborted':'aborted',
                                             'succeeded':'PUBLISH_MSG_2'},
                                remapping={'msg':'point',
+                                          'rate':'rate_1',
                                           'topic':'point_topic'})
 
         smach.StateMachine.add('PUBLISH_MSG_2',
-                                       PublishMsgState('PUBLISH_MSG_2', tf_msg_pub_observer, 'add'),
+                                       PublishMsgState('PUBLISH_MSG_2', msg_publisher, 'start'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'PUBLISH_MSG_3'},
+                               remapping={'msg':'pose',
+                                          'rate':'rate_2',
+                                          'topic':'pose_topic'})
+
+        smach.StateMachine.add('PUBLISH_MSG_3',
+                                       PublishMsgState('PUBLISH_MSG_3', msg_publisher, 'start'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'PUBLISH_MSG_4'},
+                               remapping={'msg':'pointcloud',
+                                          'rate':'rate_3',
+                                          'topic':'pointcloud_topic'})
+
+        smach.StateMachine.add('PUBLISH_MSG_4',
+                                       PublishMsgState('PUBLISH_MSG_4', msg_publisher, 'start'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'PUBLISH_MSG_5'},
+                               remapping={'msg':'pointcloud2',
+                                          'rate':'rate_4',
+                                          'topic':'pointcloud2_topic'})
+
+        smach.StateMachine.add('PUBLISH_MSG_5',
+                                       PublishMsgState('PUBLISH_MSG_5', msg_publisher, 'start'),
                                transitions={'aborted':'aborted',
                                             'succeeded':'START_RECORDING_1'},
-                               remapping={'msg':'pose',
-                                          'topic':'pose_topic'})
+                               remapping={'msg':'posearray',
+                                          'rate':'rate_5',
+                                          'topic':'posearray_topic'})
 
         smach.StateMachine.add('START_RECORDING_1',
                                        RecordROSBagState('START_RECORDING_1', bag_recorder, 'start'),
@@ -863,12 +829,19 @@ def main():
         smach.StateMachine.add('START_RECORDING_2',
                                        RecordROSBagState('START_RECORDING_2', bag_recorder, 'start'),
                                transitions={'aborted':'aborted',
-                                            'succeeded':'WAIT'},
+                                            'succeeded':'START_RECORDING_3'},
                                remapping={'file':'file_2',
                                           'topics':'topics_2'})
 
+        smach.StateMachine.add('START_RECORDING_3',
+                                       RecordROSBagState('START_RECORDING_3', bag_recorder, 'start'),
+                               transitions={'aborted':'aborted',
+                                            'succeeded':'WAIT'},
+                               remapping={'file':'file_3',
+                                          'topics':'topics_3'})
+
         smach.StateMachine.add('WAIT',
-                                       SleepState(10),
+                                       SleepState(5),
                                transitions={'succeeded':'STOP_RECORDING'})
 
         smach.StateMachine.add('STOP_RECORDING',
@@ -877,28 +850,11 @@ def main():
                                             'succeeded':'UNPUBLISH_MSG'})
 
         smach.StateMachine.add('UNPUBLISH_MSG',
-                                       PublishMsgState('UNPUBLISH_MSG', tf_msg_pub_observer, 'remove_all'),
+                                       PublishMsgState('UNPUBLISH_MSG', msg_publisher, 'stop_all'),
                                transitions={'aborted':'aborted',
                                             'succeeded':'succeeded'})
 
-
-
-        
-
-
-
-
-
-    
-
     outcome = sm.execute()
-
-
-
-
-
-    
-
 
 
 if __name__ == '__main__':

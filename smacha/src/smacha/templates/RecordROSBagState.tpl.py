@@ -1,8 +1,32 @@
+{% block meta %}
+name: ROSBagAPIThreadRecorder
+description:
+  SMACH template that can start and stop rosbag recordings using different types
+  of recorder classes, namely ROSBagCLIProcessRecorder or ROSBagAPIThreadRecorder.
+
+language: Python
+framework: SMACH
+type: None
+tags: [core]
+includes: []
+extends: []
+variables: []
+input_keys: []
+output_keys: []
+{% endblock meta %}
+
 {% from "Utils.tpl.py" import import_module, render_init_callbacks, render_execute_callbacks %}
 
 {% extends "State.tpl.py" %}
 
-{% include "ROSBagRecorder.tpl.py" %}
+{% if recorder is not defined %}
+{% set recorder = 'ROSBagCLIProcessRecorder' %}
+{% include "ROSBagCLIProcessRecorder.tpl.py" %}
+{% elif recorder == 'ROSBagAPIThreadRecorder' %}
+{% include "ROSBagAPIThreadRecorder.tpl.py" %}
+{% else %}
+{% include "ROSBagCLIProcessRecorder.tpl.py" %}
+{% endif %}
 
 {% block class_defs %}
 {{ super() }}
@@ -58,7 +82,7 @@ class RecordROSBagState(smach.State):
 {% block main_def %}
 {{ super() }}
 {% if 'bag_recorder' not in defined_headers %}
-bag_recorder = ROSBagRecorder()
+bag_recorder = {{ recorder }}()
 {% do defined_headers.append('bag_recorder') %}{% endif %}
 {% endblock main_def %}
 

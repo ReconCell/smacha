@@ -1,8 +1,12 @@
 {% block meta %}
-name: ROSBagRecorder
+name: ROSBagAPIThreadRecorder
 description:
-  SMACH template that provides a ROSBagRecorder helper class for
-  RecordROSBagState.
+  SMACH template that provides a ROSBagAPIThreadRecorder helper class for
+  RecordROSBagState. It uses the rosbag API (application programming interface)
+  as well as the threading library in order to manage multiple recording
+  threads. NOTE: this means that this recorder may have issues with the Python
+  GIL (global interpreter lock) when other threads (e.g. MoveIt! commands)
+  block execution.
 
   Based in part on code from:
   https://github.com/francisc0garcia/sensor_board/blob/master/src/classes/bags/recorder.py
@@ -35,12 +39,13 @@ except ImportError:
 {% endblock imports %}
 
 {% block class_defs %}
-{% if 'class_ROSBagRecorder' not in defined_headers %}
-class ROSBagRecorder(object):
-    """
-    Subscribes to topics and maintains a dicts of currently open rosbag
-    recordings & topic subscribers that are updated with the topic subscription
-    callbacks.
+{% if 'class_ROSBagAPIThreadRecorder' not in defined_headers %}
+class ROSBagAPIThreadRecorder(object):
+    """A rosbag recorder class that uses the rosbag API (application
+    programming interface) as well as the threading library in order to manage
+    multiple recording threads. NOTE: this means that this recorder may have
+    issues with the Python GIL (global interpreter lock) when other threads (e.g.
+    MoveIt! commands) block execution.
     """
     def __init__(self):
         # Get a reference to the ROS master
@@ -50,7 +55,7 @@ class ROSBagRecorder(object):
         self._master_check_threads = dict()
 
         # The rate at which to poll the ROS master for new topics
-        self._master_check_interval = 1.0
+        self._master_check_interval = 0.1
 
         # A dict of rosbags indexed by filenames
         self._bags = dict()
@@ -94,12 +99,14 @@ class ROSBagRecorder(object):
         try:
             while not self._stop_flags[bag_file]:
                 # Get a list of topics currently being published
+                currently_published_topics = []
                 try:
                     currently_published_topics = self._master.getPublishedTopics('')
                 except Exception as e:
-                    self._unsubscribe_bag_topics(bag_file)
-                    self._close_bag(bag_file)
-                    raise ValueError('Failed to get list of currently published topics from ROS master: {}'.format(repr(e)))
+                    # TODO: Allow this warning to be included if a
+                    # debug/verbosity flag is passed to the state.
+                    # rospy.logwarn('Failed to get list of currently published topics from ROS master: {}'.format(repr(e)))
+                    pass
 
                 # Check for new topics
                 for topic, msg_type in currently_published_topics:
@@ -140,7 +147,8 @@ class ROSBagRecorder(object):
 
     def _close_bag(self, bag_file):
         try:
-            self._bags[bag_file].close()
+            with self._bag_locks[bag_file]:
+                self._bags[bag_file].close()
         except Exception as e:
             rospy.logerr('Failed to close rosbag with filename \'{}\': {}'.format(bag_file, repr(e)))
             raise
@@ -165,6 +173,8 @@ class ROSBagRecorder(object):
             rospy.logerr('Error when writing to rosbag file {}: {}'.format(bag_file, repr(e)))
 
     def start(self, bag_file, topics):
+        """Start a rosbag recording.
+        """
         # Open the bag file for writing
         try:
             assert(bag_file not in self._bags.keys())
@@ -191,6 +201,8 @@ class ROSBagRecorder(object):
         return 'succeeded'
 
     def stop(self, bag_file):
+        """Stop a rosbag recording.
+        """
         # Signal threads to stop bag recording
         with self._stop_conditions[bag_file]:
             self._stop_flags[bag_file] = True
@@ -202,7 +214,7 @@ class ROSBagRecorder(object):
         # Wait for the bag to be closed
         t = rospy.get_time()
         r = rospy.Rate(self._bag_close_sleep_rate)
-        while bag_file in list(self._bag_subs.keys()) and bag_file in list(self._bags.keys()):
+        while bag_file in list(self._bags.keys()):
             if rospy.get_time() - t < self._bag_close_timeout:
                 r.sleep()
             else:
@@ -211,7 +223,7 @@ class ROSBagRecorder(object):
             return 'succeeded'
 
         # If the bag is still open, issue a warning and attempt forced closure.
-        rospy.logwarn('Warning: timeout exceeded for stopping writing to rosbag file {}. Attempting forced stop...')
+        rospy.logwarn('Warning: timeout exceeded for stopping writing to rosbag file {}. Attempting forced stop...'.format(bag_file))
         try:
             self._unsubscribe_bag_topics(bag_file)
             self._close_bag(bag_file)
@@ -222,12 +234,14 @@ class ROSBagRecorder(object):
         return 'succeeded'
 
     def stop_all(self):
+        """Stop all rosbag recordings.
+        """
         # Stop all current recordings
-        for bag_file in self._bags.keys():
+        for bag_file in list(self._bags.keys()):
             if self.stop(bag_file) != 'succeeded':
                 return 'aborted'
 
         return 'succeeded'
 
-{% do defined_headers.append('class_ROSBagRecorder') %}{% endif %}
+{% do defined_headers.append('class_ROSBagAPIThreadRecorder') %}{% endif %}
 {% endblock class_defs %}
