@@ -1,9 +1,11 @@
 {% block meta %}
-name: PublishMsgState
+name: PublishObserverMsgState
 description: >
   SMACH template that publishes a ROS message passed via a userdata input_key
-  to a topic. If the message type is not specified, attempts will be made to
-  infer it from the message data.
+  to a topic by using a message publisher observer object that is set to
+  subscribe to and observe another topic which determines the publication rate.
+  If the message type is not specified, attempts will be made to infer it from
+  the message data.
 language: Python
 framework: SMACH
 type: None
@@ -31,10 +33,10 @@ variables:
       type: dict of str
 - action:
     description: >
-      The action that the state should perform. The options are 'start', 'stop'
-      and 'stop_all', which will start publication of the specified message to
-      the specified topic, stop publication to the specified topic, and stop
-      publication of all currently published topics respectively.
+      The action that the state should perform. The options are 'add', 'remove'
+      and 'remove_all', which will add the specified message publication topic,
+      remove the specified message publication topic, and remove all currently
+      published topics respectively.
     type: str
 input_keys:
 - msg:
@@ -71,10 +73,6 @@ input_keys:
       description:
         The id of a specific tf frame to which the published message should be attached.
       type: str
-- - rate:
-      description:
-        The rate at which the message should be published specified in hertz (hz).
-      type: float
 output_keys:
 - msg:
     description: >
@@ -86,13 +84,11 @@ output_keys:
     description:
       See input_keys description.
     type: str
-- - rate:
-      description:
-        The rate at which the message should be published specified in hertz (hz).
-      type: float
 {% endblock meta %}
 
 {% from "Utils.tpl.py" import import_module, render_transitions, render_remapping, render_input_keys, render_output_keys, render_init_callbacks, render_execute_callbacks, render_callbacks %}
+
+{% if sub_topic is not defined %}{% set sub_topic = 'tf' %}{% endif %}
 
 {% extends "State.tpl.py" %}
 
@@ -101,7 +97,7 @@ output_keys:
 {% include "ParsePoseArray.tpl.py" %}
 {% include "ParsePointCloud.tpl.py" %}
 {% include "ParsePointCloud2.tpl.py" %}
-{% include "MsgPublisher.tpl.py" %}
+{% include "MsgPublisherObserver.tpl.py" %}
 
 {% block imports %}
 {{ super() }}
@@ -110,16 +106,16 @@ output_keys:
 
 {% block class_defs %}
 {{ super() }}
-{% if 'class_PublishMsgState' not in defined_headers %}
-class PublishMsgState(smach.State):
-    def __init__(self, name, msg_publisher, action, input_keys = ['msg', 'topic', 'rate'], output_keys = ['msg', 'topic'], callbacks = None):
+{% if 'class_PublishObserverMsgState' not in defined_headers %}
+class PublishObserverMsgState(smach.State):
+    def __init__(self, name, msg_pub_observer, action, input_keys = ['msg', 'topic'], output_keys = ['msg', 'topic'], callbacks = None):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded', 'aborted'])
 
         # Save the state name
         self._name = name
 
         # Save the MsgPublisherObserver object reference
-        self._msg_publisher = msg_publisher
+        self._msg_pub_observer= msg_pub_observer
 
         # Save the action
         self._action = action
@@ -168,10 +164,8 @@ class PublishMsgState(smach.State):
 
         {{ render_execute_callbacks() }}
 
-        # Start or stop the message publisher
-        outcome = 'aborted'
-        if self._action == 'start':
-            # Parse msg
+        # Parse msg
+        if self._action != 'remove_all':
             try:
                 if 'msg_type' in self._input_keys:
                     published_msg = self._parse_msg(userdata.msg, msg_type=userdata.msg_type)
@@ -181,83 +175,66 @@ class PublishMsgState(smach.State):
                 rospy.logerr('Failed to parse message: '.format(repr(e)))
                 return 'aborted'
 
-            # Get topic if it's specified as an input key
-            if 'topic' in self._input_keys:
-                topic = userdata.topic
-            # Otherwise, construct it from the state name
-            else:
-                topic = 'smacha/' + self._name.lower()
+        # Get topic if it's specified as an input key
+        if 'topic' in self._input_keys:
+            topic = userdata.topic
+        # Otherwise, construct it from the state name
+        else:
+            topic = 'smacha/' + self._name.lower()
 
-            # Get rate if it's specified as an input key
-            if 'rate' in self._input_keys:
-                rate = userdata.rate
-            else:
-                rate = 100.0
-
-            # Get callback if it's specified as an input key
-            if 'callback' in self._input_keys:
-                callback = userdata.callback
-            else:
-                callback = ''
-
-            # Get frame_id if it's specified as an input key
+        # Add or remove the message + publisher
+        outcome = 'aborted'
+        if self._action == 'add':
             if 'frame_id' in self._input_keys:
-                frame_id = userdata.frame_id
+                outcome = self._msg_pub_observer.add(published_msg, topic, frame_id=userdata.frame_id)
             else:
-                frame_id = ''
-
-            # Start the publisher
-            outcome = self._msg_publisher.start(published_msg, topic, rate, frame_id=frame_id, callback=callback)
-
-        elif self._action == 'stop':
-            outcome = self._msg_publisher.stop(topic)
-
-        elif self._action == 'stop_all':
-            outcome = self._msg_publisher.stop_all()
+                outcome = self._msg_pub_observer.add(published_msg, topic)
+        elif self._action == 'remove':
+            outcome = self._msg_pub_observer.remove(topic)
+        elif self._action == 'remove_all':
+            outcome = self._msg_pub_observer.remove_all()
 
         # Set topic output key if specified
-        if self._action == 'start' and outcome == 'succeeded':
+        if self._action == 'add' and outcome == 'succeeded':
             for output_key in ['topic', 'output_topic', 'topic_output']:
                 if output_key in self._output_keys:
                     setattr(userdata, output_key, topic)
 
         # Set msg output key if specified
-        if self._action == 'start' and outcome == 'succeeded':
+        if self._action == 'add' and outcome == 'succeeded':
             for output_key in ['msg', 'output_msg', 'msg_output']:
                 if output_key in self._output_keys:
                     setattr(userdata, output_key, published_msg)
 
         return outcome
-{% do defined_headers.append('class_PublishMsgState') %}{% endif %}
+{% do defined_headers.append('class_PublishObserverMsgState') %}{% endif %}
 {% endblock class_defs %}
 
 {% block main_def %}
 {{ super() }}
-{% if 'msg_publisher' not in defined_headers %}
-msg_publisher = MsgPublisher()
-{% do defined_headers.append('msg_publisher') %}{% endif %}
+{% if sub_topic + '_msg_pub_observer' not in defined_headers %}
+{{ sub_topic }}_msg_pub_observer = MsgPublisherObserver(sub_topic='{{ sub_topic }}')
+{% do defined_headers.append(sub_topic + '_msg_pub_observer') %}{% endif %}
 {% endblock main_def %}
 
 {% block header %}
 {{ super() }}
 {#
- # By using this bit of trickery, we ensure that the mandatory userdata variables
- # 'rate' and 'topic' get defined as an empty string before any other userdata
+ # By using this bit of trickery, we ensure that the mandatory userdata variable
+ # 'topic' gets defined as an empty string before any other userdata
  # variables are defined (these are rendered via the 'header_userdata' block
  # usually, which is rendered after the 'header' block). This allows for the
- # specification of 'rate' and 'topic' to be omitted in the SMACHA script state
- # definitions to simplify scripts under certain circumstances,
- # e.g. 'topic' can be omitted when the 'action' variable is set to 'stop_all'.
+ # specification of 'topic' to be omitted in the SMACHA script state
+ # definitions when the 'action' variable is set to 'remove_all'.
  #}
 {% if mandatory_userdata is not defined %}{% set mandatory_userdata = dict() %}{% endif %}
-{% if 'rate' not in mandatory_userdata.keys() %}{% set _dummy = mandatory_userdata.update({'rate':100.0}) %}{% endif %}
-{% if action == 'stop_all' and 'topic' not in mandatory_userdata.keys() %}{% set _dummy = mandatory_userdata.update({'topic':''}) %}{% endif %}
+{% if action == 'remove_all' and 'topic' not in mandatory_userdata.keys() %}{% set _dummy = mandatory_userdata.update({'topic':''}) %}{% endif %}
 {% if mandatory_userdata is defined %}{{ render_userdata(parent_sm_name, mandatory_userdata) }}{% endif %}
 {% endblock header %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
-        {{ '' | indent(23, true) }}{{ class_name }}('{{ name }}', msg_publisher, '{{ action }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
+        {{ '' | indent(23, true) }}{{ class_name }}('{{ name }}', {{ sub_topic }}_msg_pub_observer, '{{ action }}'{% if input_keys is defined %}, {{ render_input_keys(input_keys, indent=0) }}{% endif %}{% if output_keys is defined %}, {{ render_output_keys(output_keys, indent=0) }}{% endif %}{% if callbacks is defined %}, {{ render_callbacks(name, uuid, callbacks, indent=0) }}{% endif %}){% if transitions is defined %},
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
 {{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}

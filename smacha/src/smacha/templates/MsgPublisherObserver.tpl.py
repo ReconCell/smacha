@@ -83,7 +83,7 @@ class MsgPublisherObserver(object):
             try:
                 self._sub = rospy.Subscriber(self._sub_topic, msg_class, self._pub_cb)
             except Exception as e:
-                raise ValueError('Failed to subscribe to TFMessage topic: {}'.format(repr(e)))
+                raise ValueError('Failed to subscribe to {} topic {}: {}'.format(msg_class, self._sub_topic, repr(e)))
 
         # Add message with specified frame_id
         try:

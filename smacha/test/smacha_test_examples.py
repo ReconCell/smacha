@@ -313,24 +313,52 @@ class TestTools(Tester):
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
-    def test_generate_rosbag_recording_1(self):
-        """Test generate rosbag_recording_1.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_recording_1.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_recording_1.yml'))
+    def test_generate_publish_msg_1(self):
+        """Test generate publish_msg_1.yml"""
+        with open(os.path.join(self._base_path, 'smacha_test_examples/publish_msg_1.py')) as original_file:
+            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/publish_msg_1.yml'))
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
-    def test_generate_rosbag_recording_2(self):
-        """Test generate rosbag_recording_2.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_recording_2.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_recording_2.yml'))
+    def test_generate_rosbag_api_recording_1(self):
+        """Test generate rosbag_api_recording_1.yml"""
+        with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_api_recording_1.py')) as original_file:
+            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_api_recording_1.yml'))
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
-    def test_generate_rosbag_recording_3(self):
-        """Test generate rosbag_recording_3.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_recording_3.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_recording_3.yml'))
+    def test_generate_rosbag_api_recording_2(self):
+        """Test generate rosbag_api_recording_2.yml"""
+        with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_api_recording_2.py')) as original_file:
+            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_api_recording_2.yml'))
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+
+    def test_generate_rosbag_api_recording_3(self):
+        """Test generate rosbag_api_recording_3.yml"""
+        with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_api_recording_3.py')) as original_file:
+            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_api_recording_3.yml'))
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+
+    def test_generate_rosbag_cli_recording_1(self):
+        """Test generate rosbag_cli_recording_1.yml"""
+        with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_cli_recording_1.py')) as original_file:
+            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_cli_recording_1.yml'))
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+
+    def test_generate_rosbag_cli_recording_2(self):
+        """Test generate rosbag_cli_recording_2.yml"""
+        with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_cli_recording_2.py')) as original_file:
+            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_cli_recording_2.yml'))
+            original_code = original_file.read()
+            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+
+    def test_generate_rosbag_cli_recording_3(self):
+        """Test generate rosbag_cli_recording_3.yml"""
+        with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_cli_recording_3.py')) as original_file:
+            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_cli_recording_3.yml'))
             original_code = original_file.read()
             self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
