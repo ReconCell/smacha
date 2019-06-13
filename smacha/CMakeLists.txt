@@ -8,10 +8,7 @@ project(smacha)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rospy
-  actionlib_msgs
-  actionlib
-  geometry_msgs
+  smach
 )
 
 ## System dependencies are found with CMake's conventions
@@ -60,10 +57,10 @@ catkin_python_setup()
 #   Service1.srv
 #   Service2.srv
 # )
-add_service_files(
-  DIRECTORY test/executive_smach_tutorials/smach_tutorials/srv
-  FILES GripperSrv.srv
-)
+# add_service_files(
+#   DIRECTORY test/executive_smach_tutorials/smach_tutorials/srv
+#   FILES GripperSrv.srv
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -71,19 +68,19 @@ add_service_files(
 #   Action1.action
 #   Action2.action
 # )
-add_action_files(
-  DIRECTORY test/executive_smach_tutorials/smach_tutorials/action
-  FILES Test.action
-)
+# add_action_files(
+#   DIRECTORY test/executive_smach_tutorials/smach_tutorials/action
+#   FILES Test.action
+# )
 
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
 #   std_msgs  # Or other packages containing msgs
 # )
-generate_messages(
-  DEPENDENCIES actionlib_msgs geometry_msgs
-)
+# generate_messages(
+#   DEPENDENCIES actionlib_msgs geometry_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -234,4 +231,5 @@ install(DIRECTORY
 # endif()
 
 ## Add folders to be run by python nosetests
-catkin_add_nosetests(test)
+# catkin_add_nosetests(test)
+catkin_add_nosetests(test/smacha_generate_test.py)
