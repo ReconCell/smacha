@@ -38,7 +38,7 @@ class TestTools(Tester):
             *args,
             script_dirs=[os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples')],
             template_dirs=[
-                os.path.join(self._base_path, CORE_TEMPLATES_DIR),
+                # os.path.join(self._base_path, CORE_TEMPLATES_DIR),
                 os.path.join(self._base_path, TEMPLATES_DIR)
                 ],
             **kwargs)

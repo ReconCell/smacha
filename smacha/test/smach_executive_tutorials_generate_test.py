@@ -37,12 +37,12 @@ class TestTools(Tester):
             *args,
             script_dirs=[os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples')],
             template_dirs=[
-                os.path.join(self._base_path, CORE_TEMPLATES_DIR),
+                # os.path.join(self._base_path, CORE_TEMPLATES_DIR),
                 os.path.join(self._base_path, TEMPLATES_DIR)
                 ],
             **kwargs)
 
-    def test_generate_hard_coded_params(self):
+    def test_code_generation_and_execution(self):
         """Generate Python code from all the available scripts in the test folder
         and run them."""
 
