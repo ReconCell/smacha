@@ -232,7 +232,3 @@ install(DIRECTORY
 
 ## Add folders to be run by python nosetests
 catkin_add_nosetests(test)
-# catkin_add_nosetests(
-#   test/smacha_generate_test.py
-#   test/smach_executive_tutorials_generate_test.py
-# )

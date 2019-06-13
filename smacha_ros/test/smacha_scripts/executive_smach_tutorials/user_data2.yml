@@ -1,0 +1,14 @@
+--- # User Data Passing Tutorial SMACHA script.
+name: sm
+template: Base
+manifest: smacha
+node_name: smach_example_state_machine
+outcomes: [outcome4]
+userdata: {sm_counter: 0}
+states:
+  - FOO: {template: Foo,
+          transitions: {outcome1: BAR, outcome2: outcome4},
+          remapping: {foo_counter_in: sm_counter, foo_counter_out: sm_counter}}
+  - BAR: {template: Bar,
+          transitions: {outcome1: FOO},
+          remapping: {bar_counter_in: sm_counter}}

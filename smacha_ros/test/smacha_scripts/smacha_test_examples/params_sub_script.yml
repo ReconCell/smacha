@@ -1,0 +1,14 @@
+# SMACHA Sub-Script for Nesting Parameter Passing Test
+- SUB:
+    template: StateMachine
+    outcomes: [outcome_c]
+    transitions: {outcome_c: final_outcome}
+    states:
+      # In these states, the [params, name_0] and [params, name_1] parameter lookups
+      # are populated by parameters defined in the super-script ('nesting_params_with_sub_script.yml').
+      - FOO_0: {template: ParamFoo, params: {outcome: outcome_a},
+                name_param: [params, name_0], outcome_param: [params, outcome],
+                transitions: {outcome_a: FOO_1, outcome_b: outcome_c}}
+      - FOO_1: {template: ParamFoo, params: {outcome: outcome_b},
+                name_param: [params, name_1], outcome_param: [params, outcome],
+                transitions: {outcome_a: FOO_1, outcome_b: outcome_c}}

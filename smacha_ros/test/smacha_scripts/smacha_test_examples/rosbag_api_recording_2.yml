@@ -1,0 +1,44 @@
+--- # SMACHA multiple rosbag API (application programming interface) recordings example
+name: sm
+template: Base
+outcomes: [succeeded, aborted]
+states:
+- PUBLISH_MSG_1:
+    template: PublishMsgState
+    action: start
+    userdata: {point: Point(), point_topic: smacha/rosbag_api_recording_1_point, rate_1: 10.0}
+    remapping: {msg: point, topic: point_topic, rate: rate_1}
+    transitions: {succeeded: PUBLISH_MSG_2, aborted: aborted}
+- PUBLISH_MSG_2:
+    template: PublishMsgState
+    action: start
+    userdata: {pose: Pose(), pose_topic: smacha/rosbag_api_recording_1_pose, rate_2: 100.0}
+    remapping: {msg: pose, topic: pose_topic, rate: rate_2}
+    transitions: {succeeded: START_RECORDING_1, aborted: aborted}
+- START_RECORDING_1:
+    template: RecordROSBagState
+    recorder: ROSBagAPIThreadRecorder
+    action: start
+    userdata: {file_1: /tmp/rosbag_api_recording_2_bag_1.bag, topics_1: [smacha/rosbag_api_recording_1_point]}
+    remapping: {file: file_1, topics: topics_1}
+    transitions: {succeeded: START_RECORDING_2, aborted: aborted}
+- START_RECORDING_2:
+    template: RecordROSBagState
+    recorder: ROSBagAPIThreadRecorder
+    action: start
+    userdata: {file_2: /tmp/rosbag_api_recording_2_bag_2.bag, topics_2: [smacha/rosbag_api_recording_1_pose]}
+    remapping: {file: file_2, topics: topics_2}
+    transitions: {succeeded: WAIT, aborted: aborted}
+- WAIT:
+    template: SleepState
+    time: 5
+    transitions: {succeeded: STOP_RECORDING}
+- STOP_RECORDING:
+    template: RecordROSBagState
+    recorder: ROSBagAPIThreadRecorder
+    action: stop_all
+    transitions: {succeeded: UNPUBLISH_MSG, aborted: aborted}
+- UNPUBLISH_MSG:
+    template: PublishMsgState
+    action: stop_all
+    transitions: {succeeded: succeeded, aborted: aborted}

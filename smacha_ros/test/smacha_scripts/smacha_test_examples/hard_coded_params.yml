@@ -1,0 +1,13 @@
+--- # SMACHA Hard-Coded Parameter Passing Test
+name: sm
+template: Base
+outcomes: [final_outcome]
+states:
+  # These states show examples of hard-coding of parameter variables that are
+  # later used within templates.
+  - FOO_0: {template: ParamFoo,
+            name_param: FOO_0, outcome_param: outcome_a,
+            transitions: {outcome_a: FOO_1, outcome_b: final_outcome}}
+  - FOO_1: {template: ParamFoo,
+            name_param: FOO_1, outcome_param: outcome_b,
+            transitions: {outcome_a: FOO_1, outcome_b: final_outcome}}

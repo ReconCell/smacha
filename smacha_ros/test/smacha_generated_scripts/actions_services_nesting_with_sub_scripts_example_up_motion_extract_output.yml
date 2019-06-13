@@ -1,0 +1,47 @@
+name: sm_top
+template: ReconCellBase
+function_name: actions_services_example
+node_name: actions_services_example
+outcomes: [top_finished]
+userdata:
+  up_motion_offset: [[0.0, 0.0, -0.2], [0, 0, 0, 1]]
+  up_motion_time: 4
+  down_motion_offset: [[0.0, 0.0, 0.4], [0, 0, 0, 1]]
+  down_motion_speed: 0.25
+states:
+- READ_ROBOT_JOINT_CONFIGURATION:
+    template: ReadFromDatabaseState
+    userdata: {db_entry_1: smacha_testing/j_via_1}
+    remapping: {entry: db_entry_1, output: joint_initial_position}
+    transitions: {succeeded: JOINT_TRAP_MOVEMENT, failed: top_finished}
+- JOINT_TRAP_MOVEMENT:
+    template: JointTrapVelActionState
+    params: {robot: ur10_2}
+    robot: [params, robot]
+    userdata: {jt_speed: 0.25, jt_blend: 0}
+    remapping: {joints: joint_initial_position, speed_percent: jt_speed, blend_radius: jt_blend}
+    transitions: {succeeded: UP_MOTION, preempted: top_finished, aborted: top_finished}
+- UP_MOTION:
+    script: up_motion
+    params: {robot: ur10_2}
+    remapping: {up_motion_offset: up_motion_offset, up_motion_time: up_motion_time}
+    transitions: {up_motion_outcome_1: top_finished, up_motion_outcome_2: DOWN_MOTION}
+- DOWN_MOTION:
+    template: StateMachine
+    params: {robot: ur10_2}
+    input_keys: [down_motion_offset, down_motion_speed]
+    output_keys: [robot_pose_2]
+    remapping: {down_motion_offset: down_motion_offset, down_motion_speed: down_motion_speed}
+    outcomes: [down_motion_outcome_1]
+    transitions: {down_motion_outcome_1: top_finished}
+    states:
+    - READ_CURRENT_POSE_CART_TRAP:
+        template: TransformState
+        userdata: {tf_t_2: [[params, robot], /base], tf_s_2: [[params, robot], /tool_changer]}
+        remapping: {target: tf_t_2, source: tf_s_2, output: robot_pose_2}
+        transitions: {succeeded: CART_TRAP_MOVEMENT, aborted: down_motion_outcome_1}
+    - CART_TRAP_MOVEMENT:
+        template: CartTrapVelActionState
+        robot: [params, robot]
+        remapping: {target_frame: robot_pose_2, offset: down_motion_offset, speed_percent: down_motion_speed}
+        transitions: {succeeded: down_motion_outcome_1, preempted: down_motion_outcome_1, aborted: down_motion_outcome_1}

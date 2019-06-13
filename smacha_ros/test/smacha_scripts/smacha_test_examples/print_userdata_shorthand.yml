@@ -1,0 +1,9 @@
+--- # SMACHA print userdata example
+n: sm
+T: Base
+o: [final_outcome]
+ud: {foo: 'Hello World!'}
+s:
+  - FOO_0: {T: PrintUserdataState, ik: [foo], t: {succeeded: FOO_1}}
+  - FOO_1: {T: CallbacksState, ud: {bar: 'Goodbye World!'}, t: {succeeded: FOO_2}}
+  - FOO_2: {T: PrintUserdataState, ik: [foobar], r: {foobar: bar}, t: {succeeded: final_outcome}}

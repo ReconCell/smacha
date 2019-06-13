@@ -1,0 +1,15 @@
+# SMACHA state sequence example
+name: sm
+template: Base
+outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
+states:
+- SUB:
+    script: seq_nesting_1_sub_script
+    params: {name: FOO_0, outcome: outcome_a, name_1: FOO_1}
+    transitions: {sub_outcome_1: final_outcome_b, sub_outcome_2: FOO_2}
+- FOO_2:
+    template: ParamFoo
+    params: {name: FOO_2, outcome: outcome_a}
+    name_param: [params, name]
+    outcome_param: [params, outcome]
+    transitions: {outcome_a: final_outcome_a, outcome_b: final_outcome_c}
