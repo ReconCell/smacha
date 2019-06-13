@@ -8,11 +8,10 @@ import unittest
 from smacha.util import Tester
 from smacha.util import bcolors
 
-TEST_SCRIPTS_DIR = 'smacha_scripts/smacha_test_examples/'
+TEST_SCRIPTS_DIR = 'smacha_scripts/executive_smach_tutorials/'
 CORE_TEMPLATES_DIR = '../src/templates'
-TEMPLATES_DIR = 'smacha_templates/smacha_test_examples'
+TEMPLATES_DIR = 'smacha_templates/executive_smach_tutorials'
 DEBUG_LEVEL = 1
-
 class TestTools(Tester):
     """Tester class for general unit testing of various SMACHA tool
     functionalities.
@@ -43,7 +42,7 @@ class TestTools(Tester):
                 ],
             **kwargs)
 
-    def test_code_generation_and_execution(self):
+    def test_generate_hard_coded_params(self):
         """Generate Python code from all the available scripts in the test folder
         and run them."""
 
