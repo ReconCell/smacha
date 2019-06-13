@@ -7,7 +7,7 @@ class Bas(smach.State):
         smach.State.__init__(self, outcomes=['outcome3'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state {{ name }}')
+        print('Executing state {{ name }}')
         return 'outcome3'
 {% endblock class_defs %}
 
