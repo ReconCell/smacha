@@ -119,7 +119,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES smacha_ros
-#  CATKIN_DEPENDS rospy smach smach_ros smacha std_msgs
+ CATKIN_DEPENDS rospy smach smach_ros smacha std_msgs geometry_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -214,9 +214,7 @@ install(PROGRAMS
 # endif()
 
 ## Add folders to be run by python nosetests
-catkin_add_nosetests(test/api_generate_test.py)
-
-# if (CATKIN_ENABLE_TESTING)
-#   find_package(rostest REQUIRED)
-#   add_rostest(test/generate.test)
-# endif()
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(test/generate.test)
+endif()
