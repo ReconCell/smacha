@@ -1,6 +1,6 @@
 # SMACHA state sequence example
 n: sm
-T: Base
+T: ROSBase
 o: [final_outcome_a, final_outcome_b, final_outcome_c]
 s:
 - SUB:

@@ -1,6 +1,6 @@
 --- # User Data Passing Tutorial SMACHA script.
 name: sm
-template: Base
+template: ROSBase
 manifest: smacha
 node_name: smach_example_state_machine
 outcomes: [outcome4]

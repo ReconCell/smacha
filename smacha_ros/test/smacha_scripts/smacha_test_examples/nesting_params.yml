@@ -1,6 +1,6 @@
 --- # SMACHA Nesting Parameter Passing Test
 name: sm
-template: Base
+template: ROSBase
 outcomes: [final_outcome]
 states:
   # This container state defines some parameter variables (name_0 and name_1)

@@ -1,6 +1,6 @@
 --- # SMACHA rosbag CLI (command-line interface) recording example
 name: sm
-template: Base
+template: ROSBase
 outcomes: [succeeded, aborted]
 states:
 - PUBLISH_MSG:

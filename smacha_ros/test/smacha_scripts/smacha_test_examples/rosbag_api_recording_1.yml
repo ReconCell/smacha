@@ -1,6 +1,6 @@
 --- # SMACHA rosbag API (application programming interface) recording example
 name: sm
-template: Base
+template: ROSBase
 outcomes: [succeeded, aborted]
 states:
 - PUBLISH_MSG:

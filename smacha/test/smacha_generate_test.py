@@ -9,9 +9,8 @@ from smacha.util import Tester
 from smacha.util import bcolors
 
 TEST_SCRIPTS_DIR = 'smacha_scripts/smacha_test_examples/'
-CORE_TEMPLATES_DIR = '../src/templates'
 TEMPLATES_DIR = 'smacha_templates/smacha_test_examples'
-DEBUG_LEVEL = 1
+DEBUG_LEVEL = 2
 
 class TestTools(Tester):
     """Tester class for general unit testing of various SMACHA tool
@@ -30,7 +29,6 @@ class TestTools(Tester):
             *args,
             script_dirs=[os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples')],
             template_dirs=[
-                # os.path.join(self._base_path, CORE_TEMPLATES_DIR),
                 os.path.join(self._base_path, TEMPLATES_DIR)
                 ],
             **kwargs)

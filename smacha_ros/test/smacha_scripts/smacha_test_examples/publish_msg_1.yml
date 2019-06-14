@@ -1,6 +1,6 @@
 --- # SMACHA message publication example
 name: sm
-template: Base
+template: ROSBase
 outcomes: [succeeded, aborted]
 states:
 - PUBLISH_MSG:

@@ -1,6 +1,6 @@
 --- # Concurrent States Tutorial SMACHA script.
 name: sm_top
-template: Base
+template: ROSBase
 manifest: smacha
 node_name: smach_example_state_machine
 outcomes: [outcome6]

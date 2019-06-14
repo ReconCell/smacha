@@ -1,6 +1,6 @@
 --- # SMACHA sleep example
 name: sm
-template: Base
+template: ROSBase
 outcomes: [final_outcome]
 states:
   - FOO_0:

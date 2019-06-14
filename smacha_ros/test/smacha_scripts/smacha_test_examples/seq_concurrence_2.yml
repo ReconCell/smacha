@@ -1,6 +1,6 @@
 # SMACHA state sequence example
 name: sm
-template: Base
+template: ROSBase
 outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
 states:
 - FOO_0:

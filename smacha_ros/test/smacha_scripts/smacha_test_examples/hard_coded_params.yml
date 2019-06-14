@@ -1,6 +1,6 @@
 --- # SMACHA Hard-Coded Parameter Passing Test
 name: sm
-template: Base
+template: ROSBase
 outcomes: [final_outcome]
 states:
   # These states show examples of hard-coding of parameter variables that are

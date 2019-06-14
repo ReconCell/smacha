@@ -1,9 +1,9 @@
 # SMACHA state sequence example
 n: sm
-T: Base
+T: ROSBase
 o: [final_outcome_a, final_outcome_b, final_outcome_c]
 s:
 - SUB_0: {S: seq_nesting_1_sub_script, p: {name: SUB_0_FOO_0, outcome: outcome_a, name_1: SUB_0_FOO_1},
-          t: {sub_outcome_1: final_outcome_b, sub_outcome_2: FOO_2}}
+          t: {sub_outcome_1: final_outcome_b, sub_outcome_2: final_outcome_a}}
 - SUB_1: {S: seq_nesting_1_sub_script_shorthand, p: {name: SUB_1_FOO_0, outcome: outcome_a, name_1: SUB_1_FOO_1},
-          t: {sub_outcome_1: final_outcome_b, sub_outcome_2: FOO_2}}
+          t: {sub_outcome_1: final_outcome_b, sub_outcome_2: final_outcome_a}}
