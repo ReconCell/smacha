@@ -1,6 +1,6 @@
 {% block meta %}
 name: ROSBagCLIProcessRecorder
-description:
+description: >
   SMACH template that provides a ROSBagCLIProcessRecorder helper class for
   RecordROSBagState. It uses subprocess calls to the rosbag CLI (command-line
   interface) recording tool in order to circumvent threading and Python GIL
