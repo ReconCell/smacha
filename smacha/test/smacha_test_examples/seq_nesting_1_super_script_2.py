@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import roslib; roslib.load_manifest('smacha')
+import roslib
 import rospy
 import smach
 import smach_ros
@@ -22,11 +22,11 @@ class Foo(smach.State):
 
 
 def main():
-    rospy.init_node('smacha_params_test')
+    rospy.init_node('sm')
 
-    sm_top = smach.StateMachine(outcomes=['final_outcome_a', 'final_outcome_b', 'final_outcome_c'])
+    sm = smach.StateMachine(outcomes=['final_outcome_a', 'final_outcome_b', 'final_outcome_c'])
 
-    with sm_top:
+    with sm:
 
         sm_sub_0 = smach.StateMachine(outcomes=['sub_outcome_1', 'sub_outcome_2'])
 
@@ -57,7 +57,7 @@ def main():
                                transitions={'sub_outcome_1': 'final_outcome_b',
                                             'sub_outcome_2': 'FOO_2'})
 
-    outcome = sm_top.execute()
+    outcome = sm.execute()
 
 
 if __name__ == '__main__':

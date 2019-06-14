@@ -41,6 +41,34 @@ class Tester(unittest.TestCase):
     _debug_level = 1
 
     def __init__(self, *args, **kwargs):
+        """
+        Constructor.
+
+        :param script_dirs:
+            A list of directories in which to search for SMACHA YAML scripts.
+        :type script_dirs: list of str
+        :param template_dirs:
+            A list of directories in which to search for SMACHA templates.
+        :type template_dirs: list of str
+        :param include_introspection_server:
+            A flag indicating whether a SMACH introspection server should be
+            included in the generated output code.
+        :type include_introspection_server: bool
+        """
+        # Handle args
+        if 'script_dirs' in kwargs.keys():
+            self._script_dirs = kwargs.pop('script_dirs')
+        else:
+            self._script_dirs = []
+        if 'template_dirs' in kwargs.keys():
+            self._template_dirs = kwargs.pop('template_dirs')
+        else:
+            self._template_dirs = []
+        if 'include_introspection_server' in kwargs.keys():
+            self._include_introspection_server = kwargs.pop('include_introspection_server')
+        else:
+            self._include_introspection_server = False
+
         super(Tester, self).__init__(*args, **kwargs)
 
         # Create the output directories if they don't exist
@@ -48,6 +76,17 @@ class Tester(unittest.TestCase):
             os.makedirs(self._output_py_dir)
         if not os.path.exists(self._output_yml_dir):
             os.makedirs(self._output_yml_dir)
+
+        # Load parser
+        self._parser = smacha.Parser(script_dirs=self._script_dirs)
+
+        # Load templater
+        self._templater = smacha.Templater(
+            self._template_dirs,
+            include_introspection_server=self._include_introspection_server)
+
+        # Load code generator
+        self._generator = smacha.Generator(self._parser, self._templater, verbose=False)
 
     def set_write_output_files(self, write_output_files):
         self._write_output_files = write_output_files
@@ -62,45 +101,22 @@ class Tester(unittest.TestCase):
         self._debug_level = debug_level
 
     def _generate(self,
-                  smacha_script_filename, script_dirs, template_dirs,
-                  include_introspection_server=False,
+                  smacha_script_filename,
                   output_file = None):
         """Generate smach code using smacha yaml script file and templates.
 
         :param smacha_script_filename: The SMACHA YAML script filename.
         :type smacha_script_filename: str
-        :param script_dirs:
-            A list of directories in which to search for SMACHA YAML scripts.
-        :type script_dirs: list of str
-        :param template_dirs:
-            A list of directories in which to search for SMACHA templates.
-        :type template_dirs: list of str
-        :param include_introspection_server:
-            A flag indicating whether a SMACH introspection server should be
-            included in the generated output code.
-        :type include_introspection_server: bool
         :param output_file:
             An (optional) output filename for the generated output code.
         :type output_file: str or None
         """
-        # Load parser
-        parser = smacha.Parser(script_dirs=script_dirs)
-
         # Load and parse SMACHA script
-        script_str, _ = parser.load(smacha_script_filename)
-        script = parser.parse(script_str)
-
-        # Load template processor
-
-        templater = smacha.Templater(
-            template_dirs,
-            include_introspection_server=include_introspection_server)
-
-        # Load code generator
-        generator = smacha.Generator(parser, templater, verbose=False)
+        script_str, _ = self._parser.load(smacha_script_filename)
+        script = self._parser.parse(script_str)
 
         # Generate the SMACH code
-        smach_code = generator.run(script)
+        smach_code = self._generator.run(script)
 
         # Write the final output to a SMACH python file
         if self._write_output_files:
@@ -115,16 +131,13 @@ class Tester(unittest.TestCase):
         return smach_code
 
     def _contain(self,
-                 smacha_script_filename, script_dirs,
+                 smacha_script_filename,
                  container_name, container_type, states,
                  output_file = None):
         """Containerize a sequence of states in a script.
 
         :param smacha_script_filename: The SMACHA YAML script filename.
         :type smacha_script_filename: str
-        :param script_dirs:
-            A list of directories in which to search for SMACHA YAML scripts.
-        :type script_dirs: list of str
         :param container_name: The name of the container.
         :type container_name: str
         :param container_type:
@@ -136,18 +149,15 @@ class Tester(unittest.TestCase):
             An (optional) output filename for the generated output code.
         :type output_file: str or None
         """
-        # Load parser
-        parser = smacha.Parser(script_dirs = script_dirs)
-
         # Load and parse SMACHA script
-        script_str, _ = parser.load(smacha_script_filename)
-        script = parser.parse(script_str)
+        script_str, _ = self._parser.load(smacha_script_filename)
+        script = self._parser.parse(script_str)
 
         # Use the contain method in the parser to do script conversion
-        contained_script = parser.contain(script, container_name, container_type, states)
+        contained_script = self._parser.contain(script, container_name, container_type, states)
 
         # Dump the script to string
-        contained_script_string = parser.dump(contained_script)
+        contained_script_string = self._parser.dump(contained_script)
 
         # Write the final output to a SMACHA YAML file
         if self._write_output_files:
@@ -159,7 +169,7 @@ class Tester(unittest.TestCase):
         return contained_script_string
 
     def _extract(self,
-                 smacha_script_filename, script_dirs,
+                 smacha_script_filename,
                  container_state_name,
                  sub_script_filename,
                  output_sub_script_file=None,
@@ -169,9 +179,6 @@ class Tester(unittest.TestCase):
 
         :param smacha_script_filename: The SMACHA YAML script filename.
         :type smacha_script_filename: str
-        :param script_dirs:
-            A list of directories in which to search for SMACHA YAML scripts.
-        :type script_dirs: list of str
         :param container_state_name:
             The name of the container state in the script.
         :type container_state_name: str
@@ -186,21 +193,18 @@ class Tester(unittest.TestCase):
             An (optional) output filename for the generated super-script.
         :type output_super_script_file: str or None
         """
-        # Load parser
-        parser = smacha.Parser(script_dirs = script_dirs)
-
         # Load and parse SMACHA script
-        script_str, _ = parser.load(smacha_script_filename)
-        script = parser.parse(script_str)
+        script_str, _ = self._parser.load(smacha_script_filename)
+        script = self._parser.parse(script_str)
 
         # Use the extract() method in the parser to perform the extraction
-        sub_script, super_script = parser.extract(script, container_state_name, sub_script_filename=sub_script_filename)
+        sub_script, super_script = self._parser.extract(script, container_state_name, sub_script_filename=sub_script_filename)
 
         # Dump the sub-script to a string
-        extracted_sub_script_string = parser.dump([sub_script])
+        extracted_sub_script_string = self._parser.dump([sub_script])
 
         # Dump the super-script to a string
-        extracted_super_script_string = parser.dump(super_script)
+        extracted_super_script_string = self._parser.dump(super_script)
 
         # Write the final output to a SMACHA YAML files
         if self._write_output_files:

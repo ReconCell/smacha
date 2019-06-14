@@ -6,9 +6,9 @@ framework: SMACH
 type: State
 tags: [core]
 includes:
-  - State
   - TF2ListenerSingleton
-extends: []
+extends:
+  - State
 variables: []
 input_keys:
 - target:
@@ -26,22 +26,19 @@ outcomes:
 - aborted
 {% endblock meta %}
 
-{% from "Utils.tpl.py" import import_module, render_transitions, render_remapping %}
+{% from "Utils.tpl.py" import import_module %}
 
-{% include "State.tpl.py" %}
+{% extends "State.tpl.py" %}
+
 {% include "TF2ListenerSingleton.tpl.py" %}
 
-{% block base_header %}
-{% endblock base_header %}
-
 {% block imports %}
+{{ super() }}
 {{ import_module(defined_headers, 'tf2_ros') }}
 {% endblock imports %}
 
-{% block defs %}
-{% endblock defs %}
-
 {% block class_defs %}
+{{ super() }}
 {% if 'class_TF2ListenerState' not in defined_headers %}
 class TF2ListenerState(smach.State):
     def __init__(self):
@@ -81,30 +78,3 @@ class TF2ListenerState(smach.State):
         return 'succeeded'
 {% do defined_headers.append('class_TF2ListenerState') %}{% endif %}
 {% endblock class_defs %}
-
-{% block header %}
-{% endblock header %}
-
-{% block main_def %}
-{% endblock main_def %}
-
-{% block body %}
-smach.StateMachine.add('{{ name }}', TF2ListenerState(){% if transitions is defined %},
-{{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
-{{ render_remapping(remapping) }}{% endif %})
-{% endblock body %}
-
-{% block footer %}
-{% endblock footer %}
-
-{% block execute %}
-{% endblock execute %}
-
-{% block spin %}
-{% endblock spin %}
-
-{% block base_footer %}
-{% endblock base_footer %}
-
-{% block main %}
-{% endblock main %}

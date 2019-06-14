@@ -35,10 +35,14 @@ class Bar(smach.State):
     def __init__(self):
         smach.State.__init__(self, 
                              outcomes=['outcome1'])
-        
+
     def execute(self, userdata):
         rospy.loginfo('Executing state BAR') 
         return 'outcome1'
+
+
+
+
 
 
 
@@ -49,7 +53,7 @@ def main():
 
     
 
-   
+
 
     sm = smach.StateMachine(outcomes=['outcome4'])
 
@@ -61,7 +65,7 @@ def main():
         smach.StateMachine.add('FOO', Foo(), 
                                transitions={'outcome1':'BAR',
                                             'outcome2':'outcome4'})
-        
+
         smach.StateMachine.add('BAR', Bar(), 
                                transitions={'outcome1':'FOO'})
 
@@ -76,7 +80,7 @@ def main():
     
 
     outcome = sm.execute()
-    
+
 
 
 

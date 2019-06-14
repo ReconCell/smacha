@@ -32,9 +32,9 @@ Some variables are quite important for core template functioning:
 Core Blocks and Code Insertion Variables
 ========================================
 
-There are a number of core blocks and code insertion variables present in
-the ``Base`` template above, as well as in many of the other :doc:`core API
-templates <core_api_templates>`, that enable the code generation engine to
+There are a number of core blocks and code insertion variables present in the
+``Base`` template above, as well as in many of the other :doc:`core API state
+templates <core_api_state_templates>`, that enable the code generation engine to
 produce code in the appropriate places:
 
 -  the ``base_header`` block: used to specify any code that must appear near

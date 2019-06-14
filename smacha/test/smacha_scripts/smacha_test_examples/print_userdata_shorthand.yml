@@ -1,8 +1,6 @@
 --- # SMACHA print userdata example
 n: sm
 T: Base
-m: smacha
-nn: smacha_print_userdata_test
 o: [final_outcome]
 ud: {foo: 'Hello World!'}
 s:

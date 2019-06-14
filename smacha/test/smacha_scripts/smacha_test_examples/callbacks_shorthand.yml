@@ -1,8 +1,6 @@
 --- # SMACHA callbacks example
 n: sm
 T: Base
-m: smacha
-nn: smacha_callbacks_test
 o: [final_outcome]
 ud: {animals: [cats, dogs, sharks], numbers: [1, 2, 3]} 
 s:

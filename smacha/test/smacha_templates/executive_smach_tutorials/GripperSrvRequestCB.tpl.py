@@ -7,9 +7,6 @@
 {{ super() }}
 {% endblock imports %}
 
-{% block header %}
-{% endblock header %}
-
 {% block body %}
 @smach.cb_interface(input_keys=['gripper_input'])
 def gripper_request_cb(userdata, request):

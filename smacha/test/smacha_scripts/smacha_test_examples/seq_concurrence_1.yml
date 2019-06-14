@@ -1,8 +1,6 @@
 # SMACHA state sequence example
-name: sm_top
+name: sm
 template: Base
-manifest: smacha
-node_name: smacha_params_test
 outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
 states:
 - CON:

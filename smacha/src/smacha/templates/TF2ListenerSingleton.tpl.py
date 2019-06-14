@@ -1,6 +1,7 @@
 {% block meta %}
-name: Utils
-description: SMACH template that provides a TF2ListenerSingleton helper class for TF2ListenerState.
+name: Tf2listenersingleton
+description:
+  SMACH template that provides a TF2ListenerSingleton helper class for TF2ListenerState.
 language: Python
 framework: SMACH
 type: None

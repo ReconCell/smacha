@@ -12,14 +12,8 @@ from actionlib import *
 
 from smacha.msg import TestGoal
 
-
 from smacha.msg import TestAction
-
-
-
 from actionlib_msgs.msg import *
-
-
 
 
 
@@ -50,6 +44,10 @@ class TestServer:
 
 
 
+
+
+
+
 def main():
     rospy.init_node('smach_example_actionlib')
 
@@ -58,7 +56,7 @@ def main():
     # Start an action server
     server = TestServer('test_action')
 
-   
+
 
     sm0 = smach.StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
 
@@ -70,16 +68,18 @@ def main():
         smach.StateMachine.add('GOAL_DEFAULT',
                                smach_ros.SimpleActionState('test_action', TestAction),
                                transitions={'succeeded':'GOAL_STATIC'})
-        
+
         # Add another simple action state. This will give a goal
         # that should abort the action state when it is received, so we
         # map 'aborted' for this state onto 'succeeded' for the state machine.
-        
+
+
+
         smach.StateMachine.add('GOAL_STATIC',
                                smach_ros.SimpleActionState('test_action', TestAction,
                                                            goal = TestGoal(goal=1)),
                                transitions={'aborted':'GOAL_CB'})
-        
+
         # Add another simple action state. This will give a goal
         # that should abort the action state when it is received, so we
         # map 'aborted' for this state onto 'succeeded' for the state machine.
@@ -87,7 +87,9 @@ def main():
             goal = TestGoal()
             goal.goal = 2
             return goal
-        
+
+
+
         smach.StateMachine.add('GOAL_CB',
                                smach_ros.SimpleActionState('test_action', TestAction,
                                                            goal_cb = goal_callback),
@@ -104,7 +106,7 @@ def main():
     
 
     outcome = sm0.execute()
-    
+
 
 
 

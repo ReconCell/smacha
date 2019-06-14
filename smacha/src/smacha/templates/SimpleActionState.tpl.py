@@ -1,6 +1,7 @@
 {% block meta %}
 name: SimpleActionState
-description: SMACH SimpleActionState for calling actions using an action server. 
+description:
+  SMACH SimpleActionState for calling actions using an action server.
 language: Python
 framework: SMACH
 type: State
@@ -10,7 +11,9 @@ includes:
 extends: []
 variables:
 - action_server_namespace:
-    description: The ROS topic/namespace of the action server, e.g. '/robot_1/joint_motion_action'.
+    description:
+      The ROS topic/namespace of the action server, e.g.
+      '/robot_1/joint_motion_action'.
     type: str
 - action:
     description: The action type.
@@ -20,25 +23,29 @@ variables:
       type: str
   - goal_slots:
       description: Goal slots as defined by userdata.
-      type: list
+      type: list of str
   - goal_cb:
       description: A goal callback.
       type: str
 - - result_slots:
       description: Result slots as defined by userdata.
-      type: list
+      type: list of str
   - result_cb:
       description: A result callback.
       type: str
 - - input_keys:
-      description: The userdata input keys needed for the request callback.
-      type: list
+      description:
+        The userdata input keys needed for the request callback.
+      type: list of str
 - - output_keys:
-      description: The userdata output keys needed for the response callback.
-      type: list
+      description:
+        The userdata output keys needed for the response callback.
+      type: list of str
 - - userdata:
-      description: The definitions for the userdata keys named in the input_keys and output_keys variables.
-      type: dict
+      description:
+        The definitions for the userdata keys named in the input_keys and
+        output_keys variables.
+      type: dict of str
 outcomes:
   - succeeded
   - aborted
@@ -47,26 +54,12 @@ outcomes:
 
 {% from "Utils.tpl.py" import from_import, render_goal_slots, render_input_keys, render_result_slots, render_output_keys, render_transitions, render_remapping %}
 
-{% include "State.tpl.py" %}
-
-{% block base_header %}
-{% endblock base_header %}
+{% extends "State.tpl.py" %}
 
 {% block imports %}
+{{ super() }}
 {{ from_import(defined_headers, 'actionlib', '*') }}
 {% endblock imports %}
-
-{% block defs %}
-{% endblock defs %}
-
-{% block class_defs %}
-{% endblock class_defs %}
-
-{% block header %}
-{% endblock header %}
-
-{% block main_def %}
-{% endblock main_def %}
 
 {% block body %}
 smach.{{ parent_type }}.add('{{ name }}',
@@ -81,18 +74,3 @@ smach.{{ parent_type }}.add('{{ name }}',
 {{ render_transitions(transitions) }}{% endif %}{% if remapping is defined %},
 {{ render_remapping(remapping) }}{% endif %})
 {% endblock body %}
-
-{% block footer %}
-{% endblock footer %}
-
-{% block execute %}
-{% endblock execute %}
-
-{% block spin %}
-{% endblock spin %}
-
-{% block base_footer %}
-{% endblock base_footer %}
-
-{% block main %}
-{% endblock main %}

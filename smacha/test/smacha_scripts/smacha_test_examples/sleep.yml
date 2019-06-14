@@ -1,8 +1,6 @@
 --- # SMACHA sleep example
 name: sm
 template: Base
-manifest: smacha
-node_name: smacha_sleep_test
 outcomes: [final_outcome]
 states:
   - FOO_0:

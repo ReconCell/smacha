@@ -109,7 +109,10 @@ Templating
    Template Inheritance<Templating/inheritance>
    Template Metadata<Templating/metadata>
    Template Macros<Templating/macros>
-   Core API Templates<Templating/core_api_templates>
+   Core API Base Templates<Templating/core_api_base_templates>
+   Core API Container Templates<Templating/core_api_container_templates>
+   Core API State Templates<Templating/core_api_state_templates>
+   Other Core API Templates<Templating/other_core_api_templates>
 
 :doc:`Templating/smacha_templates` are filled out by :doc:`the Templater module
 <API/smacha.templater>` as directed by :doc:`the Generator module
@@ -254,19 +257,19 @@ Modules
 .. toctree::
    :hidden:
 
-   The Parser Module<API/smacha.parser>
-   The Templater Module<API/smacha.templater>
-   The Generator Module<API/smacha.generator>
-   The Utilties Module<API/smacha.util>
-   The Exceptions Module<API/smacha.exceptions>
+   Parser<API/smacha.parser>
+   Templater<API/smacha.templater>
+   Generator<API/smacha.generator>
+   Utilties<API/smacha.util>
+   Exceptions<API/smacha.exceptions>
 
 These are the main smacha package submodules:
 
-- :doc:`API/smacha.parser`: provides the :class:`smacha.parser.Parser` class for parsing :doc:`Scripting/smacha_scripts`.
-- :doc:`API/smacha.templater`: provides the :class:`smacha.templater.Templater` class as well as other functions for processing :doc:`Templating/smacha_templates`.
-- :doc:`API/smacha.generator`: provides the :class:`smacha.generator.Generator` class for generating executable Python SMACH code.
-- :doc:`API/smacha.util`: provides various utilities.
-- :doc:`API/smacha.exceptions`: provides exception definitions.
+- :doc:`Parser <API/smacha.parser>`: provides the :class:`smacha.parser.Parser` class for parsing :doc:`Scripting/smacha_scripts`.
+- :doc:`Templater <API/smacha.templater>`: provides the :class:`smacha.templater.Templater` class as well as other functions for processing :doc:`Templating/smacha_templates`.
+- :doc:`Generator <API/smacha.generator>`: provides the :class:`smacha.generator.Generator` class for generating executable Python SMACH code.
+- :doc:`Util <API/smacha.util>`: provides various utilities.
+- :doc:`Exceptions <API/smacha.exceptions>`: provides exception definitions.
 
 Templates
 =========
@@ -282,9 +285,9 @@ Base Templates
 .. toctree::
    :hidden:
 
-   The Base Template<API/Templates/Base.tpl.py>
+   Base<API/Templates/Base.tpl.py>
 
-- :doc:`API/Templates/Base.tpl.py`: used for specifying the bare bones of a Python SMACH state machine script.
+- :doc:`Base <API/Templates/Base.tpl.py>`: used for specifying the bare bones of a Python SMACH state machine script.
 
 Container Templates
 -------------------
@@ -292,11 +295,11 @@ Container Templates
 .. toctree::
    :hidden:
 
-   The StateMachine Template<API/Templates/StateMachine.tpl.py>
-   The Concurrence Template<API/Templates/Concurrence.tpl.py>
+   StateMachine<API/Templates/StateMachine.tpl.py>
+   Concurrence<API/Templates/Concurrence.tpl.py>
 
-- :doc:`API/Templates/StateMachine.tpl.py`: used for inserting a `StateMachine container <http://wiki.ros.org/smach/Tutorials/StateMachine%20container>`__.
-- :doc:`API/Templates/Concurrence.tpl.py`: used for inserting a `Concurrence container <http://wiki.ros.org/smach/Tutorials/Concurrence%20container>`__.
+- :doc:`StateMachine <API/Templates/StateMachine.tpl.py>`: used for inserting a `StateMachine container <http://wiki.ros.org/smach/Tutorials/StateMachine%20container>`__.
+- :doc:`Concurrence <API/Templates/Concurrence.tpl.py>`: used for inserting a `Concurrence container <http://wiki.ros.org/smach/Tutorials/Concurrence%20container>`__.
 
 
 State Templates
@@ -305,20 +308,32 @@ State Templates
 .. toctree::
    :hidden:
 
-   The CallbacksState Template<API/Templates/CallbacksState.tpl.py>
-   The PrintUserdataState Template<API/Templates/PrintUserdataState.tpl.py>
-   The RandomOutcomeState Template<API/Templates/RandomOutcomeState.tpl.py>
-   The ServiceState Template<API/Templates/ServiceState.tpl.py>
-   The SimpleActionState Template<API/Templates/SimpleActionState.tpl.py>
-   The SleepState Template<API/Templates/SleepState.tpl.py>
-   The TF2ListenerState Template<API/Templates/TF2ListenerState.tpl.py>
+   CallbacksState<API/Templates/CallbacksState.tpl.py>
+   ConditionalOutcomeState<API/Templates/ConditionalOutcomeState.tpl.py>
+   DeleteFileState<API/Templates/DeleteFileState.tpl.py>
+   PrintUserdataState<API/Templates/PrintUserdataState.tpl.py>
+   PublishMsgState<API/Templates/PublishMsgState.tpl.py>
+   RandomOutcomeState<API/Templates/RandomOutcomeState.tpl.py>
+   ReadTopicState<API/Templates/ReadTopicState.tpl.py>
+   ServiceState<API/Templates/ServiceState.tpl.py>
+   SimpleActionState<API/Templates/SimpleActionState.tpl.py>
+   SleepState<API/Templates/SleepState.tpl.py>
+   TF2ListenerState<API/Templates/TF2ListenerState.tpl.py>
+   TransformMsgState<API/Templates/TransformMsgState.tpl.py>
+   WriteCSVFileState<API/Templates/WriteCSVFileState.tpl.py>
 
-- :doc:`API/Templates/CallbacksState.tpl.py`: used for creating lambda function callbacks.
-- :doc:`API/Templates/PrintUserdataState.tpl.py`: used for printing userdata entries to standard output.
-- :doc:`API/Templates/RandomOutcomeState.tpl.py`: used for selecting a random outcome from a specified list of outcomes.
-- :doc:`API/Templates/ServiceState.tpl.py`: used for inserting a `ServiceState <http://wiki.ros.org/smach/Tutorials/ServiceState>`__.
-- :doc:`API/Templates/SimpleActionState.tpl.py`: used for inserting a `SimpleActionState <http://wiki.ros.org/smach/Tutorials/SimpleActionState>`__.
-- :doc:`API/Templates/TF2ListenerState.tpl.py`: used for reading TF2 transforms.
+- :doc:`CallbacksState <API/Templates/CallbacksState.tpl.py>`: used for creating lambda function callbacks.
+- :doc:`ConditionalOutcomeState <API/Templates/ConditionalOutcomeState.tpl.py>`: used for conditionally selecting an outcome.
+- :doc:`DeleteFileState <API/Templates/DeleteFileState.tpl.py>`: used for deleting files from the file system.
+- :doc:`PrintUserdataState <API/Templates/PrintUserdataState.tpl.py>`: used for printing userdata entries to standard output.
+- :doc:`PublishMsgState <API/Templates/PublishMsgState.tpl.py>`: used for publishing userdata ROS message entries to topics.
+- :doc:`RandomOutcomeState <API/Templates/RandomOutcomeState.tpl.py>`: used for selecting a random outcome from a specified list of outcomes.
+- :doc:`ReadTopicState <API/Templates/ReadTopicState.tpl.py>`: used for reading ROS messages from topics to userdata.
+- :doc:`ServiceState <API/Templates/ServiceState.tpl.py>`: used for inserting a `ServiceState <http://wiki.ros.org/smach/Tutorials/ServiceState>`_.
+- :doc:`SimpleActionState <API/Templates/SimpleActionState.tpl.py>`: used for inserting a `SimpleActionState <http://wiki.ros.org/smach/Tutorials/SimpleActionState>`_.
+- :doc:`TF2ListenerState <API/Templates/TF2ListenerState.tpl.py>`: used for reading `TF2 <https://wiki.ros.org/tf2>`_ transforms.
+- :doc:`TransformMsgState <API/Templates/TransformMsgState.tpl.py>`: used for transforming userdata ROS messages from one `tf <https://wiki.ros.org/tf>`_ frame to another.
+- :doc:`WriteCSVFileState <API/Templates/WriteCSVFileState.tpl.py>`: used for writing `CSV files <https://en.wikipedia.org/wiki/Comma-separated_values>`_ to the file system.
 
 Other Templates
 ---------------
@@ -326,13 +341,33 @@ Other Templates
 .. toctree::
    :hidden:
 
-   The State Template<API/Templates/State.tpl.py>
-   The Utilities Template<API/Templates/Utils.tpl.py>
-   The TF2ListenerSingleton Template<API/Templates/TF2ListenerSingleton.tpl.py>
+   MsgPublisherObserver<API/Templates/MsgPublisherObserver.tpl.py>
+   ParseJointTrajectoryPoint<API/Templates/ParseJointTrajectoryPoint.tpl.py>
+   ParsePointCloud<API/Templates/ParsePointCloud.tpl.py>
+   ParsePointCloud2<API/Templates/ParsePointCloud2.tpl.py>
+   ParsePointStamped<API/Templates/ParsePointStamped.tpl.py>
+   ParsePose<API/Templates/ParsePose.tpl.py>
+   ParsePoseArray<API/Templates/ParsePoseArray.tpl.py>
+   ParsePoseStamped<API/Templates/ParsePoseStamped.tpl.py>
+   ParseTransformStamped<API/Templates/ParseTransformStamped.tpl.py>
+   State<API/Templates/State.tpl.py>
+   TF2ListenerSingleton<API/Templates/TF2ListenerSingleton.tpl.py>
+   Utilities<API/Templates/Utils.tpl.py>
+   WaitForMsgState<API/Templates/WaitForMsgState.tpl.py>
 
-- :doc:`API/Templates/State.tpl.py`: contains code common to all state templates.
-- :doc:`API/Templates/Utils.tpl.py`: contains template macros and other utilities.
-- :doc:`API/Templates/TF2ListenerSingleton.tpl.py`: provides a helper class for :doc:`API/Templates/TF2ListenerState.tpl.py`.
+- :doc:`MsgPublisherObserver <API/Templates/MsgPublisherObserver.tpl.py>`: provides a helper class for the :doc:`PublishMsgState <API/Templates/PublishMsgState.tpl.py>` template.
+- :doc:`ParseJointTrajectoryPoint <API/Templates/ParseJointTrajectoryPoint.tpl.py>`: provides a helper function for parsing `trajectory_msgs/JointTrajectoryPoint <https://docs.ros.org/api/trajectory_msgs/html/msg/JointTrajectoryPoint.html>`_ types.
+- :doc:`ParsePointCloud <API/Templates/ParsePointCloud.tpl.py>`: provides a helper function for parsing `sensor_msgs/PointCloud <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud.html>`_ types.
+- :doc:`ParsePointCloud2 <API/Templates/ParsePointCloud2.tpl.py>`: provides a helper function for parsing `sensor_msgs/PointCloud2 <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html>`_ types.
+- :doc:`ParsePointStamped <API/Templates/ParsePointStamped.tpl.py>`: provides a helper function for parsing `geometry_msgs/PointStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PointStamped.html>`_ types.
+- :doc:`ParsePose <API/Templates/ParsePose.tpl.py>`: provides a helper function for parsing `geometry_msgs/Pose <https://docs.ros.org/api/geometry_msgs/html/msg/Pose.html>`_ types.
+- :doc:`ParsePoseArray <API/Templates/ParsePoseArray.tpl.py>`: provides a helper function for parsing `geometry_msgs/PoseArray <https://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html>`_ types.
+- :doc:`ParsePoseStamped <API/Templates/ParsePoseStamped.tpl.py>`: provides a helper function for parsing `geometry_msgs/PoseStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PoseStamped.html>`_ types.
+- :doc:`ParseTransformStamped <API/Templates/ParseTransformStamped.tpl.py>`: provides a helper function for parsing `geometry_msgs/TransformStamped <https://docs.ros.org/api/geometry_msgs/html/msg/TransformStamped.html>`_ types.
+- :doc:`State <API/Templates/State.tpl.py>`: contains code common to all state templates.
+- :doc:`TF2ListenerSingleton <API/Templates/TF2ListenerSingleton.tpl.py>`: provides a helper class for the :doc:`TF2ListenerState <API/Templates/TF2ListenerState.tpl.py>` template.
+- :doc:`Utils <API/Templates/Utils.tpl.py>`: contains template macros and other utilities.
+- :doc:`WaitForMsgState <API/Templates/WaitForMsgState.tpl.py>`: provides a helper class for the :doc:`ReadTopicState <API/Templates/ReadTopicState.tpl.py>` template.
 
 *********************
 Other SMACHA Packages
