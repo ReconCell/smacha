@@ -37,6 +37,13 @@ The :doc:`PublishMsgState <../API/Templates/PublishMsgState.tpl.py>` template is
 
 .. program-output:: ../scripts/help PublishMsgState -n
 
+PublishObserverMsgState
+=======================
+
+The :doc:`PublishObserverMsgState <../API/Templates/PublishObserverMsgState.tpl.py>` template is used for publishing userdata ROS message entries to topics using an `observer pattern <https://en.wikipedia.org/wiki/Observer_pattern>`_ and is specified as follows:
+
+.. program-output:: ../scripts/help PublishObserverMsgState -n
+
 RandomOutcomeState
 ==================
 
@@ -50,6 +57,13 @@ ReadTopicState
 The :doc:`ReadTopicState <../API/Templates/ReadTopicState.tpl.py>` template is used for reading ROS messages from topics and is specified as follows:
 
 .. program-output:: ../scripts/help ReadTopicState -n
+
+RecordROSBagState
+=================
+
+The :doc:`RecordROSBagState <../API/Templates/RecordROSBagState.tpl.py>` template is used for recording topic data to `ROS bags <https://wiki.ros.org/Bags>`_ and is specified as follows:
+
+.. program-output:: ../scripts/help RecordROSBagState -n
 
 ServiceState
 ============
