@@ -2,10 +2,17 @@
 Other Core API Templates
 ************************
 
+MsgPublisher
+====================
+
+The :doc:`MsgPublisher <../API/Templates/MsgPublisher.tpl.py>` template provides a helper class for :doc:`../API/Templates/PublishMsgState.tpl.py`  and is specified as follows:
+
+.. program-output:: ../scripts/help MsgPublisher -n
+
 MsgPublisherObserver
 ====================
 
-The :doc:`MsgPublisherObserver <../API/Templates/MsgPublisherObserver.tpl.py>` template provides a helper class for :doc:`../API/Templates/PublishMsgState.tpl.py`  and is specified as follows:
+The :doc:`MsgPublisherObserver <../API/Templates/MsgPublisherObserver.tpl.py>` template provides a helper class for :doc:`../API/Templates/PublishObserverMsgState.tpl.py`  and is specified as follows:
 
 .. program-output:: ../scripts/help MsgPublisherObserver -n
 
@@ -64,6 +71,20 @@ ParseTransformStamped
 The :doc:`ParseTransformStamped <../API/Templates/ParseTransformStamped.tpl.py>` provides a helper function for parsing `geometry_msgs/TransformStamped <https://docs.ros.org/api/geometry_msgs/html/msg/TransformStamped.html>`_ types and is specified as follows:
 
 .. program-output:: ../scripts/help ParseTransformStamped -n
+
+ROSBagAPIThreadRecorder
+=======================
+
+The :doc:`ROSBagAPIThreadRecorder <../API/Templates/ROSBagAPIThreadRecorder.tpl.py>` provides a helper class for the :doc:`RecordROSBagState <../API/Templates/RecordROSBagState.tpl.py>` template that allows for ROS bags to be recorded using the `ROS bag Python application programming interface <https://wiki.ros.org/rosbag/Code%20API#Python_API>`_ and is specified as follows:
+
+.. program-output:: ../scripts/help ROSBagAPIThreadRecorder -n
+
+ROSBagCLIProcessRecorder
+========================
+
+The :doc:`ROSBagCLIProcessRecorder <../API/Templates/ROSBagCLIProcessRecorder.tpl.py>` provides a helper class for the :doc:`RecordROSBagState <../API/Templates/RecordROSBagState.tpl.py>` template that allows for ROS bags to be recorded using the `ROS bag command line interface <https://wiki.ros.org/rosbag/Commandline>`_ and is specified as follows:
+
+.. program-output:: ../scripts/help ROSBagCLIProcessRecorder -n
 
 State 
 =====

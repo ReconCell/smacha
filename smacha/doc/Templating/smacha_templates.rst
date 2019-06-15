@@ -45,7 +45,7 @@ we see that the base template ``Base`` is specified at the top of the script:
 
 .. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml
    :language: yaml
-   :lines: 1-7
+   :lines: 1-5
 
 This ``Base`` template is the :doc:`core SMACHA Base template <../API/Templates/Base.tpl.py>`
 defined in the :download:`Base.tpl.py </../src/smacha/templates/Base.tpl.py>` file.
@@ -71,7 +71,7 @@ with the following code for the block definition:
 
 .. literalinclude:: /../src/smacha/templates/Base.tpl.py
    :language: python
-   :lines: 65-74
+   :lines: 69-84
 
 The core idea behind SMACHA :doc:`code generation
 <../CodeGeneration/smacha_code_generator>` and :ref:`template rendering
@@ -97,7 +97,7 @@ render the ``SUB`` state:
 
 .. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml
    :language: yaml
-   :lines: 8-13
+   :lines: 6-11
 
 This is the :doc:`core SMACHA StateMachine container template
 <../API/Templates/StateMachine.tpl.py>` defined in the
@@ -115,7 +115,7 @@ with the following code for the block definition:
 
 .. literalinclude:: /../src/smacha/templates/StateMachine.tpl.py
    :language: python
-   :lines: 36-51
+   :lines: 36-57
 
 Container templates play a dual role as both the parents of child states,
 where the contents of the child state ``body`` blocks get rendered into their
@@ -138,7 +138,7 @@ as well as the ``FOO_2`` state that follows:
 
 .. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml
    :language: yaml
-   :lines: 24-29
+   :lines: 5-27
 
 This ``ParamFoo`` template is a simple example state from the 
 `test/smacha_scripts/smacha_test_examples <https://gitlab.com/reconcell/smacha/tree/master/smacha/test/smacha_scripts/smacha_test_examples>`__
