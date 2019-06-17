@@ -7,14 +7,16 @@ PublishMsgState
 
 The :doc:`PublishMsgState <../API/Templates/PublishMsgState.tpl.py>` template is used for publishing userdata ROS message entries to topics and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help PublishMsgState -n -t ../src/smacha_ros/templates
+.. command-output:: rosrun smacha help PublishMsgState -n -t $(rospack find smacha_ros)/src/smacha_ros/templates
+  :shell: 
 
 ReadTopicState
 ==============
 
 The :doc:`ReadTopicState <../API/Templates/ReadTopicState.tpl.py>` template is used for reading ROS messages from topics and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help ReadTopicState -n -t ../src/smacha_ros/templates
+.. program-output:: $(rospack find smacha)/scripts/help ReadTopicState -n -t $(rospack find smacha_ros)/src/smacha_ros/templates
+  :shell:
 
 ServiceState
 ============
