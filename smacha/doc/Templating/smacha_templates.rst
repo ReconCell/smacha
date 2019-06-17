@@ -138,7 +138,7 @@ as well as the ``FOO_2`` state that follows:
 
 .. literalinclude:: /../test/smacha_scripts/smacha_test_examples/seq_nesting_1.yml
    :language: yaml
-   :lines: 24-29
+   :lines: 22-27
 
 This ``ParamFoo`` template is a simple example state from the 
 `test/smacha_scripts/smacha_test_examples <https://gitlab.com/reconcell/smacha/tree/master/smacha/test/smacha_scripts/smacha_test_examples>`__
