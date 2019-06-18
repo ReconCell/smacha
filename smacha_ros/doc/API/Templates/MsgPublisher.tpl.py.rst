@@ -5,5 +5,5 @@ The MsgPublisher Template
 
   smacha/src/smacha/templates/MsgPublisher.tpl.py
 
-.. literalinclude:: /../src/smacha/templates/MsgPublisher.tpl.py
+.. literalinclude:: /../src/smacha_ros/templates/MsgPublisher.tpl.py
    :language: python

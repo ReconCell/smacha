@@ -5,5 +5,5 @@ The RecordROSBagState Template
 
   smacha/src/smacha/templates/RecordROSBagState.tpl.py
 
-.. literalinclude:: /../src/smacha/templates/RecordROSBagState.tpl.py
+.. literalinclude:: /../src/smacha_ros/templates/RecordROSBagState.tpl.py
    :language: python

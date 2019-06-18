@@ -5,5 +5,5 @@ The ROSBagAPIThreadRecorder Template
 
   smacha/src/smacha/templates/ROSBagAPIThreadRecorder.tpl.py
 
-.. literalinclude:: /../src/smacha/templates/ROSBagAPIThreadRecorder.tpl.py
+.. literalinclude:: /../src/smacha_ros/templates/ROSBagAPIThreadRecorder.tpl.py
    :language: python

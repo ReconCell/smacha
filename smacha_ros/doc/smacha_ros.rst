@@ -149,6 +149,24 @@ before calling the ``Extract`` service in order to extract the ``SUB`` state fro
 
    $ rosservice call /smacha/extract /contained_seq/script SUB
 
+Templating
+==========
+
+.. toctree::
+   :hidden:
+
+   ROS State Templates<Templating/core_api_state_templates>
+   Other ROS Templates<Templating/other_core_api_templates>
+
+The SMACHA ROS package provides :doc:`ROS state templates <Templating/core_api_state_templates>` as well as :doc:`other ROS templates<Templating/other_core_api_templates>`
+in order to provide ROS integration and additional functionality, for example:
+
+* **Templates for publishing arbitrary messages to topics**,
+* **Templates for performing TF transforms**,
+* **Templates for parsing messages into selected types**,
+* **Templates for recording ROS bags**,
+* etc.
+
 *********************
 Other SMACHA Packages
 *********************
@@ -165,18 +183,20 @@ SMACHA GUI
 The `SMACHA GUI package <https://reconcell.gitlab.io/reconcell_docs/DevManuals/smacha_gui/index.html>`_ provides a
 visual programming interface for SMACHA for use within the `ReconCell Project <https://reconcell.gitlab.io/reconcell_docs/#>`_.
 
-*********
+**************
+SMACHA ROS API
+**************
+
 Templates
-*********
+=========
 
 .. toctree::
    :hidden:
 
-   Core API State Templates<Templating/core_api_state_templates>
-   Other Core API Templates<Templating/other_core_api_templates>
+These are the core smacha_ros package templates:
 
 State Templates
-===============
+---------------
 
 .. toctree::
    :hidden:
@@ -194,7 +214,6 @@ State Templates
 
 - :doc:`PublishMsgState <API/Templates/PublishMsgState.tpl.py>`: used for publishing userdata ROS message entries to topics.
 - :doc:`PublishObserverMsgState <API/Templates/PublishObserverMsgState.tpl.py>`: used for publishing userdata ROS message entries to topics using an `observer pattern <https://en.wikipedia.org/wiki/Observer_pattern>`_.
-- :doc:`RandomOutcomeState <API/Templates/RandomOutcomeState.tpl.py>`: used for selecting a random outcome from a specified list of outcomes.
 - :doc:`ReadTopicState <API/Templates/ReadTopicState.tpl.py>`: used for reading ROS messages from topics to userdata.
 - :doc:`RecordROSBagState <API/Templates/RecordROSBagState.tpl.py>`: used for recording topic data to `ROS bags <https://wiki.ros.org/Bags>`_.
 - :doc:`ServiceState <API/Templates/ServiceState.tpl.py>`: used for inserting a `ServiceState <http://wiki.ros.org/smach/Tutorials/ServiceState>`_.
@@ -204,7 +223,7 @@ State Templates
 
 
 Other Templates
-===============
+---------------
 
 .. toctree::
    :hidden:
@@ -221,6 +240,7 @@ Other Templates
    ParseTransformStamped<API/Templates/ParseTransformStamped.tpl.py>
    ROSBagAPIThreadRecorder<API/Templates/ROSBagAPIThreadRecorder.tpl.py>
    ROSBagCLIProcessRecorder<API/Templates/ROSBagCLIProcessRecorder.tpl.py>
+   TF2ListenerSingleton<API/Templates/TF2ListenerSingleton.tpl.py>
    WaitForMsgState<API/Templates/WaitForMsgState.tpl.py>
 
 - :doc:`MsgPublisher <API/Templates/MsgPublisher.tpl.py>`: provides a helper class for the :doc:`PublishMsgState <API/Templates/PublishMsgState.tpl.py>` template.
@@ -235,6 +255,9 @@ Other Templates
 - :doc:`ParseTransformStamped <API/Templates/ParseTransformStamped.tpl.py>`: provides a helper function for parsing `geometry_msgs/TransformStamped <https://docs.ros.org/api/geometry_msgs/html/msg/TransformStamped.html>`_ types.
 - :doc:`ROSBagAPIThreadRecorder <API/Templates/ROSBagAPIThreadRecorder.tpl.py>`: provides a helper class for the :doc:`RecordROSBagState <API/Templates/RecordROSBagState.tpl.py>` template that allows for ROS bags to be recorded using the `ROS bag Python application programming interface <https://wiki.ros.org/rosbag/Code%20API#Python_API>`_.
 - :doc:`ROSBagCLIProcessRecorder <API/Templates/ROSBagCLIProcessRecorder.tpl.py>`: provides a helper class for the :doc:`RecordROSBagState <API/Templates/RecordROSBagState.tpl.py>` template that allows for ROS bags to be recorded using the `ROS bag command line interface <https://wiki.ros.org/rosbag/Commandline>`_.
+- :doc:`TF2ListenerSingleton <API/Templates/TF2ListenerSingleton.tpl.py>`: provides a helper class for the :doc:`TF2ListenerState <API/Templates/TF2ListenerState.tpl.py>` template.
+- :doc:`WaitForMsgState <API/Templates/WaitForMsgState.tpl.py>`: provides a helper class for the :doc:`ReadTopicState <API/Templates/ReadTopicState.tpl.py>` template.
+
 
 ******************
 Indices and tables

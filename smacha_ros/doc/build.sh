@@ -96,7 +96,7 @@ cd ..
 source ./catkin_ws/devel/setup.bash
 
 # Test build with non-ROS wrapped Sphinx command to allow warnings and errors to be caught
-sphinx-build -W -b html /$CI_PROJECT_NAME/$PACKAGE_NAME /$CI_PROJECT_NAME/$PACKAGE_NAME/public_native_build
+sphinx-build -W -b html /$CI_PROJECT_NAME/$PACKAGE_NAME/doc /$CI_PROJECT_NAME/$PACKAGE_NAME/public_native_build
 
 # Test build with ROS-version of Sphinx command so that it is generated same as ros.org
 rosdoc_lite -o /$CI_PROJECT_NAME/$PACKAGE_NAME/public_build /$CI_PROJECT_NAME/$PACKAGE_NAME
