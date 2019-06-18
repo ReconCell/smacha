@@ -37,7 +37,7 @@ apt-get -qq install wget
 apt-get -qq install apt-utils
 sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-latest.list'
 wget http://packages.ros.org/ros.key -O - | apt-key add -
-apt-get -qq install -y python-rosdep python-wstool python-catkin-tools
+apt-get -qq install -y --allow-unauthenticated python-rosdep python-wstool python-catkin-tools
 
 # Setup rosdep
 rosdep init
