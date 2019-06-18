@@ -1,6 +1,6 @@
 {% block meta %}
 name: ROSBagAPIThreadRecorder
-description:
+description: >
   SMACH template that provides a ROSBagAPIThreadRecorder helper class for
   RecordROSBagState. It uses the rosbag API (application programming interface)
   as well as the threading library in order to manage multiple recording

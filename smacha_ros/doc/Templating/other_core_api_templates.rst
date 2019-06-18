@@ -2,68 +2,89 @@
 Other Core API Templates
 ************************
 
+MsgPublisher
+====================
+
+The :doc:`MsgPublisher <../API/Templates/MsgPublisher.tpl.py>` template provides a helper class for :doc:`../API/Templates/PublishMsgState.tpl.py`  and is specified as follows:
+
+.. program-output:: ../scripts/help MsgPublisher -n
+
 MsgPublisherObserver
 ====================
 
-The :doc:`MsgPublisherObserver <../API/Templates/MsgPublisherObserver.tpl.py>` template provides a helper class for :doc:`../API/Templates/PublishMsgState.tpl.py`  and is specified as follows:
+The :doc:`MsgPublisherObserver <../API/Templates/MsgPublisherObserver.tpl.py>` template provides a helper class for :doc:`../API/Templates/PublishObserverMsgState.tpl.py`  and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help MsgPublisherObserver -n -t ../src/smacha_ros/templates
+.. program-output:: ../scripts/help MsgPublisherObserver -n
 
 ParseJointTrajectoryPoint
 =========================
 
 The :doc:`ParseJointTrajectoryPoint <../API/Templates/ParseJointTrajectoryPoint.tpl.py>` template provides a helper function for parsing `trajectory_msgs/JointTrajectoryPoint <https://docs.ros.org/api/trajectory_msgs/html/msg/JointTrajectoryPoint.html>`_ types and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help ParseJointTrajectoryPoint -n -t ../src/smacha_ros/templates
+.. program-output:: ../scripts/help ParseJointTrajectoryPoint -n
 
 ParsePointCloud
 ===============
 
 The :doc:`ParsePointCloud <../API/Templates/ParsePointCloud.tpl.py>` template provides a helper function for parsing `sensor_msgs/PointCloud <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud.html>`_ types and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help ParsePointCloud -n -t ../src/smacha_ros/templates
+.. program-output:: ../scripts/help ParsePointCloud -n
 
 ParsePointCloud2
 ================
 
 The :doc:`ParsePointCloud2 <../API/Templates/ParsePointCloud2.tpl.py>` template provides a helper function for parsing `sensor_msgs/PointCloud2 <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html>`_ types and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help ParsePointCloud2 -n -t ../src/smacha_ros/templates
+.. program-output:: ../scripts/help ParsePointCloud2 -n
 
 ParsePointStamped
 =================
 
 The :doc:`ParsePointStamped <../API/Templates/ParsePointStamped.tpl.py>` template provides a helper function for parsing `geometry_msgs/PointStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PointStamped.html>`_ types and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help ParsePointStamped -n -t ../src/smacha_ros/templates
+.. program-output:: ../scripts/help ParsePointStamped -n
 
 ParsePose 
 =========
 
 The :doc:`ParsePose <../API/Templates/ParsePose.tpl.py>` template provides a helper function for parsing `geometry_msgs/Pose <https://docs.ros.org/api/geometry_msgs/html/msg/Pose.html>`_ types and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help ParsePose -n -t ../src/smacha_ros/templates
+.. program-output:: ../scripts/help ParsePose -n
 
 ParsePoseArray
 ==============
 
 The :doc:`ParsePoseArray <../API/Templates/ParsePoseArray.tpl.py>` template provides a helper function for parsing `geometry_msgs/PoseArray <https://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html>`_ types and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help ParsePoseArray -n -t ../src/smacha_ros/templates
+.. program-output:: ../scripts/help ParsePoseArray -n
 
 ParsePoseStamped
 ================
 
 The :doc:`ParsePoseStamped <../API/Templates/ParsePoseStamped.tpl.py>` template provides a helper function for parsing `geometry_msgs/PoseStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PoseStamped.html>`_ types and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help ParsePoseStamped -n -t ../src/smacha_ros/templates
+.. program-output:: ../scripts/help ParsePoseStamped -n
 
 ParseTransformStamped
 =====================
 
 The :doc:`ParseTransformStamped <../API/Templates/ParseTransformStamped.tpl.py>` provides a helper function for parsing `geometry_msgs/TransformStamped <https://docs.ros.org/api/geometry_msgs/html/msg/TransformStamped.html>`_ types and is specified as follows:
 
-.. program-output:: ../../smacha/scripts/help ParseTransformStamped -n -t ../src/smacha_ros/templates
+.. program-output:: ../scripts/help ParseTransformStamped -n
+
+ROSBagAPIThreadRecorder
+=======================
+
+The :doc:`ROSBagAPIThreadRecorder <../API/Templates/ROSBagAPIThreadRecorder.tpl.py>` provides a helper class for the :doc:`RecordROSBagState <../API/Templates/RecordROSBagState.tpl.py>` template that allows for ROS bags to be recorded using the `ROS bag Python application programming interface <https://wiki.ros.org/rosbag/Code%20API#Python_API>`_ and is specified as follows:
+
+.. program-output:: ../scripts/help ROSBagAPIThreadRecorder -n
+
+ROSBagCLIProcessRecorder
+========================
+
+The :doc:`ROSBagCLIProcessRecorder <../API/Templates/ROSBagCLIProcessRecorder.tpl.py>` provides a helper class for the :doc:`RecordROSBagState <../API/Templates/RecordROSBagState.tpl.py>` template that allows for ROS bags to be recorded using the `ROS bag command line interface <https://wiki.ros.org/rosbag/Commandline>`_ and is specified as follows:
+
+.. program-output:: ../scripts/help ROSBagCLIProcessRecorder -n
 
 WaitForMsgState
 ===============

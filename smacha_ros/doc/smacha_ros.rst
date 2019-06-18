@@ -181,25 +181,26 @@ State Templates
 .. toctree::
    :hidden:
 
-
    PublishMsgState<API/Templates/PublishMsgState.tpl.py>
+   PublishObserverMsgState<API/Templates/PublishObserverMsgState.tpl.py>
    ReadTopicState<API/Templates/ReadTopicState.tpl.py>
+   RecordROSBagState<API/Templates/RecordROSBagState.tpl.py>
    ServiceState<API/Templates/ServiceState.tpl.py>
    SimpleActionState<API/Templates/SimpleActionState.tpl.py>
    SleepState<API/Templates/SleepState.tpl.py>
    TF2ListenerState<API/Templates/TF2ListenerState.tpl.py>
-   TF2ListenerSingleton<API/Templates/TF2ListenerSingleton.tpl.py>
    TransformMsgState<API/Templates/TransformMsgState.tpl.py>
-   WaitForMsgState<API/Templates/WaitForMsgState.tpl.py>
 
 
 - :doc:`PublishMsgState <API/Templates/PublishMsgState.tpl.py>`: used for publishing userdata ROS message entries to topics.
+- :doc:`PublishObserverMsgState <API/Templates/PublishObserverMsgState.tpl.py>`: used for publishing userdata ROS message entries to topics using an `observer pattern <https://en.wikipedia.org/wiki/Observer_pattern>`_.
+- :doc:`RandomOutcomeState <API/Templates/RandomOutcomeState.tpl.py>`: used for selecting a random outcome from a specified list of outcomes.
 - :doc:`ReadTopicState <API/Templates/ReadTopicState.tpl.py>`: used for reading ROS messages from topics to userdata.
+- :doc:`RecordROSBagState <API/Templates/RecordROSBagState.tpl.py>`: used for recording topic data to `ROS bags <https://wiki.ros.org/Bags>`_.
 - :doc:`ServiceState <API/Templates/ServiceState.tpl.py>`: used for inserting a `ServiceState <http://wiki.ros.org/smach/Tutorials/ServiceState>`_.
 - :doc:`SimpleActionState <API/Templates/SimpleActionState.tpl.py>`: used for inserting a `SimpleActionState <http://wiki.ros.org/smach/Tutorials/SimpleActionState>`_.
 - :doc:`TF2ListenerState <API/Templates/TF2ListenerState.tpl.py>`: used for reading `TF2 <https://wiki.ros.org/tf2>`_ transforms.
 - :doc:`TransformMsgState <API/Templates/TransformMsgState.tpl.py>`: used for transforming userdata ROS messages from one `tf <https://wiki.ros.org/tf>`_ frame to another.
-- :doc:`WaitForMsgState <API/Templates/WaitForMsgState.tpl.py>`: provides a helper class for the :doc:`ReadTopicState <API/Templates/ReadTopicState.tpl.py>` template.
 
 
 Other Templates
@@ -208,6 +209,7 @@ Other Templates
 .. toctree::
    :hidden:
    
+   MsgPublisher<API/Templates/MsgPublisher.tpl.py>
    MsgPublisherObserver<API/Templates/MsgPublisherObserver.tpl.py>
    ParseJointTrajectoryPoint<API/Templates/ParseJointTrajectoryPoint.tpl.py>
    ParsePointCloud<API/Templates/ParsePointCloud.tpl.py>
@@ -217,9 +219,12 @@ Other Templates
    ParsePoseArray<API/Templates/ParsePoseArray.tpl.py>
    ParsePoseStamped<API/Templates/ParsePoseStamped.tpl.py>
    ParseTransformStamped<API/Templates/ParseTransformStamped.tpl.py>
-   TF2ListenerSingleton<API/Templates/TF2ListenerSingleton.tpl.py>
+   ROSBagAPIThreadRecorder<API/Templates/ROSBagAPIThreadRecorder.tpl.py>
+   ROSBagCLIProcessRecorder<API/Templates/ROSBagCLIProcessRecorder.tpl.py>
+   WaitForMsgState<API/Templates/WaitForMsgState.tpl.py>
 
-- :doc:`MsgPublisherObserver <API/Templates/MsgPublisherObserver.tpl.py>`: provides a helper class for the :doc:`PublishMsgState <API/Templates/PublishMsgState.tpl.py>` template.
+- :doc:`MsgPublisher <API/Templates/MsgPublisher.tpl.py>`: provides a helper class for the :doc:`PublishMsgState <API/Templates/PublishMsgState.tpl.py>` template.
+- :doc:`MsgPublisherObserver <API/Templates/MsgPublisherObserver.tpl.py>`: provides a helper class for the :doc:`PublishObserverMsgState <API/Templates/PublishObserverMsgState.tpl.py>` template.
 - :doc:`ParseJointTrajectoryPoint <API/Templates/ParseJointTrajectoryPoint.tpl.py>`: provides a helper function for parsing `trajectory_msgs/JointTrajectoryPoint <https://docs.ros.org/api/trajectory_msgs/html/msg/JointTrajectoryPoint.html>`_ types.
 - :doc:`ParsePointCloud <API/Templates/ParsePointCloud.tpl.py>`: provides a helper function for parsing `sensor_msgs/PointCloud <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud.html>`_ types.
 - :doc:`ParsePointCloud2 <API/Templates/ParsePointCloud2.tpl.py>`: provides a helper function for parsing `sensor_msgs/PointCloud2 <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html>`_ types.
@@ -228,7 +233,8 @@ Other Templates
 - :doc:`ParsePoseArray <API/Templates/ParsePoseArray.tpl.py>`: provides a helper function for parsing `geometry_msgs/PoseArray <https://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html>`_ types.
 - :doc:`ParsePoseStamped <API/Templates/ParsePoseStamped.tpl.py>`: provides a helper function for parsing `geometry_msgs/PoseStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PoseStamped.html>`_ types.
 - :doc:`ParseTransformStamped <API/Templates/ParseTransformStamped.tpl.py>`: provides a helper function for parsing `geometry_msgs/TransformStamped <https://docs.ros.org/api/geometry_msgs/html/msg/TransformStamped.html>`_ types.
-- :doc:`TF2ListenerSingleton <API/Templates/TF2ListenerSingleton.tpl.py>`: provides a helper class for the :doc:`TF2ListenerState <API/Templates/TF2ListenerState.tpl.py>` template.
+- :doc:`ROSBagAPIThreadRecorder <API/Templates/ROSBagAPIThreadRecorder.tpl.py>`: provides a helper class for the :doc:`RecordROSBagState <API/Templates/RecordROSBagState.tpl.py>` template that allows for ROS bags to be recorded using the `ROS bag Python application programming interface <https://wiki.ros.org/rosbag/Code%20API#Python_API>`_.
+- :doc:`ROSBagCLIProcessRecorder <API/Templates/ROSBagCLIProcessRecorder.tpl.py>`: provides a helper class for the :doc:`RecordROSBagState <API/Templates/RecordROSBagState.tpl.py>` template that allows for ROS bags to be recorded using the `ROS bag command line interface <https://wiki.ros.org/rosbag/Commandline>`_.
 
 ******************
 Indices and tables
