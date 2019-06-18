@@ -33,4 +33,4 @@ fi
 export CI_PROJECT_NAME=${MOUNT_POINT/*\//}
 
 # Run the documentation build script in a ROS Kinetic docker image
-docker run --rm -v "$MOUNT_POINT:/$CI_PROJECT_NAME" -e CI_PROJECT_NAME=$CI_PROJECT_NAME -e CI_REPOSITORY_URL=/$CI_PROJECT_NAME ros:kinetic-ros-base /$CI_PROJECT_NAME/$PACKAGE_NAME/doc/build.sh
+docker run -rm -v "$MOUNT_POINT:/$CI_PROJECT_NAME" -e CI_PROJECT_NAME=$CI_PROJECT_NAME -e CI_REPOSITORY_URL=/$CI_PROJECT_NAME ros:kinetic-ros-base /$CI_PROJECT_NAME/$PACKAGE_NAME/doc/build.sh
