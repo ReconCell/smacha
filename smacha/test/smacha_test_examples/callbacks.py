@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-
-import roslib
-import rospy
 import smach
-import smach_ros
 import random
 
 
@@ -14,6 +10,7 @@ import random
 def foo_animals_cb(userdata):
     userdata['animals'].append('turtles')
     return 'succeeded'
+
 
 # Define normal callback for 'numbers' output key
 @smach.cb_interface(input_keys=['numbers'],
@@ -30,6 +27,7 @@ class Foo(smach.State):
 
         self._name = name
 
+        
         self._cbs = []
 
         if callbacks:
@@ -55,10 +53,9 @@ class Foo(smach.State):
                 self.register_output_keys(self._cb_output_keys[-1])
                 self.register_outcomes(self._cb_outcomes[-1])
 
-
     def execute(self, userdata):
         for input_key in self._input_keys:
-            rospy.loginfo('Userdata input key \'{}\' BEFORE callback execution: {}'.format(input_key, userdata[input_key]))
+            smach.loginfo('Userdata input key \'{}\' BEFORE callback execution: {}'.format(input_key, userdata[input_key]))
 
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
@@ -71,9 +68,8 @@ class Foo(smach.State):
             except:
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
-
         for input_key in self._input_keys:
-            rospy.loginfo('Userdata input key \'{}\' AFTER callback execution: {}'.format(input_key, userdata[input_key]))
+            smach.loginfo('Userdata input key \'{}\' AFTER callback execution: {}'.format(input_key, userdata[input_key]))
 
         return 'succeeded'
 
@@ -106,7 +102,6 @@ class CallbacksState(smach.State):
                 self.register_output_keys(self._cb_output_keys[-1])
                 self.register_outcomes(self._cb_outcomes[-1])
 
-
     def execute(self, userdata):
 
         # Call callbacks
@@ -120,14 +115,12 @@ class CallbacksState(smach.State):
             except:
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
-
         return 'succeeded'
-
-
 
 @smach.cb_interface(input_keys=['animals'], 
                     output_keys=['animals'],
                     outcomes=[])
+
 def animals_foo_1_lambda_cb(self, userdata):
     lambda_cb = lambda ud: ud.animals if ud.animals.append('ducks') else ud.animals
     userdata.animals = lambda_cb(userdata)
@@ -217,10 +210,6 @@ def a_random_number_2_foo_9_lambda_cb(self, userdata):
 Foo.a_random_number_2_foo_9_lambda_cb = a_random_number_2_foo_9_lambda_cb
 
 
-
-
-
-
 @smach.cb_interface(input_keys=['numbers', 'a_random_number_1', 'a_random_number_2', 'b_random_number_sum'], 
                     output_keys=['b_random_number_sum'],
                     outcomes=[])
@@ -253,12 +242,9 @@ def numbers_foo_10_lambda_cb(self, userdata):
 CallbacksState.numbers_foo_10_lambda_cb = numbers_foo_10_lambda_cb
 
 
-
 def main():
-    rospy.init_node('sm')
 
     sm = smach.StateMachine(outcomes=['final_outcome'])
-
     sm.userdata.animals = ['cats', 'dogs', 'sharks']
     sm.userdata.numbers = [1, 2, 3]
     sm.userdata.number = 123
@@ -306,7 +292,6 @@ def main():
                                transitions={'succeeded':'final_outcome'})
 
     outcome = sm.execute()
-
 
 if __name__ == '__main__':
     main()
