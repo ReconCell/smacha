@@ -175,14 +175,5 @@ if __name__=="__main__":
         OUTPUT_YML_DIR = args.output_yml_dir
         DEBUG_LEVEL = int(args.debug_level)
 
-    # for test_case in CONF_DICT['TEST_CONTAIN']:
-    #     test_params = test_case.values()[0]
-    #     script = test_params['script']
-    #     baseline = test_params['baseline']
-    #     contain_into = test_params['contain_into']
-    #     contain_from = test_params['contain_from']
-    #     print(contain_from)
-    #     print(contain_into)
-
 
     unittest.main()
