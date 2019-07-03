@@ -3,7 +3,7 @@
 import sys
 import argparse
 import os
-import unittest
+import unittest2 as unittest
 from ruamel import yaml
 from smacha.util import Tester
 
@@ -43,326 +43,70 @@ class TestTools(Tester):
                                         template_dirs=[os.path.join(self._base_path, 'smacha_templates/smacha_test_examples')],
                                         **kwargs)
 
-    def test_generate_hard_coded_params(self):
-        """Test generating hard_coded_params.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/params.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/hard_coded_params.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    def test_generate(self):
+        """Test generating against baseline files"""
+        for test_case in CONF_DICT['TEST_GENERATE']:
+            with self.subTest(test_case=test_case):
+                test_params = test_case.values()[0]
+                script_file = test_params['script']
+                baseline = test_params['baseline']
+                with open(os.path.join(self._base_path, 'smacha_test_examples/{}'.format(baseline))) as original_file:
+                    generated_code = self._strip_uuids(self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/{}'.format(script_file))))
+                    original_code = original_file.read()
+                self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
-    def test_generate_assigned_params(self):
-        """Test generating assigned_params.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/params.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/assigned_params.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    def test_containerize(self):
+        """Test containerizing states against baseline files"""
+        for test_case in CONF_DICT['TEST_CONTAIN']:
+            with self.subTest(test_case=test_case):
+                test_params = test_case.values()[0]
+                script_file = test_params['script']
+                baseline = test_params['baseline']
+                contain_into = test_params['contain_into']
+                contain_from = test_params['contain_from']
+                with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/{}'.format(baseline))) as original_file:
+                    generated_code = self._contain(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/{}'.format(script_file)),
+                                                contain_into, 'StateMachine', contain_from,
+                                                output_file = '{}_contain_output.yml'.format(baseline))
+                    original_code = original_file.read()
+                    self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
-    def test_generate_nesting_params(self):
-        """Test generating nesting_params.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/nesting_params.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/nesting_params.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    def test_containerize_concurrence(self):
+        """Test containerizing of concurrent states against baseline files"""
+        for test_case in CONF_DICT['TEST_CON_CONTAIN']:
+            with self.subTest(test_case=test_case):
+                test_params = test_case.values()[0]
+                script_file = test_params['script']
+                baseline = test_params['baseline']
+                contain_into = test_params['contain_into']
+                contain_from = test_params['contain_from']
+                with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/{}'.format(baseline))) as original_file:
+                    generated_code = self._contain(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/{}'.format(script_file)),
+                                                contain_into, 'Concurrence', contain_from,
+                                                output_file = '{}_contain_output.yml'.format(baseline))
+                    original_code = original_file.read()
+                    self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
-    def test_generate_nesting_params_with_sub_script(self):
-        """Test generating nesting_params_with_sub_script.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/nesting_params.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/nesting_params_with_sub_script.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+    def test_extract(self):
+        """Test extracting container state as sub-script against baseline scripts"""
+        for test_case in CONF_DICT['TEST_EXTRACT']:
+            with self.subTest(test_case=test_case):
+                test_params = test_case.values()[0]
+                test_name = test_case.keys()[0]
+                script_file = test_params['script']
+                baseline_sub = test_params['baseline_sub']
+                baseline_sup = test_params['baseline_sup']
+                extract_state = test_params['extract_state']
+                with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/{}'.format(baseline_sub))) as original_sub_script_file, open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/{}'.format(baseline_sup))) as original_super_script_file:
+                    generated_sub_script_code, generated_super_script_code = (
+                        self._extract(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/{}'.format(script_file)),
+                                    extract_state, '/smacha_scripts/{}_sub_script.yml'.format(test_name)))
+                    original_sub_script_code = original_sub_script_file.read()
+                    original_super_script_code = original_super_script_file.read()
+                    self.assertTrue(
+                        self._compare(generated_sub_script_code, original_sub_script_code, file_a='generated', file_b='original') and
+                        self._compare(generated_super_script_code, original_super_script_code, file_a='generated', file_b='original'))
 
-    def test_generate_seq_nesting_1(self):
-        """Test generating seq_nesting_1.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_nesting_1.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_1.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_nesting_2(self):
-        """Test generating seq_nesting_2.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_nesting_2.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_2.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_nesting_3(self):
-        """Test generating seq_nesting_3.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_nesting_3.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_3.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_containerize_seq_1(self):
-        """Test containerizing states FOO_0 and FOO_1 from seq.yml"""
-        with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_1.yml')) as original_file:
-            generated_code = self._contain(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq.yml'),
-                                           'SUB', 'StateMachine', ['FOO_0', 'FOO_1'],
-                                           output_file = 'seq_nesting_1_contain_output.yml')
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_containerize_seq_2(self):
-        """Test containerizing states FOO_1 and FOO_2 from seq.yml"""
-        with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_2.yml')) as original_file:
-            generated_code = self._contain(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq.yml'),
-                                           'SUB', 'StateMachine', ['FOO_1', 'FOO_2'],
-                                           output_file = 'seq_nesting_2_contain_output.yml')
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_containerize_seq_3(self):
-        """Test containerizing states FOO0, FOO_1 and FOO_2 from seq.yml"""
-        with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_3.yml')) as original_file:
-            generated_code = self._contain(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq.yml'),
-                                           'SUB', 'StateMachine', ['FOO_0', 'FOO_1', 'FOO_2'],
-                                           output_file = 'seq_nesting_3_contain_output.yml')
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_extract_seq_nesting_1(self):
-        """Test extracting container state as sub-script from seq_nesting_1.yml"""
-        with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_1_sub_script.yml')) as original_sub_script_file, open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_1_super_script.yml')) as original_super_script_file:
-            generated_sub_script_code, generated_super_script_code = (
-                self._extract(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_1.yml'),
-                              'SUB', '/smacha_scripts/seq_nesting_1_sub_script.yml'))
-            original_sub_script_code = original_sub_script_file.read()
-            original_super_script_code = original_super_script_file.read()
-            self.assertTrue(
-                self._compare(generated_sub_script_code, original_sub_script_code, file_a='generated', file_b='original') and
-                self._compare(generated_super_script_code, original_super_script_code, file_a='generated', file_b='original'))
-
-    def test_extract_seq_nesting_2(self):
-        """Test extracting container state as sub-script from seq_nesting_2.yml"""
-        with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_2_sub_script.yml')) as original_sub_script_file, open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_2_super_script.yml')) as original_super_script_file:
-            generated_sub_script_code, generated_super_script_code = (
-                self._extract(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_2.yml'),
-                              'SUB', '/smacha_scripts/seq_nesting_2_sub_script.yml'))
-            original_sub_script_code = original_sub_script_file.read()
-            original_super_script_code = original_super_script_file.read()
-            self.assertTrue(
-                self._compare(generated_sub_script_code, original_sub_script_code, file_a='generated', file_b='original') and
-                self._compare(generated_super_script_code, original_super_script_code, file_a='generated', file_b='original'))
-
-    def test_extract_seq_nesting_3(self):
-        """Test extracting container state as sub-script from seq_nesting_3.yml"""
-        with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_3_sub_script.yml')) as original_sub_script_file, open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_3_super_script.yml')) as original_super_script_file:
-            generated_sub_script_code, generated_super_script_code = (
-                self._extract(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_3.yml'),
-                              'SUB', '/smacha_scripts/seq_nesting_3_sub_script.yml'))
-            original_sub_script_code = original_sub_script_file.read()
-            original_super_script_code = original_super_script_file.read()
-            self.assertTrue(
-                self._compare(generated_sub_script_code, original_sub_script_code, file_a='generated', file_b='original') and
-                self._compare(generated_super_script_code, original_super_script_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_concurrence_1(self):
-        """Test generating seq_concurrence_1.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_concurrence_1.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_concurrence_1.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_concurrence_2(self):
-        """Test generating seq_concurrence_2.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_concurrence_2.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_concurrence_2.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_concurrence_3(self):
-        """Test generating seq_concurrence_3.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_concurrence_3.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_concurrence_3.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_concurrence_containerize_seq_1(self):
-        """Test concurrence containerizing states FOO_0 and FOO_1 from seq.yml"""
-        with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_concurrence_1.yml')) as original_file:
-            generated_code = self._contain(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq.yml'),
-                                           'CON', 'Concurrence', ['FOO_0', 'FOO_1'],
-                                           output_file = 'seq_concurrence_1_contain_output.yml')
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_concurrence_containerize_seq_2(self):
-        """Test concurrence containerizing  states FOO_1 and FOO_2 from seq.yml"""
-        with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_concurrence_2.yml')) as original_file:
-            generated_code = self._contain(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq.yml'),
-                                           'CON', 'Concurrence', ['FOO_1', 'FOO_2'],
-                                           output_file = 'seq_concurrence_2_contain_output.yml')
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_concurrence_containerize_seq_3(self):
-        """Test concurrence containerizing states FOO_0, FOO_1 and FOO_2 from seq.yml"""
-        with open(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_concurrence_3.yml')) as original_file:
-            generated_code = self._contain(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq.yml'),
-                                           'CON', 'Concurrence', ['FOO_0', 'FOO_1', 'FOO_2'],
-                                           output_file = 'seq_concurrence_3_contain_output.yml')
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_callbacks(self):
-        """Test generate callbacks.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/callbacks.py')) as original_file:
-            generated_code = self._strip_uuids(self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/callbacks.yml')))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_random_outcomes(self):
-        """Test generate random_outcomes.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/random_outcomes.py')) as original_file:
-            generated_code = self._strip_uuids(self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/random_outcomes.yml')))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_print_userdata(self):
-        """Test print_userdata.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/print_userdata.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/print_userdata.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_nesting_1_super_script_2(self):
-        """Test generate seq_nesting_1_super_script_2.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_nesting_1_super_script_2.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_1_super_script_2.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_nesting_params_shorthand(self):
-        """Test generate nesting_params_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/nesting_params.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/nesting_params_shorthand.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_assigned_params_shorthand(self):
-        """Test generate assigned_params_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/params.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/assigned_params_shorthand.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-    
-    def test_generate_print_userdata_shorthand(self):
-        """Test generate print_userdata_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/print_userdata.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/print_userdata_shorthand.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_callbacks_shorthand(self):
-        """Test generate callbacks_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/callbacks.py')) as original_file:
-            generated_code = self._strip_uuids(self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/callbacks_shorthand.yml')))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_nesting_1_super_script_2_shorthand(self):
-        """Test generate seq_nesting_1_super_script_2_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_nesting_1_super_script_2.py')) as original_file:
-            generated_code = self._strip_uuids(self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_1_super_script_2_shorthand.yml')))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_nesting_1_shorthand(self):
-        """Test generate seq_nesting_1_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_nesting_1.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_1_shorthand.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_nesting_2_shorthand(self):
-        """Test generate seq_nesting_2_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_nesting_2.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_2_shorthand.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_nesting_3_shorthand(self):
-        """Test generate seq_nesting_3_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_nesting_3.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_nesting_3_shorthand.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_concurrence_1_shorthand(self):
-        """Test generate seq_concurrence_1_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_concurrence_1.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_concurrence_1_shorthand.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_concurrence_2_shorthand(self):
-        """Test generate seq_concurrence_2_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_concurrence_2.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_concurrence_2_shorthand.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    def test_generate_seq_concurrence_3_shorthand(self):
-        """Test generate seq_concurrence_3_shorthand.yml"""
-        with open(os.path.join(self._base_path, 'smacha_test_examples/seq_concurrence_3.py')) as original_file:
-            generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/seq_concurrence_3_shorthand.yml'))
-            original_code = original_file.read()
-            self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    # def test_generate_sleep(self):
-    #     """Test generate sleep.yml"""
-    #     with open(os.path.join(self._base_path, 'smacha_test_examples/sleep.py')) as original_file:
-    #         generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/sleep.yml'))
-    #         original_code = original_file.read()
-    #         self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    # def test_generate_publish_msg_1(self):
-    #     """Test generate publish_msg_1.yml"""
-    #     with open(os.path.join(self._base_path, 'smacha_test_examples/publish_msg_1.py')) as original_file:
-    #         generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/publish_msg_1.yml'))
-    #         original_code = original_file.read()
-    #         self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    # def test_generate_rosbag_api_recording_1(self):
-    #     """Test generate rosbag_api_recording_1.yml"""
-    #     with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_api_recording_1.py')) as original_file:
-    #         generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_api_recording_1.yml'))
-    #         original_code = original_file.read()
-    #         self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    # def test_generate_rosbag_api_recording_2(self):
-    #     """Test generate rosbag_api_recording_2.yml"""
-    #     with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_api_recording_2.py')) as original_file:
-    #         generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_api_recording_2.yml'))
-    #         original_code = original_file.read()
-    #         self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    # def test_generate_rosbag_api_recording_3(self):
-    #     """Test generate rosbag_api_recording_3.yml"""
-    #     with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_api_recording_3.py')) as original_file:
-    #         generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_api_recording_3.yml'))
-    #         original_code = original_file.read()
-    #         self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    # def test_generate_rosbag_cli_recording_1(self):
-    #     """Test generate rosbag_cli_recording_1.yml"""
-    #     with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_cli_recording_1.py')) as original_file:
-    #         generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_cli_recording_1.yml'))
-    #         original_code = original_file.read()
-    #         self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    # def test_generate_rosbag_cli_recording_2(self):
-    #     """Test generate rosbag_cli_recording_2.yml"""
-    #     with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_cli_recording_2.py')) as original_file:
-    #         generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_cli_recording_2.yml'))
-    #         original_code = original_file.read()
-    #         self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
-
-    # def test_generate_rosbag_cli_recording_3(self):
-    #     """Test generate rosbag_cli_recording_3.yml"""
-    #     with open(os.path.join(self._base_path, 'smacha_test_examples/rosbag_cli_recording_3.py')) as original_file:
-    #         generated_code = self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/rosbag_cli_recording_3.yml'))
-    #         original_code = original_file.read()
-    #         self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
 
 if __name__=="__main__":
 
@@ -372,11 +116,8 @@ if __name__=="__main__":
         conf_file_loc = os.path.join(base_path, CONF_FILE)
         f = open(conf_file_loc)
         CONF_DICT = yaml.load(f)
-    except OSError:
-        print('Could not open configuration file. Aborting test')
-        exit()
     except Exception as e:
-        print('Unexpected exeption occured:\n{}'.format(e))
+        print('Failed to read the configuration file. See error:\n{}'.format(e))
         exit()
 
     if CONF_DICT.has_key('WRITE_OUTPUT_FILES'):
@@ -433,5 +174,15 @@ if __name__=="__main__":
         OUTPUT_PY_DIR = args.output_py_dir
         OUTPUT_YML_DIR = args.output_yml_dir
         DEBUG_LEVEL = int(args.debug_level)
+
+    # for test_case in CONF_DICT['TEST_CONTAIN']:
+    #     test_params = test_case.values()[0]
+    #     script = test_params['script']
+    #     baseline = test_params['baseline']
+    #     contain_into = test_params['contain_into']
+    #     contain_from = test_params['contain_from']
+    #     print(contain_from)
+    #     print(contain_into)
+
 
     unittest.main()
