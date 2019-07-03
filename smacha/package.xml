@@ -16,6 +16,7 @@
   <depend>python-argparse</depend>
   <depend>python-ruamel.yaml</depend>
   <depend>python-jinja2</depend>
+  <depend>python-unittest2</depend>
   <depend>smach</depend>
   
   <export>
