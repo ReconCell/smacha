@@ -10,7 +10,7 @@ from smacha.util import Tester
 WRITE_OUTPUT_FILES = False
 OUTPUT_PY_DIR = '/tmp/smacha/smacha_test_examples/smacha_generated_py'
 OUTPUT_YML_DIR = '/tmp/smacha/smacha_test_examples/smacha_generated_scripts'
-CONF_FILE = 'config.yml'
+CONF_FILE = 'test_examples_config.yml'
 DEBUG_LEVEL = 1
 CONF_DICT = {}
 

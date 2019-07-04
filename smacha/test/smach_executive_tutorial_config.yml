@@ -1,0 +1,72 @@
+---
+WRITE_OUTPUT_FILES: False
+OUTPUT_PY_DIR: '/tmp/smacha/executive_smach_tutorials/smacha_generated_py'
+OUTPUT_YML_DIR: '/tmp/smacha/executive_smach_tutorials/smacha_generated_scripts'
+DEBUG_LEVEL: 1
+TEST_GENERATE:
+  - state_machine2: {
+    script: state_machine2.yml,
+    baseline: state_machine2.py
+    }
+  - user_data2: {
+    script: user_data2.yml,
+    baseline: user_data2.py
+    }
+  - test_state_machine_nesting2: {
+    script: test_state_machine_nesting2.yml,
+    baseline: test_state_machine_nesting2.py
+    }
+  - state_machine_nesting2_shorthand: {
+    script: state_machine_nesting2_shorthand.yml,
+    baseline: test_state_machine_nesting2.py
+    }
+  - concurrence2: {
+    script: concurrence2.yml,
+    baseline: concurrence2.py
+    }
+  - actionlib2_test: {
+    script: actionlib2_test.yml,
+    baseline: actionlib2_test.py
+    }
+  - service_test: {
+    script: service_test.yml,
+    baseline: service_test.py
+    }
+TEST_CONTAIN:
+  - seq_nesting_1: {
+      script: seq.yml,
+      baseline: seq_nesting_1.yml,
+      contain_into: SUB,
+      contain_from: ['FOO_0', 'FOO_1']
+    }
+  - seq_nesting_2: {
+      script: seq.yml,
+      baseline: seq_nesting_2.yml,
+      contain_into: SUB,
+      contain_from: ['FOO_1', 'FOO_2']
+    }
+  - seq_nesting_3: {
+      script: seq.yml,
+      baseline: seq_nesting_3.yml,
+      contain_into: SUB,
+      contain_from: ['FOO_0', 'FOO_1', 'FOO_2']
+    }
+TEST_CON_CONTAIN:
+  - seq_concurrence_1: {
+      script: seq.yml,
+      baseline: seq_concurrence_1.yml,
+      contain_into: CON,
+      contain_from: ['FOO_0', 'FOO_1']
+    }
+  - seq_concurrence_2: {
+      script: seq.yml,
+      baseline: seq_concurrence_2.yml,
+      contain_into: CON,
+      contain_from: ['FOO_1', 'FOO_2']
+    }
+  - seq_concurrence_3: {
+      script: seq.yml,
+      baseline: seq_concurrence_3.yml,
+      contain_into: CON,
+      contain_from: ['FOO_0', 'FOO_1', 'FOO_2']
+    }

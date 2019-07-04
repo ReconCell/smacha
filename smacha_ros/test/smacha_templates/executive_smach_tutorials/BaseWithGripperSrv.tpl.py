@@ -1,4 +1,4 @@
-{% extends "Base.tpl.py" %}
+{% extends "ROSBase.tpl.py" %}
 
 {% from "Utils.tpl.py" import from_import %}
 
