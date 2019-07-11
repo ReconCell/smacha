@@ -10,6 +10,9 @@ project(smacha_ros)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
+  actionlib_msgs
+  geometry_msgs
+  actionlib
   message_generation
   smach
   smach_ros
@@ -68,6 +71,7 @@ add_service_files(
   Generate.srv
   Contain.srv
   Extract.srv
+  ../test/executive_smach_tutorials/smach_tutorials/srv/GripperSrv.srv
 )
 
 # Generate actions in the 'action' folder
@@ -83,7 +87,7 @@ add_action_files(
 # )
 generate_messages(
   DEPENDENCIES
-  actionlib_msgs  std_msgs
+  actionlib_msgs  std_msgs geometry_msgs
 )
 
 ################################################
@@ -118,7 +122,15 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES smacha_ros
- CATKIN_DEPENDS rospy smach smach_ros smacha std_msgs geometry_msgs message_runtime
+ CATKIN_DEPENDS 
+ rospy
+ smach
+ smach_ros
+ smacha
+ std_msgs
+ geometry_msgs
+ actionlib_msgs
+ message_runtime
 #  DEPENDS system_lib
 )
 
