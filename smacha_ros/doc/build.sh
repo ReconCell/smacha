@@ -37,7 +37,7 @@ apt-get -qq install wget
 apt-get -qq install apt-utils
 sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-latest.list'
 wget http://packages.ros.org/ros.key -O - | apt-key add -
-apt-get -qq install -y python-rosdep python-wstool python-catkin-tools
+apt-get -qq install -y --allow-unauthenticated python-rosdep python-wstool python-catkin-tools
 
 # Setup rosdep
 rosdep init
@@ -96,7 +96,7 @@ cd ..
 source ./catkin_ws/devel/setup.bash
 
 # Test build with non-ROS wrapped Sphinx command to allow warnings and errors to be caught
-sphinx-build -W -b html /$CI_PROJECT_NAME/$PACKAGE_NAME /$CI_PROJECT_NAME/$PACKAGE_NAME/public_native_build
+sphinx-build -W -b html /$CI_PROJECT_NAME/$PACKAGE_NAME/doc /$CI_PROJECT_NAME/$PACKAGE_NAME/public_native_build
 
 # Test build with ROS-version of Sphinx command so that it is generated same as ros.org
 rosdoc_lite -o /$CI_PROJECT_NAME/$PACKAGE_NAME/public_build /$CI_PROJECT_NAME/$PACKAGE_NAME

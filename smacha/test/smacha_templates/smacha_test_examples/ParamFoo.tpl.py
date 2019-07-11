@@ -11,8 +11,8 @@ class Foo(smach.State):
         self._outcome = outcome
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state {}'.format(self._name))
-        rospy.loginfo('Returning {}'.format(self._outcome))
+        smach.loginfo('Executing state {}'.format(self._name))
+        smach.loginfo('Returning {}'.format(self._outcome))
 
         return self._outcome
 {% do defined_headers.append('class_foo') %}{% endif %}

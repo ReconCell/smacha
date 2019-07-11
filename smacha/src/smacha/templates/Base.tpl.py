@@ -38,10 +38,7 @@ output_keys: []
 {% endblock base_header %}
 
 {% block imports %}
-{{ import_module(defined_headers, 'roslib') }}{% if manifest is defined %}; roslib.load_manifest('{{ manifest }}'){% endif %}
-{{ import_module(defined_headers, 'rospy') }}
 {{ import_module(defined_headers, 'smach') }}
-{{ import_module(defined_headers, 'smach_ros') }}
 {{ imports }}
 {% endblock imports %}
 
@@ -61,8 +58,7 @@ output_keys: []
 
 {% block main_def %}
 def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main{% endif %}():
-    rospy.init_node('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}')
-
+    
     {{ main_def | indent(4) }}
 {% endblock main_def %}
 
@@ -87,20 +83,11 @@ def {% if function_name is defined %}{{ function_name | lower() }}{% else %}main
         {{ footer | indent(8) }}
 {% endblock footer %}
 
-{% block introspection_server %}
-    sis = smach_ros.IntrospectionServer('{% if node_name is defined %}{{ node_name }}{% else %}{{ name }}{% endif %}', {{ name | lower() }}, '/{{ name }}')
-    sis.start()
-{% endblock introspection_server %}
-
 {% block execute %}
     {{ execute | indent(4) }}
 
     outcome = {{ sm_name }}.execute()
 {% endblock execute %}
-
-{% block spin %}
-    rospy.spin()
-{% endblock spin %}
 
 {% block base_footer %}
     {{ base_footer | indent(4) }}

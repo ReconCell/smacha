@@ -214,11 +214,11 @@ Help
 
 Help information may be printed for any template that contains
 a :doc:`metadata block <Templating/metadata>` by running, e.g.
-the following command for the :doc:`ServiceState template <API/Templates/ServiceState.tpl.py>`:
+the following command for the :doc:`PrintUserdataState template <API/Templates/PrintUserdataState.tpl.py>`:
 
 .. code-block:: bash
 
-   $ rosrun smacha help ServiceState
+   $ rosrun smacha help PrintUserdataState
 
 Testing
 =======
@@ -312,31 +312,14 @@ State Templates
    ConditionalOutcomeState<API/Templates/ConditionalOutcomeState.tpl.py>
    DeleteFileState<API/Templates/DeleteFileState.tpl.py>
    PrintUserdataState<API/Templates/PrintUserdataState.tpl.py>
-   PublishMsgState<API/Templates/PublishMsgState.tpl.py>
-   PublishObserverMsgState<API/Templates/PublishObserverMsgState.tpl.py>
    RandomOutcomeState<API/Templates/RandomOutcomeState.tpl.py>
-   ReadTopicState<API/Templates/ReadTopicState.tpl.py>
-   RecordROSBagState<API/Templates/RecordROSBagState.tpl.py>
-   ServiceState<API/Templates/ServiceState.tpl.py>
-   SimpleActionState<API/Templates/SimpleActionState.tpl.py>
-   SleepState<API/Templates/SleepState.tpl.py>
-   TF2ListenerState<API/Templates/TF2ListenerState.tpl.py>
-   TransformMsgState<API/Templates/TransformMsgState.tpl.py>
    WriteCSVFileState<API/Templates/WriteCSVFileState.tpl.py>
 
 - :doc:`CallbacksState <API/Templates/CallbacksState.tpl.py>`: used for creating lambda function callbacks.
 - :doc:`ConditionalOutcomeState <API/Templates/ConditionalOutcomeState.tpl.py>`: used for conditionally selecting an outcome.
 - :doc:`DeleteFileState <API/Templates/DeleteFileState.tpl.py>`: used for deleting files from the file system.
 - :doc:`PrintUserdataState <API/Templates/PrintUserdataState.tpl.py>`: used for printing userdata entries to standard output.
-- :doc:`PublishMsgState <API/Templates/PublishMsgState.tpl.py>`: used for publishing userdata ROS message entries to topics.
-- :doc:`PublishObserverMsgState <API/Templates/PublishObserverMsgState.tpl.py>`: used for publishing userdata ROS message entries to topics using an `observer pattern <https://en.wikipedia.org/wiki/Observer_pattern>`_.
 - :doc:`RandomOutcomeState <API/Templates/RandomOutcomeState.tpl.py>`: used for selecting a random outcome from a specified list of outcomes.
-- :doc:`ReadTopicState <API/Templates/ReadTopicState.tpl.py>`: used for reading ROS messages from topics to userdata.
-- :doc:`RecordROSBagState <API/Templates/RecordROSBagState.tpl.py>`: used for recording topic data to `ROS bags <https://wiki.ros.org/Bags>`_.
-- :doc:`ServiceState <API/Templates/ServiceState.tpl.py>`: used for inserting a `ServiceState <http://wiki.ros.org/smach/Tutorials/ServiceState>`_.
-- :doc:`SimpleActionState <API/Templates/SimpleActionState.tpl.py>`: used for inserting a `SimpleActionState <http://wiki.ros.org/smach/Tutorials/SimpleActionState>`_.
-- :doc:`TF2ListenerState <API/Templates/TF2ListenerState.tpl.py>`: used for reading `TF2 <https://wiki.ros.org/tf2>`_ transforms.
-- :doc:`TransformMsgState <API/Templates/TransformMsgState.tpl.py>`: used for transforming userdata ROS messages from one `tf <https://wiki.ros.org/tf>`_ frame to another.
 - :doc:`WriteCSVFileState <API/Templates/WriteCSVFileState.tpl.py>`: used for writing `CSV files <https://en.wikipedia.org/wiki/Comma-separated_values>`_ to the file system.
 
 Other Templates
@@ -345,39 +328,12 @@ Other Templates
 .. toctree::
    :hidden:
 
-   MsgPublisher<API/Templates/MsgPublisher.tpl.py>
-   MsgPublisherObserver<API/Templates/MsgPublisherObserver.tpl.py>
-   ParseJointTrajectoryPoint<API/Templates/ParseJointTrajectoryPoint.tpl.py>
-   ParsePointCloud<API/Templates/ParsePointCloud.tpl.py>
-   ParsePointCloud2<API/Templates/ParsePointCloud2.tpl.py>
-   ParsePointStamped<API/Templates/ParsePointStamped.tpl.py>
-   ParsePose<API/Templates/ParsePose.tpl.py>
-   ParsePoseArray<API/Templates/ParsePoseArray.tpl.py>
-   ParsePoseStamped<API/Templates/ParsePoseStamped.tpl.py>
-   ParseTransformStamped<API/Templates/ParseTransformStamped.tpl.py>
-   ROSBagAPIThreadRecorder<API/Templates/ROSBagAPIThreadRecorder.tpl.py>
-   ROSBagCLIProcessRecorder<API/Templates/ROSBagCLIProcessRecorder.tpl.py>
    State<API/Templates/State.tpl.py>
-   TF2ListenerSingleton<API/Templates/TF2ListenerSingleton.tpl.py>
    Utilities<API/Templates/Utils.tpl.py>
-   WaitForMsgState<API/Templates/WaitForMsgState.tpl.py>
 
-- :doc:`MsgPublisher <API/Templates/MsgPublisher.tpl.py>`: provides a helper class for the :doc:`PublishMsgState <API/Templates/PublishMsgState.tpl.py>` template.
-- :doc:`MsgPublisherObserver <API/Templates/MsgPublisherObserver.tpl.py>`: provides a helper class for the :doc:`PublishObserverMsgState <API/Templates/PublishObserverMsgState.tpl.py>` template.
-- :doc:`ParseJointTrajectoryPoint <API/Templates/ParseJointTrajectoryPoint.tpl.py>`: provides a helper function for parsing `trajectory_msgs/JointTrajectoryPoint <https://docs.ros.org/api/trajectory_msgs/html/msg/JointTrajectoryPoint.html>`_ types.
-- :doc:`ParsePointCloud <API/Templates/ParsePointCloud.tpl.py>`: provides a helper function for parsing `sensor_msgs/PointCloud <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud.html>`_ types.
-- :doc:`ParsePointCloud2 <API/Templates/ParsePointCloud2.tpl.py>`: provides a helper function for parsing `sensor_msgs/PointCloud2 <https://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html>`_ types.
-- :doc:`ParsePointStamped <API/Templates/ParsePointStamped.tpl.py>`: provides a helper function for parsing `geometry_msgs/PointStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PointStamped.html>`_ types.
-- :doc:`ParsePose <API/Templates/ParsePose.tpl.py>`: provides a helper function for parsing `geometry_msgs/Pose <https://docs.ros.org/api/geometry_msgs/html/msg/Pose.html>`_ types.
-- :doc:`ParsePoseArray <API/Templates/ParsePoseArray.tpl.py>`: provides a helper function for parsing `geometry_msgs/PoseArray <https://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html>`_ types.
-- :doc:`ParsePoseStamped <API/Templates/ParsePoseStamped.tpl.py>`: provides a helper function for parsing `geometry_msgs/PoseStamped <https://docs.ros.org/api/geometry_msgs/html/msg/PoseStamped.html>`_ types.
-- :doc:`ParseTransformStamped <API/Templates/ParseTransformStamped.tpl.py>`: provides a helper function for parsing `geometry_msgs/TransformStamped <https://docs.ros.org/api/geometry_msgs/html/msg/TransformStamped.html>`_ types.
-- :doc:`ROSBagAPIThreadRecorder <API/Templates/ROSBagAPIThreadRecorder.tpl.py>`: provides a helper class for the :doc:`RecordROSBagState <API/Templates/RecordROSBagState.tpl.py>` template that allows for ROS bags to be recorded using the `ROS bag Python application programming interface <https://wiki.ros.org/rosbag/Code%20API#Python_API>`_.
-- :doc:`ROSBagCLIProcessRecorder <API/Templates/ROSBagCLIProcessRecorder.tpl.py>`: provides a helper class for the :doc:`RecordROSBagState <API/Templates/RecordROSBagState.tpl.py>` template that allows for ROS bags to be recorded using the `ROS bag command line interface <https://wiki.ros.org/rosbag/Commandline>`_.
+
 - :doc:`State <API/Templates/State.tpl.py>`: contains code common to all state templates.
-- :doc:`TF2ListenerSingleton <API/Templates/TF2ListenerSingleton.tpl.py>`: provides a helper class for the :doc:`TF2ListenerState <API/Templates/TF2ListenerState.tpl.py>` template.
 - :doc:`Utils <API/Templates/Utils.tpl.py>`: contains template macros and other utilities.
-- :doc:`WaitForMsgState <API/Templates/WaitForMsgState.tpl.py>`: provides a helper class for the :doc:`ReadTopicState <API/Templates/ReadTopicState.tpl.py>` template.
 
 *********************
 Other SMACHA Packages
@@ -386,8 +342,8 @@ Other SMACHA Packages
 SMACHA ROS
 ==========
 
-The `SMACHA ROS package <https://reconcell.gitlab.io/smacha/smacha_ros/smacha_ros.html>`_ contains a SMACHA server
-that provides ROS services, ROS parameter server integration, and other functions.
+The `SMACHA ROS <https://reconcell.gitlab.io/smacha/smacha_ros/smacha_ros.html>`_ provides ROS oriented templates and contains a SMACHA server
+that provides ROS services, ROS parameter server integration, and other functions. 
 
 SMACHA GUI
 ==========

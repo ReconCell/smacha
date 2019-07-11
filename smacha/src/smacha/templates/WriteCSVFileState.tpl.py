@@ -177,7 +177,7 @@ class WriteCSVFileState(smach.State):
                 # for the benefit of csv.writer.writerows()
                 data = [data]
             except Exception as e:
-                rospy.logwarn('Failed to parse data keys for CSV file writing: {}'.format(repr(e)))
+                smach.logwarn('Failed to parse data keys for CSV file writing: {}'.format(repr(e)))
                 return 'aborted'
 
         # Write to CSV file
@@ -188,7 +188,7 @@ class WriteCSVFileState(smach.State):
                     writer.writerow(header)
                 writer.writerows(data)
         except Exception as e:
-            rospy.logwarn('Failed to write to CSV file \'{}\': {}'.format(userdata.file, repr(e)))
+            smach.logwarn('Failed to write to CSV file \'{}\': {}'.format(userdata.file, repr(e)))
             return 'aborted'
 
         # Write the header as output key if required.

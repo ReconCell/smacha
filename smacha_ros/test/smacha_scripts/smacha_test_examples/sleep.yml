@@ -1,0 +1,13 @@
+--- # SMACHA sleep example
+name: sm
+template: ROSBase
+outcomes: [final_outcome]
+states:
+  - FOO_0:
+      template: SleepState
+      time: 5
+      transitions: {succeeded: FOO_1}
+  - FOO_1:
+      template: SleepState
+      time: 10
+      transitions: {succeeded: final_outcome}

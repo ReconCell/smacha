@@ -64,15 +64,15 @@ class DeleteFileState(smach.State):
         {{ render_execute_callbacks() }}
 
         try:
-            rospy.loginfo("Deleting '{}'".format(userdata.file)) 
+            smach.loginfo("Deleting '{}'".format(userdata.file)) 
             os.remove(userdata.file)
         except:
             try:
                 for f in glob.glob(userdata.file):
-                    rospy.loginfo("Deleting '{}'".format(f)) 
+                    smach.loginfo("Deleting '{}'".format(f)) 
                     os.remove(f)
             except Exception as e:
-                rospy.logerr("Failed to delete file(s) with filespec: '{}'!".format(userdata.file)) 
+                smach.logerr("Failed to delete file(s) with filespec: '{}'!".format(userdata.file)) 
                 return 'aborted'
 
         return 'succeeded'
