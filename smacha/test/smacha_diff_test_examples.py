@@ -12,7 +12,7 @@ OUTPUT_PY_DIR = '/tmp/smacha/smacha_test_examples/smacha_generated_py'
 OUTPUT_YML_DIR = '/tmp/smacha/smacha_test_examples/smacha_generated_scripts'
 CONF_FILE = 'test_examples_config.yml'
 DEBUG_LEVEL = 1
-CONF_DICT = {}
+# CONF_DICT = {}
 
 class TestTools(Tester):
     """Tester class for general unit testing of various SMACHA tool
