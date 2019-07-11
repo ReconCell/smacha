@@ -18,6 +18,8 @@
   <depend>python-jinja2</depend>
   <depend>smach</depend>
   
+  <test_depend>python-unittest2</test_depend>
+  
   <export>
   </export>
 </package>

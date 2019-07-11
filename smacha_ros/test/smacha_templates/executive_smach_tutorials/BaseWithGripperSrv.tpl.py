@@ -1,12 +1,12 @@
-{% extends "Base.tpl.py" %}
+{% extends "ROSBase.tpl.py" %}
 
 {% from "Utils.tpl.py" import from_import %}
 
 {% block imports %}
 {{ super() }}
-{{ from_import(defined_headers, 'smacha.srv', 'GripperSrv') }}
-{{ from_import(defined_headers, 'smacha.srv', 'GripperSrvRequest') }}
-{{ from_import(defined_headers, 'smacha.srv', 'GripperSrvResponse') }}
+{{ from_import(defined_headers, 'smacha_ros.srv', 'GripperSrv') }}
+{{ from_import(defined_headers, 'smacha_ros.srv', 'GripperSrvRequest') }}
+{{ from_import(defined_headers, 'smacha_ros.srv', 'GripperSrvResponse') }}
 {{ from_import(defined_headers, 'geometry_msgs.msg', '*') }}
 {% endblock imports %}
 

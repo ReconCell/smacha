@@ -3,7 +3,7 @@
 {% from "Utils.tpl.py" import from_import %}
 
 {% block imports %}
-{{ from_import(defined_headers, 'smacha.srv', 'GripperSrvRequest') }}
+{{ from_import(defined_headers, 'smacha_ros.srv', 'GripperSrvRequest') }}
 {{ super() }}
 {% endblock imports %}
 

@@ -1,6 +1,0 @@
-- SUB:
-    T: StateMachine
-    o: [sub_outcome_1, sub_outcome_2]
-    s:
-    - FOO_0: {T: ParamFoo, name_param: [params, name], outcome_param: [params, outcome], t: {outcome_a: FOO_1, outcome_b: sub_outcome_1}}
-    - FOO_1: {T: ParamFoo, name_param: [params, name_1], outcome_param: [params, outcome], t: {outcome_a: sub_outcome_2, outcome_b: sub_outcome_1}}

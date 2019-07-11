@@ -1,10 +1,10 @@
-{% extends "Base.tpl.py" %}
+{% extends "ROSBase.tpl.py" %}
 
 {% from "Utils.tpl.py" import from_import %}
 
 {% block imports %}
 {{ super() }}
-{{ from_import(defined_headers, 'smacha.msg', 'TestAction') }}
+{{ from_import(defined_headers, 'smacha_ros.msg', 'TestAction') }}
 {{ from_import(defined_headers, 'actionlib_msgs.msg', '*') }}
 {% endblock imports %}
 

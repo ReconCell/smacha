@@ -10,9 +10,9 @@ import smach
 import smach_ros
 
 
-from smacha.srv import GripperSrv
-from smacha.srv import GripperSrvRequest
-from smacha.srv import GripperSrvResponse
+from smacha_ros.srv import GripperSrv
+from smacha_ros.srv import GripperSrvRequest
+from smacha_ros.srv import GripperSrvResponse
 from geometry_msgs.msg import *
 
 

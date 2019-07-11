@@ -10,9 +10,9 @@ import smach
 import smach_ros
 from actionlib import *
 
-from smacha.msg import TestGoal
+from smacha_ros.msg import TestGoal
 
-from smacha.msg import TestAction
+from smacha_ros.msg import TestAction
 from actionlib_msgs.msg import *
 
 
