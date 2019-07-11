@@ -1,0 +1,27 @@
+    # SMACHA state sequence example
+name: sm
+template: Base
+outcomes: [final_outcome_a, final_outcome_b, final_outcome_c]
+states:
+- CON:
+    template: Concurrence
+    params: {name: FOO_0, outcome: outcome_a, name_1: FOO_1}
+    outcomes: [con_outcome_1, con_outcome_2, con_default_outcome]
+    default_outcome: con_default_outcome
+    outcome_map: {con_outcome_1: {FOO_0: outcome_b, FOO_1: outcome_b}, con_outcome_2: {FOO_0: outcome_a, FOO_1: outcome_a}}
+    transitions: {con_outcome_1: final_outcome_b, con_outcome_2: FOO_2, con_default_outcome: CON}
+    states:
+    - FOO_0:
+        template: ParamFoo
+        name_param: [params, name]
+        outcome_param: [params, outcome]
+    - FOO_1:
+        template: ParamFoo
+        name_param: [params, name_1]
+        outcome_param: [params, outcome]
+- FOO_2:
+    template: ParamFoo
+    params: {name: FOO_2, outcome: outcome_a}
+    name_param: [params, name]
+    outcome_param: [params, outcome]
+    transitions: {outcome_a: final_outcome_a, outcome_b: final_outcome_c}

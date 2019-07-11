@@ -1,4 +1,7 @@
 <launch>
-  <node pkg="smacha_ros" type="smacha_server" name="smacha_ros_generate_test" args="-v -t $(find smacha)/test/smacha_templates/smacha_test_examples -s $(find smacha)/test/smacha_scripts/smacha_test_examples" output="screen" />
-  <test test-name="generate" pkg="smacha_ros" time-limit="60.0" type="generate.py" />
+  <!-- <node pkg="smacha_ros" type="smacha_server" name="smacha_ros_generate_test" args="-v -t $(find smacha_ros)/src/smacha_ros/templates $(find smacha_ros)/test/smacha_templates/smacha_test_examples $(find smacha_ros)/test/smacha_templates/executive_smach_tutorials -s $(find smacha_ros)/test/smacha_scripts/smacha_test_examples" output="screen" /> -->
+  <test test-name="api_generate" pkg="smacha_ros" time-limit="120.0" type="api_generate_test.py" />
+  <!-- <test test-name="service_generate" pkg="smacha_ros" time-limit="120.0" type="service_generate_test.py" /> -->
+  <test test-name="smacha_examples_diff_test" pkg="smacha_ros" time-limit="120.0" type="smacha_diff_test_examples.py" />
+  <test test-name="executive_smach_tutorials_diff_test" pkg="smacha_ros" time-limit="120.0" type="executive_smach_tutorials_diff_test.py" />
 </launch>

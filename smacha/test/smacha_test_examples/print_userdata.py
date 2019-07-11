@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-
-import roslib
-import rospy
 import smach
-import smach_ros
 
 
 class PrintUserdataState(smach.State):
@@ -14,7 +10,7 @@ class PrintUserdataState(smach.State):
 
         # Print input keys to terminal
         for input_key in self._input_keys:
-            rospy.loginfo('userdata.{}: {}'.format(input_key, userdata[input_key]))
+            smach.loginfo('userdata.{}: {}'.format(input_key, userdata[input_key]))
 
         return 'succeeded'
 
@@ -22,7 +18,7 @@ class PrintUserdataState(smach.State):
 class CallbacksState(smach.State):
     def __init__(self, input_keys=[], output_keys=[], callbacks=[]):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
-
+        
         self._cbs = []
 
         if callbacks:
@@ -51,6 +47,7 @@ class CallbacksState(smach.State):
 
     def execute(self, userdata):
 
+        
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -67,7 +64,6 @@ class CallbacksState(smach.State):
 
 
 def main():
-    rospy.init_node('sm')
 
     sm = smach.StateMachine(outcomes=['final_outcome'])
 
@@ -75,6 +71,7 @@ def main():
     sm.userdata.bar = 'Goodbye World!'
 
     with sm:
+
         smach.StateMachine.add('FOO_0',
                                        PrintUserdataState(input_keys = ['foo']),
                                transitions={'succeeded':'FOO_1'})

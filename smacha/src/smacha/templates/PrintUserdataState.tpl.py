@@ -38,7 +38,6 @@ outcomes:
 
 {% block imports %}
 {{ super() }}
-{{ import_module(defined_headers, 'rospy') }}
 {% endblock imports %}
 
 {% block class_defs %}
@@ -52,7 +51,7 @@ class PrintUserdataState(smach.State):
 
         # Print input keys to terminal
         for input_key in self._input_keys:
-            rospy.loginfo('userdata.{}: {}'.format(input_key, userdata[input_key]))
+            smach.loginfo('userdata.{}: {}'.format(input_key, userdata[input_key]))
 
         return 'succeeded'
 {% do defined_headers.append('class_PrintUserdataState') %}{% endif %}

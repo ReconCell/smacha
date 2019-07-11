@@ -1,0 +1,31 @@
+--- # SMACHA rosbag API (application programming interface) recording example
+name: sm
+template: ROSBase
+outcomes: [succeeded, aborted]
+states:
+- PUBLISH_MSG:
+    template: PublishMsgState
+    action: start
+    userdata: {point: Point(), topic: smacha/rosbag_api_recording_1_point, rate: 100.0}
+    remapping: {msg: point, topic: topic, rate: rate}
+    transitions: {succeeded: START_RECORDING, aborted: aborted}
+- START_RECORDING:
+    template: RecordROSBagState
+    recorder: ROSBagAPIThreadRecorder
+    action: start
+    userdata: {file: /tmp/rosbag_api_recording_1.bag, topics: [smacha/rosbag_api_recording_1_point]}
+    remapping: {file: file, topics: topics}
+    transitions: {succeeded: WAIT, aborted: aborted}
+- WAIT:
+    template: SleepState
+    time: 5
+    transitions: {succeeded: STOP_RECORDING}
+- STOP_RECORDING:
+    template: RecordROSBagState
+    recorder: ROSBagAPIThreadRecorder
+    action: stop_all
+    transitions: {succeeded: UNPUBLISH_MSG, aborted: aborted}
+- UNPUBLISH_MSG:
+    template: PublishMsgState
+    action: stop_all
+    transitions: {succeeded: succeeded, aborted: aborted}

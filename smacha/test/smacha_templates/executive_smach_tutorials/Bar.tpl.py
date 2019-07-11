@@ -9,8 +9,8 @@ class Bar(smach.State):
                              input_keys=['bar_counter_in']{% endif %})
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state {{ name }}'){% if remapping is defined %}
-        rospy.loginfo('Counter = %f'%userdata.bar_counter_in){% endif %} 
+        smach.loginfo('Executing state {{ name }}'){% if remapping is defined %}
+        smach.loginfo('Counter = %f'%userdata.bar_counter_in){% endif %} 
         return 'outcome1'
 {% endblock class_defs %}
 

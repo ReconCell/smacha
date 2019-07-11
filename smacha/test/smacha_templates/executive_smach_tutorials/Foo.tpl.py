@@ -11,7 +11,7 @@ class Foo(smach.State):
         self.counter = 0{% endif %}
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state {{ name }}'){% if remapping is defined %}
+        smach.loginfo('Executing state {{ name }}'){% if remapping is defined %}
         if userdata.foo_counter_in < 3:
             userdata.foo_counter_out = userdata.foo_counter_in + 1{% else %}
         if self.counter < 3:

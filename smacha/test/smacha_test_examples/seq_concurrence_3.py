@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-
-import roslib
-import rospy
 import smach
-import smach_ros
 
 
 # define state Foo
@@ -15,34 +11,39 @@ class Foo(smach.State):
         self._outcome = outcome
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state {}'.format(self._name))
-        rospy.loginfo('Returning {}'.format(self._outcome))
+        smach.loginfo('Executing state {}'.format(self._name))
+        smach.loginfo('Returning {}'.format(self._outcome))
 
         return self._outcome
 
 
 def main():
-    rospy.init_node('sm')
 
     sm = smach.StateMachine(outcomes=['final_outcome_a', 'final_outcome_b', 'final_outcome_c'])
 
     with sm:
+
         sm_con = smach.Concurrence(outcomes=['con_outcome_1', 'con_outcome_2', 'con_outcome_3', 'con_default_outcome'],
                                            default_outcome='con_default_outcome',
                                            outcome_map={'con_outcome_1': { 'FOO_0': 'outcome_b', 'FOO_1': 'outcome_b'},
                                                         'con_outcome_2': { 'FOO_0': 'outcome_a', 'FOO_1': 'outcome_a', 'FOO_2': 'outcome_a'},
                                                         'con_outcome_3': { 'FOO_2': 'outcome_b'}})
 
+
+
         with sm_con:
+
             smach.Concurrence.add('FOO_0', Foo('FOO_0', 'outcome_a'))
+
             smach.Concurrence.add('FOO_1', Foo('FOO_1', 'outcome_a'))
+
             smach.Concurrence.add('FOO_2', Foo('FOO_2', 'outcome_a'))
 
         smach.StateMachine.add('CON', sm_con,
-                               transitions={'con_default_outcome': 'CON',
-                                            'con_outcome_1': 'final_outcome_b',
-                                            'con_outcome_2': 'final_outcome_a',
-                                            'con_outcome_3': 'final_outcome_c'})
+                               transitions={'con_default_outcome':'CON',
+                                            'con_outcome_1':'final_outcome_b',
+                                            'con_outcome_2':'final_outcome_a',
+                                            'con_outcome_3':'final_outcome_c'})
 
     outcome = sm.execute()
 

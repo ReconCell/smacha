@@ -1,0 +1,19 @@
+--- # SMACHA message publication example
+name: sm
+template: ROSBase
+outcomes: [succeeded, aborted]
+states:
+- PUBLISH_MSG:
+    template: PublishMsgState
+    action: start
+    userdata: {point: Point(), topic: smacha/rosbag_recording_1_point, rate: 100.0}
+    remapping: {msg: point, topic: topic, rate: rate}
+    transitions: {succeeded: WAIT, aborted: aborted}
+- WAIT:
+    template: SleepState
+    time: 10
+    transitions: {succeeded: UNPUBLISH_MSG}
+- UNPUBLISH_MSG:
+    template: PublishMsgState
+    action: stop_all
+    transitions: {succeeded: succeeded, aborted: aborted}

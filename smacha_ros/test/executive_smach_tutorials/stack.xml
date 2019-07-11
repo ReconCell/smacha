@@ -1,0 +1,14 @@
+<stack>
+  <description brief="executive_smach_tutorials">executive_smach_tutorials</description>
+  <author>Jonathan Bohren</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/executive_smach_tutorials</url>
+  <depend stack="common" /> <!-- actionlib -->
+  <depend stack="common_msgs" /> <!-- actionlib_msgs -->
+  <depend stack="executive_smach" /> <!-- smach_ros, smach -->
+  <depend stack="ros" /> <!-- rospy -->
+  <!--depend stack="ros_pkg_tutorials" /--> <!-- turtle_actionlib -->
+  <depend stack="ros_tutorials" /> <!-- turtlesim -->
+
+</stack>

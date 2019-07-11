@@ -38,12 +38,12 @@ class Foo(smach.State):
 
     def execute(self, userdata):
         for input_key in self._input_keys:
-            rospy.loginfo('Userdata input key \'{}\' BEFORE callback execution: {}'.format(input_key, userdata[input_key]))
+            smach.loginfo('Userdata input key \'{}\' BEFORE callback execution: {}'.format(input_key, userdata[input_key]))
 
         {{ render_execute_callbacks() }}
 
         for input_key in self._input_keys:
-            rospy.loginfo('Userdata input key \'{}\' AFTER callback execution: {}'.format(input_key, userdata[input_key]))
+            smach.loginfo('Userdata input key \'{}\' AFTER callback execution: {}'.format(input_key, userdata[input_key]))
 
         return 'succeeded'
 {% do defined_headers.append('class_Foo') %}{% endif %}
