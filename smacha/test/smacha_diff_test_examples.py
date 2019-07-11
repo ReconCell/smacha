@@ -45,15 +45,19 @@ class TestTools(Tester):
 
     def test_generate(self):
         """Test generating against baseline files"""
-        for test_case in CONF_DICT['TEST_GENERATE']:
-            with self.subTest(test_case=test_case):
-                test_params = test_case.values()[0]
-                script_file = test_params['script']
-                baseline = test_params['baseline']
-                with open(os.path.join(self._base_path, 'smacha_test_examples/{}'.format(baseline))) as original_file:
-                    generated_code = self._strip_uuids(self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/{}'.format(script_file))))
-                    original_code = original_file.read()
-                self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+        try:
+            for test_case in CONF_DICT['TEST_GENERATE']:
+                with self.subTest(test_case=test_case):
+                    test_params = test_case.values()[0]
+                    script_file = test_params['script']
+                    baseline = test_params['baseline']
+                    with open(os.path.join(self._base_path, 'smacha_test_examples/{}'.format(baseline))) as original_file:
+                        generated_code = self._strip_uuids(self._generate(os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples/{}'.format(script_file))))
+                        original_code = original_file.read()
+                    self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
+        except Exception as e:
+            print("Exception at test_generate:\n{}".format(e))
+            self.assertTrue(False)
 
     def test_containerize(self):
         """Test containerizing states against baseline files"""

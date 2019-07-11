@@ -2,7 +2,7 @@
 WRITE_OUTPUT_FILES: False
 OUTPUT_PY_DIR: '/tmp/smacha/smacha_test_examples/smacha_generated_py'
 OUTPUT_YML_DIR: '/tmp/smacha/smacha_test_examples/smacha_generated_scripts'
-DEBUG_LEVEL: 1
+DEBUG_LEVEL: 2
 TEST_GENERATE:
   - hard_coded_params: {
     script: hard_coded_params.yml,
