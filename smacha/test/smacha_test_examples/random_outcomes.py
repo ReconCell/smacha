@@ -1,17 +1,11 @@
 #!/usr/bin/env python
-
-
-import roslib
-import rospy
 import smach
-import smach_ros
 import random
-
 
 class RandomOutcomeState(smach.State):
     def __init__(self, input_keys = ['outcome'], output_keys = ['outcome'], callbacks = {}, outcomes=['succeeded']):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=outcomes)
-
+        
         self._cbs = []
 
         if callbacks:
@@ -37,9 +31,8 @@ class RandomOutcomeState(smach.State):
                 self.register_output_keys(self._cb_output_keys[-1])
                 self.register_outcomes(self._cb_outcomes[-1])
 
-
     def execute(self, userdata):
-
+        
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -51,13 +44,13 @@ class RandomOutcomeState(smach.State):
             except:
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
 
-
         return userdata.outcome
+
 
 class CallbacksState(smach.State):
     def __init__(self, input_keys=[], output_keys=[], callbacks=[]):
         smach.State.__init__(self, input_keys=input_keys, output_keys=output_keys, outcomes=['succeeded'])
-
+        
         self._cbs = []
 
         if callbacks:
@@ -83,9 +76,8 @@ class CallbacksState(smach.State):
                 self.register_output_keys(self._cb_output_keys[-1])
                 self.register_outcomes(self._cb_outcomes[-1])
 
-
     def execute(self, userdata):
-
+        
         # Call callbacks
         for (cb, ik, ok) in zip(self._cbs,
                                 self._cb_input_keys,
@@ -96,7 +88,6 @@ class CallbacksState(smach.State):
                 cb_outcome = cb(self, smach.Remapper(userdata,ik,ok,{}))
             except:
                 cb_outcome = cb(smach.Remapper(userdata,ik,ok,{}))
-
 
         return 'succeeded'
 
@@ -111,6 +102,7 @@ def outcome_randomize_lambda_cb(self, userdata):
 
 RandomOutcomeState.outcome_randomize_lambda_cb = outcome_randomize_lambda_cb
 
+
 @smach.cb_interface(input_keys=[], 
                     output_keys=['outcome'],
                     outcomes=[])
@@ -121,6 +113,7 @@ def outcome_foo_0_lambda_cb(self, userdata):
 
 CallbacksState.outcome_foo_0_lambda_cb = outcome_foo_0_lambda_cb
 
+
 @smach.cb_interface(input_keys=[], 
                     output_keys=['outcome'],
                     outcomes=[])
@@ -130,6 +123,7 @@ def outcome_foo_1_lambda_cb(self, userdata):
     return 'succeeded'
 
 CallbacksState.outcome_foo_1_lambda_cb = outcome_foo_1_lambda_cb
+
 
 @smach.cb_interface(input_keys=[], 
                     output_keys=['outcome'],
@@ -143,8 +137,7 @@ CallbacksState.outcome_foo_2_lambda_cb = outcome_foo_2_lambda_cb
 
 
 def main():
-    rospy.init_node('sm')
-
+    
     sm = smach.StateMachine(outcomes=['final_outcome'])
 
     with sm:

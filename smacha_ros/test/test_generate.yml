@@ -1,0 +1,50 @@
+---
+WRITE_OUTPUT_FILES: False
+OUTPUT_PY_DIR: '/tmp/smacha/smacha_test_examples/smacha_generated_py'
+OUTPUT_YML_DIR: '/tmp/smacha/smacha_test_examples/smacha_generated_scripts'
+DEBUG_LEVEL: 1
+SCRIPT_DIRS: [
+  'smacha_scripts/smacha_test_examples',
+  'smacha_scripts/executive_smach_tutorials'
+]
+TEMPLATE_DIRS: [
+  'smacha_templates/smacha_test_examples',
+  'smacha_templates/executive_smach_tutorials',
+]
+TEST_GENERATE:
+  - concurrence2: {
+    script: concurrence2.yml,
+    baseline: rosbag_api_recording_1.py
+    }
+  - publish_msg_1: {
+    script: publish_msg_1.yml,
+    baseline: publish_msg_1.py
+    }
+  - rosbag_api_recording_1: {
+    script: rosbag_api_recording_1.yml,
+    baseline: rosbag_api_recording_1.py
+  }
+  - rosbag_api_recording_2: {
+    script: rosbag_api_recording_2.yml,
+    baseline: rosbag_api_recording_2.py
+    }
+  - actionlib2_test: {
+    script: actionlib2_test.yml,
+    baseline: rosbag_api_recording_1.py
+    }
+  - rosbag_api_recording_3: {
+    script: rosbag_api_recording_3.yml,
+    baseline: rosbag_api_recording_3.py
+    }
+  - rosbag_cli_recording_1: {
+    script: rosbag_cli_recording_1.yml,
+    baseline: rosbag_cli_recording_1.py
+    }
+  - rosbag_cli_recording_2: {
+    script: rosbag_cli_recording_2.yml,
+    baseline: rosbag_cli_recording_2.py
+    }
+  - rosbag_cli_recording_3: {
+    script: rosbag_cli_recording_3.yml,
+    baseline: rosbag_cli_recording_3.py
+    }

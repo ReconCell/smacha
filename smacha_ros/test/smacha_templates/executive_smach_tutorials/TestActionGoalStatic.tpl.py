@@ -3,8 +3,8 @@
 {% from "Utils.tpl.py" import from_import %}
 
 {% block imports %}
-{{ from_import(defined_headers, 'smacha.msg', 'TestAction') }}
-{{ from_import(defined_headers, 'smacha.msg', 'TestGoal') }}
+{{ from_import(defined_headers, 'smacha_ros.msg', 'TestAction') }}
+{{ from_import(defined_headers, 'smacha_ros.msg', 'TestGoal') }}
 {{ super() }}
 {% endblock imports %}
 

@@ -16,6 +16,9 @@ from smacha.util import bcolors
 # Necessary SRVs
 from smacha_ros.srv import Generate
 
+# YAML parser
+from ruamel import yaml
+
 # Used to get the path to the SMACHA scripts
 import rospkg
 
@@ -24,10 +27,7 @@ import rospkg
 rospack = rospkg.RosPack()
 ROOT_DIR = rospack.get_path('smacha_ros')
 
-TEST_SCRIPTS_DIR = ROOT_DIR + '/' + 'test/smacha_scripts/smacha_test_examples/'
-
-ROS_TEMPLATES_DIR = '../src/smacha_ros/templates'
-TEMPLATES_DIR = 'smacha_templates/smacha_test_examples'
+CONF_FILE = 'test_generate.yml'
 DEBUG_LEVEL = 1
 
 class TestClass(Tester):
@@ -38,6 +38,9 @@ class TestClass(Tester):
     _logmsg = ''
     _logerr = False
 
+    _script_dirs = []
+    _conf_dict = None
+
     def __init__(self, *args, **kwargs):
         # Set Tester member variables
         self.set_debug_level(DEBUG_LEVEL)
@@ -47,6 +50,9 @@ class TestClass(Tester):
 
         # Call the parent constructor
         super(TestClass, self).__init__(*args, **kwargs)
+
+        # Read the config file
+        self._read_conf(CONF_FILE)
 
         # Create the service proxy
         rospy.wait_for_service('/smacha/generate')
@@ -65,47 +71,85 @@ class TestClass(Tester):
             self._logmsg = msg
             self._logerr = True
 
-    def test_code_generation_and_execution(self):
-        """Generate Python code from all the available scripts in the test folder
-        and run them."""
+    def _read_conf(self, conf_file):
+        # Read the configuration file before parsing arguments,
+        try:
+            conf_file_loc = os.path.join(self._base_path, conf_file)
+            f = open(conf_file_loc)
+            self._conf_dict = yaml.load(f)
+        except Exception as e:
+            print('Failed to read the configuration file. See error:\n{}'.format(e))
+            exit()
 
-        success = False
+        try:
+            [self._script_dirs.append(d) for d in self._conf_dict['SCRIPT_DIRS']]
+        except Exception as e:
+            rospy.logerr("Failed to read SCRIPT_DIRS from conf file\n{}".format(e))
+            exit()
+
+
+    def test_code_generation_and_execution(self):
+        """Generate Python code from scripts listed in the conf file
+        and run them."""
+        
+        script_files = []
+        script_loc = []
+        
         generated_code = ''
         script_file = ''
         smacha_script = ''
-        try:
-            # Get a list of available files
-            script_names = os.listdir(os.path.join(TEST_SCRIPTS_DIR))
-            script_names.sort()
-            # Remove all subscripts from the test array
-            script_names = [ script_name for script_name in script_names if script_name.find('sub_script') == -1]
-            # Loop to generate Python code from each YML script
-            for script_name in script_names:
-                script_file = TEST_SCRIPTS_DIR + script_name
-                # Read the script
-                script_file_handle = open(script_file, "r")
-                smacha_script = script_file_handle.read()
-                script_file_handle.close()
-                # Pass the script into the generator service and write the result into a variable
-                generated_code = self._generator(smacha_script).code
-                # We need to take the "init_node" from the generated code as this program here already initializes a node
-                generated_code = generated_code.replace(
-                "rospy.init_node",
-                "# rospy.init_node"
-                )
+        script_names = []
+        # Get a list of available files
+        for d in self._script_dirs:
+            file_list = os.listdir(os.path.join(self._base_path, d))
+            script_files.extend(file_list)
+            script_loc.extend([os.path.join(self._base_path, d)]*len(file_list))
+        
+        rospy.logwarn('script_files: {0}'.format(script_files))
+        rospy.logwarn('script_loc: {0}'.format(script_loc))
+        for test_case in self._conf_dict['TEST_GENERATE']:
+            with self.subTest(test_case=test_case):
+                success = False
+                try:
+                    matching_files = (s for s in script_files if test_case.values()[0]['script'] in s).next()
 
-                # Execute the generated python code
-                exec(generated_code, globals())
-                if self._logerr:
-                    raise Exception("Error in state machine execution !!")
-            success = True
-        except Exception as e:
-            rospy.logerr(
-                'Failed due to exception when generating [{0}]!!'.format(script_file))
-            rospy.logerr('Exception: {0}'.format(e))
-            rospy.logerr('YAML\n===========\n{0}'.format(smacha_script))
+                    if len(matching_files) == 0:
+                        raise Exception("Script not found in directories")
+                    try:
+                        script_file = script_loc[script_files.index(matching_files)] + '/' + matching_files
+                    except:
+                        rospy.logerr('script_loc:\n{}'.format(script_loc))
+                        rospy.logerr('matching_files:\n{}'.format(matching_files))
+                        rospy.logerr('script_files.index(matching_files):\n{}'.format(script_files.index(matching_files)))
+                        raise Exception("Failed to compile string")
+                    # Wait for service
+                    self._generator.wait_for_service()
 
-        self.assertTrue(success) 
+                    # Read the script
+                    script_file_handle = open(script_file, "r")
+                    smacha_script = script_file_handle.read()
+                    script_file_handle.close()
+                    # Pass the script into the generator service and write the result into a variable
+                    generated_code = self._generator(smacha_script).code
+                    # We need to take the "init_node" from the generated code as this program here already initializes a node
+                    generated_code = generated_code.replace(
+                    "rospy.init_node",
+                    "# rospy.init_node"
+                    )
+
+                    # Execute the generated python code
+                    exec(generated_code, globals())
+                    if self._logerr:
+                        raise Exception("Error in state machine execution !!")
+                    success = True
+                except Exception as e:
+                    rospy.logerr(
+                        'Failed due to exception when generating [{0}]!!'.format(script_file))
+                    rospy.logerr('Exception: {0}'.format(e))
+                    rospy.logerr('YAML\n===========\n{0}'.format(smacha_script))
+                
+                self.assertTrue(success) 
+
 
 if __name__=="__main__":
     

@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import os
 import re
 import difflib
-import unittest
+import unittest2 as unittest
 import stat
 
 import smacha
