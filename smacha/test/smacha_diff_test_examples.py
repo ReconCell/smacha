@@ -57,6 +57,7 @@ class TestTools(Tester):
                     self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
         except Exception as e:
             print("Exception at test_generate:\n{}".format(e))
+            print("CONF_DICT:\n{}".format(CONF_DICT))
             self.assertTrue(False)
 
     def test_containerize(self):
