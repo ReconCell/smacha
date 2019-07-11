@@ -219,6 +219,11 @@ install(DIRECTORY
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test/smacha_scripts/smacha_test_examples
   FILES_MATCHING PATTERN "*.yml"
 )
+install(DIRECTORY
+  test
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test/smacha_scripts/smacha_test_examples
+  FILES_MATCHING PATTERN "*.yml"
+)
 
 #############
 ## Testing ##

@@ -12,7 +12,6 @@ OUTPUT_PY_DIR = '/tmp/smacha/smacha_test_examples/smacha_generated_py'
 OUTPUT_YML_DIR = '/tmp/smacha/smacha_test_examples/smacha_generated_scripts'
 CONF_FILE = 'test_examples_config.yml'
 DEBUG_LEVEL = 1
-# CONF_DICT = {}
 
 class TestTools(Tester):
     """Tester class for general unit testing of various SMACHA tool
@@ -37,16 +36,40 @@ class TestTools(Tester):
         # Store the base path
         self._base_path = os.path.dirname(os.path.abspath(__file__))
 
+        # Read the config file
+        self._read_config_file(CONF_FILE)
+
         # Call the parent constructor
-        super(TestTools, self).__init__(*args,
-                                        script_dirs=[os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples')],
-                                        template_dirs=[os.path.join(self._base_path, 'smacha_templates/smacha_test_examples')],
-                                        **kwargs)
+        super(TestTools, self).__init__(
+            *args,
+            script_dirs=[os.path.join(self._base_path, 'smacha_scripts/smacha_test_examples')],
+            template_dirs=[os.path.join(self._base_path, 'smacha_templates/smacha_test_examples')],
+            **kwargs)
+
+    def _read_config_file(self, conf_file):
+        # Read the configuration file before parsing arguments,
+        try:
+            base_path = os.path.dirname(os.path.abspath(__file__))
+            conf_file_loc = os.path.join(base_path, conf_file)
+            f = open(conf_file_loc)
+            self._config_dict = yaml.load(f)
+        except Exception as e:
+            print('Failed to read the configuration file. See error:\n{}'.format(e))
+            exit()
+
+        if self._config_dict.has_key('WRITE_OUTPUT_FILES'):
+            WRITE_OUTPUT_FILES = self._config_dict['WRITE_OUTPUT_FILES']
+        if self._config_dict.has_key('OUTPUT_PY_DIR'):
+            OUTPUT_PY_DIR = self._config_dict['OUTPUT_PY_DIR']
+        if self._config_dict.has_key('OUTPUT_YML_DIR'):
+            OUTPUT_YML_DIR = self._config_dict['OUTPUT_YML_DIR']
+        if self._config_dict.has_key('DEBUG_LEVEL'):
+            DEBUG_LEVEL = self._config_dict['DEBUG_LEVEL']
 
     def test_generate(self):
         """Test generating against baseline files"""
         try:
-            for test_case in CONF_DICT['TEST_GENERATE']:
+            for test_case in self._config_dict['TEST_GENERATE']:
                 with self.subTest(test_case=test_case):
                     test_params = test_case.values()[0]
                     script_file = test_params['script']
@@ -57,12 +80,12 @@ class TestTools(Tester):
                     self.assertTrue(self._compare(generated_code, original_code, file_a='generated', file_b='original'))
         except Exception as e:
             print("Exception at test_generate:\n{}".format(e))
-            print("CONF_DICT:\n{}".format(CONF_DICT))
+            print("self._config_dict:\n{}".format(self._config_dict))
             self.assertTrue(False)
 
     def test_containerize(self):
         """Test containerizing states against baseline files"""
-        for test_case in CONF_DICT['TEST_CONTAIN']:
+        for test_case in self._config_dict['TEST_CONTAIN']:
             with self.subTest(test_case=test_case):
                 test_params = test_case.values()[0]
                 script_file = test_params['script']
@@ -78,7 +101,7 @@ class TestTools(Tester):
 
     def test_containerize_concurrence(self):
         """Test containerizing of concurrent states against baseline files"""
-        for test_case in CONF_DICT['TEST_CON_CONTAIN']:
+        for test_case in self._config_dict['TEST_CON_CONTAIN']:
             with self.subTest(test_case=test_case):
                 test_params = test_case.values()[0]
                 script_file = test_params['script']
@@ -94,7 +117,7 @@ class TestTools(Tester):
 
     def test_extract(self):
         """Test extracting container state as sub-script against baseline scripts"""
-        for test_case in CONF_DICT['TEST_EXTRACT']:
+        for test_case in self._config_dict['TEST_EXTRACT']:
             with self.subTest(test_case=test_case):
                 test_params = test_case.values()[0]
                 test_name = test_case.keys()[0]
@@ -115,36 +138,17 @@ class TestTools(Tester):
 
 if __name__=="__main__":
 
-    # Read the configuration file before parsing arguments,
-    try:
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        conf_file_loc = os.path.join(base_path, CONF_FILE)
-        f = open(conf_file_loc)
-        CONF_DICT = yaml.load(f)
-    except Exception as e:
-        print('Failed to read the configuration file. See error:\n{}'.format(e))
-        exit()
-
-    if CONF_DICT.has_key('WRITE_OUTPUT_FILES'):
-        WRITE_OUTPUT_FILES = CONF_DICT['WRITE_OUTPUT_FILES']
-    if CONF_DICT.has_key('OUTPUT_PY_DIR'):
-        OUTPUT_PY_DIR = CONF_DICT['OUTPUT_PY_DIR']
-    if CONF_DICT.has_key('OUTPUT_YML_DIR'):
-        OUTPUT_YML_DIR = CONF_DICT['OUTPUT_YML_DIR']
-    if CONF_DICT.has_key('DEBUG_LEVEL'):
-        DEBUG_LEVEL = CONF_DICT['DEBUG_LEVEL']
-
     # Parse arguments (provided arguments will override values from the conf file)
     arg_parser = argparse.ArgumentParser(description='SMACHA test examples unit tests.\
         Test configuration is read from the file {0}. Parameters provided here will override\
         the ones provided in the file.'.format(CONF_FILE))
     
-    # arg_parser.add_argument('-c', '--conf',
-    #                         dest='conf_file',
-    #                         default=CONF_FILE,
-    #                         help='Specify the configuration file (YAML). Note that \
-    #                         arguments/flags provided after this one will override \
-    #                         the options specified in the configuration file.')
+    arg_parser.add_argument('-c', '--conf',
+                            dest='conf_file',
+                            default=CONF_FILE,
+                            help='Specify the configuration file (YAML). Note that \
+                            arguments/flags provided after this one will override \
+                            the options specified in the configuration file.')
     
     arg_parser.add_argument('-w', '--write',
                             action='store_true',
@@ -176,6 +180,7 @@ if __name__=="__main__":
         sys.argv = sys.argv[:1]
         args = arg_parser.parse_args(argv)
         WRITE_OUTPUT_FILES = args.write
+        CONF_FILE = args.conf_file
         OUTPUT_PY_DIR = args.output_py_dir
         OUTPUT_YML_DIR = args.output_yml_dir
         DEBUG_LEVEL = int(args.debug_level)
