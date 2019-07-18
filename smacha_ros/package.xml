@@ -1,16 +1,21 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>smacha_ros</name>
-  <version>0.0.1</version>
-  <description>The smacha_ros package</description>
+  <version>0.5.0</version>
+  <description>SMACHA ROS is a package that provides ROS integration for SMACHA. Its main component is a SMACHA server that allows for templates to be loaded from disparate packages and accessed from anywhere within the ROS network and provides services for each of the main SMACHA functions.</description>
 
-  <maintainer email="barry.ridge@ijs.si">barry</maintainer>
+  <maintainer email="barry.ridge@ijs.si">Barry Ridge</maintainer>
 
   <license>BSD</license>
 
-  <!-- <url type="website">http://wiki.ros.org/smacha</url> -->
+  <url type="website">http://ros.org/wiki/smacha</url>
+  <url type="repository">https://github.com/ReconCell/smacha</url>
+  <url type="bugtracker">https://github.com/ReconCell/smacha/issues</url>
+  <url type="documentation">https://reconcell.gitlab.io/smacha/smacha_ros</url>
 
+  <author email="timotej.gaspar@gmail.com">Timotej Gaspar</author>
   <author email="barry.ridge@ijs.si">Barry Ridge</author>
+
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>message_generation</build_depend>
