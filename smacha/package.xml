@@ -1,16 +1,20 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>smacha</name>
-  <version>0.0.1</version>
-  <description>The smacha package</description>
+  <version>0.5.0</version>
+  <description>SMACHA (short for "State Machine Assembler", pronounced "smasha") aims at distilling the task-level simplicity of SMACH into compact YAML-based scripts in the foreground, while retaining all of its power and flexibility in Jinja2-based templates and a custom code generation engine in the background.</description>
 
-  <maintainer email="barry.ridge@ijs.si">barry</maintainer>
+  <maintainer email="barry.ridge@ijs.si">Barry Ridge</maintainer>
 
   <license>BSD</license>
 
-  <!-- <url type="website">http://wiki.ros.org/smacha</url> -->
+  <url type="website">http://ros.org/wiki/smacha</url>
+  <url type="repository">https://github.com/ReconCell/smacha</url>
+  <url type="bugtracker">https://github.com/ReconCell/smacha/issues</url>
+  <url type="documentation">https://reconcell.gitlab.io/smacha/smacha</url>
 
   <author email="barry.ridge@ijs.si">Barry Ridge</author>
+  <author email="timotej.gaspar@gmail.com">Timotej Gaspar</author>
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>python-argparse</depend>
